@@ -95,7 +95,7 @@
       </div>
     </div>
 
-    <!-- RIGHT PANEL � Order -->
+    <!-- RIGHT PANEL — Order -->
     <div class="w-full lg:w-[380px] flex flex-col overflow-hidden bg-white flex-shrink-0 shadow-lg"
       :class="posTab === 'menu' ? 'hidden lg:flex' : 'flex'">
 
@@ -345,7 +345,7 @@ const paymentMethod   = ref('cash')
 const receivedAmount  = ref('')
 const referenceNumber = ref('')
 const processing      = ref(false)
-const posTab          = ref('menu')  // 'menu' | 'cart' � mobile tab switching
+const posTab          = ref('menu')  // 'menu' | 'cart' — mobile tab switching
 
 const successState      = ref(false)
 const lastInvoiceId     = ref('')

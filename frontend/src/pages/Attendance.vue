@@ -104,12 +104,12 @@
             <div class="flex items-center gap-4">
               <div>
                 <span class="text-xs text-gray-400 font-light">Clock In</span>
-                <p class="text-sm font-medium text-gray-800">{{ myRecord?.clock_in_time ? formatTime(myRecord.clock_in_time) : '—' }}</p>
+                <p class="text-sm font-medium text-gray-800">{{ myRecord?.clock_in_time ? formatTime(myRecord.clock_in_time) : 'â€”' }}</p>
               </div>
               <div class="w-px h-8 bg-gray-100"></div>
               <div>
                 <span class="text-xs text-gray-400 font-light">Clock Out</span>
-                <p class="text-sm font-medium text-gray-800">{{ myRecord?.clock_out_time ? formatTime(myRecord.clock_out_time) : '—' }}</p>
+                <p class="text-sm font-medium text-gray-800">{{ myRecord?.clock_out_time ? formatTime(myRecord.clock_out_time) : 'â€”' }}</p>
               </div>
               <div class="w-px h-8 bg-gray-100"></div>
               <div>

@@ -136,7 +136,7 @@
               <td class="px-6 py-4 text-sm font-light text-gray-700">{{ leave.number_of_days }}d</td>
               <!-- Reason -->
               <td class="px-6 py-4 max-w-48">
-                <p class="text-sm font-light text-gray-600 line-clamp-2">{{ leave.reason || '—' }}</p>
+                <p class="text-sm font-light text-gray-600 line-clamp-2">{{ leave.reason || 'â€”' }}</p>
                 <!-- Rejection reason -->
                 <p v-if="leave.status === 'rejected' && leave.rejection_reason" class="text-xs text-red-500 italic mt-1">
                   Rejected: {{ leave.rejection_reason }}
@@ -173,7 +173,7 @@
                     Reject
                   </button>
                 </div>
-                <span v-else class="text-xs text-gray-400 font-light">—</span>
+                <span v-else class="text-xs text-gray-400 font-light">â€”</span>
               </td>
             </tr>
           </tbody>
@@ -260,7 +260,7 @@ const filteredLeaves = computed(() => {
   return list
 })
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' }) : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' }) : 'â€”'
 const avatarColors = ['#b45309','#0369a1','#4f46e5','#059669','#dc2626','#9333ea','#0891b2']
 const avatarColor  = (name) => avatarColors[(name?.charCodeAt(0)??0) % avatarColors.length]
 const typeBadge    = (t) => ({ sick:'bg-red-50 text-red-700', casual:'bg-green-50 text-green-800', annual:'bg-green-50 text-green-700', emergency:'bg-orange-50 text-orange-700', maternity:'bg-pink-50 text-pink-700', paternity:'bg-purple-50 text-purple-700' }[t] ?? 'bg-gray-100 text-gray-600')

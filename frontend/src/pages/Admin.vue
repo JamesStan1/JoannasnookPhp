@@ -111,11 +111,11 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Currency Symbol</label>
                 <select v-model="generalSettings.currency"
                         class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-                  <option value="?">? — Philippine Peso (PHP)</option>
-                  <option value="$">$ — US Dollar (USD)</option>
-                  <option value="€">€ — Euro (EUR)</option>
-                  <option value="£">£ — British Pound (GBP)</option>
-                  <option value="¥">¥ — Japanese Yen (JPY)</option>
+                  <option value="â‚±">â‚± â€” Philippine Peso (PHP)</option>
+                  <option value="$">$ â€” US Dollar (USD)</option>
+                  <option value="â‚¬">â‚¬ â€” Euro (EUR)</option>
+                  <option value="Â£">Â£ â€” British Pound (GBP)</option>
+                  <option value="Â¥">Â¥ â€” Japanese Yen (JPY)</option>
                 </select>
               </div>
             </div>
@@ -204,7 +204,7 @@
           <div class="flex items-start justify-between mb-1">
             <div>
               <h2 class="text-lg font-bold text-gray-800">Audit Logs</h2>
-              <p class="text-sm text-gray-500 mt-0.5">All completed sales transactions — POS, room, and event billing. Filter by date, employee, or transaction number.</p>
+              <p class="text-sm text-gray-500 mt-0.5">All completed sales transactions â€” POS, room, and event billing. Filter by date, employee, or transaction number.</p>
             </div>
             <button @click="fetchAuditLogs" class="text-xs bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 rounded-lg transition">
               Refresh
@@ -292,7 +292,7 @@
 
           <!-- Pagination -->
           <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
-            <span>Showing {{ auditFrom }}–{{ auditTo }} of {{ auditLogs.length }}</span>
+            <span>Showing {{ auditFrom }}â€“{{ auditTo }} of {{ auditLogs.length }}</span>
             <div class="flex items-center gap-2">
               <button @click="auditPage--" :disabled="auditPage <= 1"
                       class="px-2 py-1 border rounded disabled:opacity-40">Prev</button>
@@ -676,8 +676,8 @@ async function printEventsData() {
   try {
     const res = await api.get('/admin/export', { params: { type: 'events', month: printMonth.value } })
     const rows = res.data.data || []
-    printTable('Events Data — ' + printMonth.value, ['ID', 'Type', 'Venue', 'Date', 'Client', 'Amount'], rows.map(r => [
-      r.id, r.event_type || r.order_type, r.venue || '—', r.event_date || r.created_at, r.event_client || r.customer_name || '—', '?' + parseFloat(r.total_amount || r.total_price || 0).toFixed(2)
+    printTable('Events Data â€” ' + printMonth.value, ['ID', 'Type', 'Venue', 'Date', 'Client', 'Amount'], rows.map(r => [
+      r.id, r.event_type || r.order_type, r.venue || 'â€”', r.event_date || r.created_at, r.event_client || r.customer_name || 'â€”', '?' + parseFloat(r.total_amount || r.total_price || 0).toFixed(2)
     ]))
   } catch { toast.error('Failed to fetch events data') }
 }
@@ -687,7 +687,7 @@ async function printRoomsData() {
   try {
     const res = await api.get('/admin/export', { params: { type: 'reservations', month: printMonth.value } })
     const rows = res.data.data || []
-    printTable('Rooms Data — ' + printMonth.value, ['ID', 'Guest', 'Room', 'Check-In', 'Check-Out', 'Status'], rows.map(r => [
+    printTable('Rooms Data â€” ' + printMonth.value, ['ID', 'Guest', 'Room', 'Check-In', 'Check-Out', 'Status'], rows.map(r => [
       r.id, r.guest_name || r.user_id, r.room_number || r.room_id, r.check_in_date, r.check_out_date, r.status
     ]))
   } catch { toast.error('Failed to fetch rooms data') }
@@ -731,7 +731,7 @@ function printTable(title, headers, rows) {
       <h2>${title}</h2>
       <table>
         <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-        <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c ?? '—'}</td>`).join('')}</tr>`).join('')}</tbody>
+        <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c ?? 'â€”'}</td>`).join('')}</tr>`).join('')}</tbody>
       </table>
     </body></html>`
   const w = window.open('', '_blank')
@@ -756,20 +756,20 @@ async function saveSettings() {
 
 // -- Helpers -------------------------------------------------------------------
 function formatDate(dt) {
-  if (!dt) return '—'
+  if (!dt) return 'â€”'
   const d = new Date(dt)
   return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) +
     ' ' + d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatDateOnly(dt) {
-  if (!dt) return '—'
+  if (!dt) return 'â€”'
   const d = new Date(dt)
   return d.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
 function formatTime(dt) {
-  if (!dt) return '—'
+  if (!dt) return 'â€”'
   const d = new Date(dt)
   return d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 }

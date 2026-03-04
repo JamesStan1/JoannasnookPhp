@@ -96,7 +96,7 @@
                 <span class="text-sm font-light text-gray-700">{{ leave.number_of_days }}d</span>
               </td>
               <td class="px-6 py-4 max-w-xs">
-                <p class="text-sm font-light text-gray-600 truncate">{{ leave.reason || '—' }}</p>
+                <p class="text-sm font-light text-gray-600 truncate">{{ leave.reason || 'â€”' }}</p>
               </td>
               <td class="px-6 py-4">
                 <div>
@@ -156,7 +156,7 @@ const stats = computed(() => {
 })
 
 const formatDate = (d) => {
-  if (!d) return '—'
+  if (!d) return 'â€”'
   return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
