@@ -1,7 +1,13 @@
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const root = __dirname.replace(/\\/g, '/')
+
 export default {
   content: [
-    './index.html',
-    './src/**/*.{vue,js,ts,jsx,tsx}',
+    `${root}/index.html`,
+    `${root}/src/**/*.{vue,js,ts,jsx,tsx}`,
   ],
   theme: {
     extend: {
