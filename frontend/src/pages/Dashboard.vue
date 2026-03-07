@@ -170,9 +170,9 @@
       </div>
 
       <!-- Charts Row 2: Popularity + Predictive -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
-        <!-- Popularity Analysis -->
+        <!-- Room Popularity Analysis -->
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 lg:p-8">
           <div class="mb-6">
             <h2 class="text-xl font-light text-gray-900">Popularity Analysis</h2>
@@ -183,6 +183,20 @@
           </div>
           <div v-else class="h-64 flex items-center justify-center text-gray-400 font-light">
             No reservation data yet.
+          </div>
+        </div>
+
+        <!-- Event Popularity Analysis -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 lg:p-8">
+          <div class="mb-6">
+            <h2 class="text-xl font-light text-gray-900">Event Popularity</h2>
+            <p class="text-sm text-gray-400 font-light mt-1">Distribution of events by type</p>
+          </div>
+          <div v-if="eventTypeChartData" class="h-64">
+            <Doughnut :data="eventTypeChartData" :options="doughnutOptions" />
+          </div>
+          <div v-else class="h-64 flex items-center justify-center text-gray-400 font-light">
+            No event data yet.
           </div>
         </div>
 
@@ -824,6 +838,7 @@ const revenueChartData = ref(null)   // monthly
 const popularityChartData = ref(null)
 const predictionChartData = ref(null)
 const cafeChartData = ref(null)
+const eventTypeChartData = ref(null)
 
 const activeChartData = computed(() => {
   if (activePeriod.value === 'daily')   return dailyChartData.value
@@ -867,6 +882,7 @@ const COLORS = {
   room:    { bg: 'rgba(29,78,216,0.12)',  border: 'rgba(29,78,216,1)' },
   cafe:    { bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,1)' },
   event:   { bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,1)' },
+  pos:     { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,1)' },
 }
 
 // Revenue trends line chart options (all periods)
@@ -994,6 +1010,20 @@ const loadAnalytics = async (silent = false) => {
           borderColor: 'rgba(59,130,246,1)',
           borderWidth: 1,
           borderRadius: 4
+        }]
+      }
+    }
+
+    // Event Type Popularity
+    if (data.popularity?.event_types?.length) {
+      const eventPalette = ['#8b5cf6','#a78bfa','#c4b5fd','#7c3aed','#6d28d9','#5b21b6','#4c1d95','#ddd6fe']
+      eventTypeChartData.value = {
+        labels: data.popularity.event_types.map(e => e.event_type),
+        datasets: [{
+          data: data.popularity.event_types.map(e => parseInt(e.count) || 0),
+          backgroundColor: eventPalette,
+          borderWidth: 0,
+          hoverOffset: 8
         }]
       }
     }

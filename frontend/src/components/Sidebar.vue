@@ -243,13 +243,11 @@
 import { reactive, watch, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-
 const props = defineProps({ open: { type: Boolean, default: false } })
 const emit  = defineEmits(['close'])
 
 const route     = useRoute()
 const authStore = useAuthStore()
-
 // Renamed from `open` to `sections` to avoid shadowing the `open` prop
 const sections = reactive({
   staff: false, leave: false,

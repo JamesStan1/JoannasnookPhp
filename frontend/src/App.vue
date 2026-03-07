@@ -26,6 +26,7 @@
           <router-view />
         </main>
       </div>
+
     </template>
 
     <!-- Unauthenticated: full page -->
@@ -42,7 +43,6 @@ import NavBar from './components/NavBar.vue'
 import Sidebar from './components/Sidebar.vue'
 import ToastContainer from './components/ToastContainer.vue'
 import LoadingScreen from './components/LoadingScreen.vue'
-
 const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isAuthenticated)
 const sidebarOpen = ref(false)

@@ -681,7 +681,7 @@ import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { useToastStore } from '../stores/toast'
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
+const toast = useToastStore()
 const tabs = [
   { key: 'online',     label: '🌐 Online Requests' },
   { key: 'pending',    label: 'Pending' },

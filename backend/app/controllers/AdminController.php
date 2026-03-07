@@ -636,17 +636,24 @@ class AdminController {
         ");
         $roomPopularity = $stmt->fetchAll();
 
-        // Cafe item popularity (top 6 menu items by order count)
-        // POS checkout always stores order_type='pos', so include it alongside
-        // legacy 'restaurant' / 'room_service' values.
+        // Cafe item popularity — combine order_items (POS) + bill_items (restaurant billing)
         $stmt = $db->query("
-            SELECT mi.name, SUM(oi.quantity) as total_ordered
-            FROM order_items oi
-            JOIN menu_items mi ON oi.menu_item_id = mi.id
-            JOIN orders o ON oi.order_id = o.id
-            WHERE o.order_type IN ('pos','restaurant','room_service')
-              AND o.status = 'completed'
-            GROUP BY mi.id, mi.name
+            SELECT name, SUM(total_ordered) AS total_ordered
+            FROM (
+                SELECT mi.name, SUM(oi.quantity) AS total_ordered
+                FROM order_items oi
+                JOIN menu_items mi ON oi.menu_item_id = mi.id
+                JOIN orders o ON oi.order_id = o.id
+                WHERE o.status = 'completed'
+                GROUP BY mi.id, mi.name
+                UNION ALL
+                SELECT bi.description AS name, SUM(bi.quantity) AS total_ordered
+                FROM bill_items bi
+                JOIN bills b ON bi.bill_id = b.id
+                WHERE b.bill_type IN ('restaurant', 'room_service')
+                GROUP BY bi.description
+            ) combined
+            GROUP BY name
             ORDER BY total_ordered DESC
             LIMIT 6
         ");
@@ -663,6 +670,18 @@ class AdminController {
             ORDER BY month ASC
         ");
         $eventFrequency = $stmt->fetchAll();
+
+        // Event type popularity — breakdown by event_type
+        $stmt = $db->query("
+            SELECT event_type, COUNT(*) as count
+            FROM events
+            WHERE status IN ('pending','confirmed','completed')
+              AND deleted_at IS NULL
+            GROUP BY event_type
+            ORDER BY count DESC
+            LIMIT 8
+        ");
+        $eventTypePopularity = $stmt->fetchAll();
 
         // --- Predictive Analysis (all 4 revenue sources, last 6 months) ------
         $stmt = $db->query("
@@ -762,9 +781,10 @@ class AdminController {
             'daily_trends'    => $dailyTrends,
             'weekly_trends'   => $weeklyTrends,
             'popularity'      => [
-                'rooms'  => $roomPopularity,
-                'cafe'   => $cafePopularity,
-                'events' => $eventFrequency,
+                'rooms'       => $roomPopularity,
+                'cafe'        => $cafePopularity,
+                'events'      => $eventFrequency,
+                'event_types' => $eventTypePopularity,
             ],
             'prediction' => $prediction,
         ], 200);

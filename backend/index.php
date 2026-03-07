@@ -1,5 +1,21 @@
 <?php
 
+// Send CORS headers immediately — before any code that could throw errors.
+$requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (preg_match('#^https?://localhost(:\d+)?$#', $requestOrigin)) {
+    header('Access-Control-Allow-Origin: ' . $requestOrigin);
+} else {
+    header('Access-Control-Allow-Origin: http://localhost:5173');
+}
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 // Detect app root: supports root-level placement (app/ inside backend/),
 // same-directory placement (public_html/api/ with app/ alongside), and
 // legacy backend/public/ layout (app/ one level up).
@@ -24,6 +40,12 @@ if (file_exists($APP_ROOT . '/.env')) {
 // Serve static files directly when using PHP's built-in development server
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $staticFile  = __DIR__ . $requestPath;
+// If not found at __DIR__, also check under public/ subdirectory
+// (handles: php -S localhost:8000 index.php run from backend/ while uploads live in backend/public/)
+if (!is_file($staticFile)) {
+    $publicStatic = __DIR__ . '/public' . $requestPath;
+    if (is_file($publicStatic)) $staticFile = $publicStatic;
+}
 if ($requestPath !== '/' && $requestPath !== '/index.php' && is_file($staticFile)) {
     $ext  = strtolower(pathinfo($staticFile, PATHINFO_EXTENSION));
     $mime = [
@@ -35,21 +57,11 @@ if ($requestPath !== '/' && $requestPath !== '/index.php' && is_file($staticFile
         'pdf'  => 'application/pdf',
     ];
     header('Content-Type: ' . ($mime[$ext] ?? 'application/octet-stream'));
-    header('Access-Control-Allow-Origin: ' . (getenv('FRONTEND_URL') ?: '*'));
     readfile($staticFile);
     exit;
 }
 
-$allowedOrigin = getenv('FRONTEND_URL') ?: '*';
-header('Access-Control-Allow-Origin: ' . $allowedOrigin);
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
 
 // Load bootstrap
 require_once $APP_ROOT . '/app/helpers/Bootstrap.php';

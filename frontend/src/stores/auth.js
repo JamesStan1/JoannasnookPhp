@@ -8,6 +8,12 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref(null)
 
+  // Hydrate user immediately from localStorage on store creation
+  const _savedUser = localStorage.getItem('user')
+  if (_savedUser) {
+    try { user.value = JSON.parse(_savedUser) } catch { /* ignore malformed */ }
+  }
+
   const isAuthenticated = computed(() => !!token.value)
 
   // ── Role helpers ────────────────────────────────────────────────────────────
