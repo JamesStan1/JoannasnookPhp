@@ -1,11 +1,24 @@
 <?php
 
+// Load .env early so FRONTEND_URL is available for CORS before the full bootstrap.
+$_earlyEnv = __DIR__ . '/.env';
+if (file_exists($_earlyEnv)) {
+    foreach (parse_ini_file($_earlyEnv) as $_k => $_v) {
+        if (!getenv($_k)) putenv("$_k=$_v");
+    }
+}
+
 // Send CORS headers immediately — before any code that could throw errors.
-$requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (preg_match('#^https?://localhost(:\d+)?$#', $requestOrigin)) {
+// FRONTEND_URL may be a comma-separated list for multiple allowed origins.
+$requestOrigin   = $_SERVER['HTTP_ORIGIN'] ?? '';
+$_frontendUrl    = getenv('FRONTEND_URL') ?: 'http://localhost:5173';
+$_allowedOrigins = array_values(array_filter(array_map('trim', explode(',', $_frontendUrl))));
+
+if (preg_match('#^https?://localhost(:\d+)?$#', $requestOrigin)
+    || in_array($requestOrigin, $_allowedOrigins, true)) {
     header('Access-Control-Allow-Origin: ' . $requestOrigin);
 } else {
-    header('Access-Control-Allow-Origin: http://localhost:5173');
+    header('Access-Control-Allow-Origin: ' . ($_allowedOrigins[0] ?? 'http://localhost:5173'));
 }
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
