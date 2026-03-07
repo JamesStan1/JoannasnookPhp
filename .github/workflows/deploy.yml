@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: Build & Deploy
+    name: Build & Package
     runs-on: ubuntu-latest
 
     steps:
@@ -59,29 +59,28 @@ jobs:
           #   public_html/api/.env
           # Use backend/.env.example as a template and fill in real values.
 
-      # ── 4. Deploy via FTPS ────────────────────────────────────────────────
+      # ── 4. Create .zip archive (Hostinger backup upload format) ───────────
       #
-      # Required GitHub repository secrets (Settings → Secrets → Actions):
-      #   FTP_SERVER   – your Hostinger FTP hostname, e.g. ftp.yourdomain.com
-      #   FTP_USERNAME – Hostinger FTP username
-      #   FTP_PASSWORD – Hostinger FTP password
+      # Hostinger's "Upload website backup files" accepts:
+      #   .zip  .sql  .tar  .tar.gz  .tgz  .7z  .gz  .sql.gz
       #
-      # dangerous-clean-slate: false  → never deletes remote-only files;
-      # this preserves user-uploaded files in api/uploads/ and the manually
-      # created api/.env that holds production database credentials and secrets.
+      # After this job finishes:
+      #   1. Go to the Actions tab → select this run → download "website-backup"
+      #   2. In Hostinger hPanel → Files → Backups → Upload backup
+      #   3. Upload the downloaded website-backup.zip
+      #   4. Restore it to public_html/
       #
-      - name: Deploy to Hostinger via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Create deployment zip
+        run: |
+          cd deploy
+          zip -r ../website-backup.zip .
+          cd ..
+          echo "Archive size: $(du -sh website-backup.zip | cut -f1)"
+
+      # ── 5. Upload artifact (downloadable from the Actions run page) ────────
+      - name: Upload website-backup.zip as artifact
+        uses: actions/upload-artifact@v4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftps
-          local-dir: ./deploy/
-          server-dir: public_html/
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
-            api/.env
+          name: website-backup
+          path: website-backup.zip
+          retention-days: 7
