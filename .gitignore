@@ -1,13 +1,16 @@
 # Dependencies
+/node_modules/
 /frontend/node_modules/
 /vendor/
 
 # Build output (re-generated on deploy)
+/dist/
 /frontend/dist/
 
 # Environment files with secrets – never commit these
 /backend/.env
-/frontend/.env.production
+# frontend/.env.production is intentionally tracked – it only sets the
+# public API base URL (VITE_API_URL=/api) and contains no secrets.
 
 # OS / editor clutter
 .DS_Store
