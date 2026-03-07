@@ -113,8 +113,8 @@
               <transition name="slide">
                 <div v-show="sections.events" class="nested-section">
                   <router-link to="/events" class="nested-link" :class="{ 'sub-active': isActive('/events', true) }">Management</router-link>
-                  <router-link to="/events/edit" class="nested-link" :class="{ 'sub-active': isActive('/events/edit', true) }">Edit Package</router-link>
-                  <router-link to="/events/archived" class="nested-link" :class="{ 'sub-active': isActive('/events/archived', true) }">Archived</router-link>
+                  <router-link v-if="show.roomEdit" to="/events/edit" class="nested-link" :class="{ 'sub-active': isActive('/events/edit', true) }">Edit Package</router-link>
+                  <router-link v-if="show.roomEdit" to="/events/archived" class="nested-link" :class="{ 'sub-active': isActive('/events/archived', true) }">Archived</router-link>
                 </div>
               </transition>
             </div>
@@ -280,7 +280,7 @@ const show = computed(() => ({
   roomManagement:      isAdmin.value || isFrontDesk.value || isSecurity.value,
   roomEdit:            isAdmin.value,
   roomArchived:        isAdmin.value,
-  events:              isAdmin.value,
+  events:              isAdmin.value || isFrontDesk.value,
   reservationHistory:  isAdmin.value || isFrontDesk.value,
   reservationApproval: isAdmin.value || isFrontDesk.value,
   housekeeping:        isAdmin.value || isHouseRole.value,

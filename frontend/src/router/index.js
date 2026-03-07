@@ -10,7 +10,7 @@ const ALLOWED_PREFIXES = {
   chef:         ['/chef'],
   housekeeping: ['/housekeeping'],
   security:     ['/rooms'],
-  front_desk:   ['/reservations', '/rooms', '/pos', '/inventory'],
+  front_desk:   ['/reservations', '/rooms', '/pos', '/inventory', '/events'],
 }
 
 // Paths every authenticated user may always visit
