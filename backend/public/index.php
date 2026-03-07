@@ -1,5 +1,19 @@
 <?php
 
+// Detect app root: supports local dev (backend/public/ with app/ one level up)
+// and Hostinger layout (public_html/api/ with app/ inside the same folder).
+$APP_ROOT = is_dir(__DIR__ . '/app') ? __DIR__ : __DIR__ . '/..';
+
+// Load environment variables early so FRONTEND_URL is available for CORS headers.
+if (file_exists($APP_ROOT . '/.env')) {
+    $dotenv = parse_ini_file($APP_ROOT . '/.env');
+    foreach ($dotenv as $key => $value) {
+        if (!getenv($key)) {
+            putenv("$key=$value");
+        }
+    }
+}
+
 // Serve static files directly when using PHP's built-in development server
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $staticFile  = __DIR__ . $requestPath;
@@ -14,12 +28,13 @@ if ($requestPath !== '/' && $requestPath !== '/index.php' && is_file($staticFile
         'pdf'  => 'application/pdf',
     ];
     header('Content-Type: ' . ($mime[$ext] ?? 'application/octet-stream'));
-    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Origin: ' . (getenv('FRONTEND_URL') ?: '*'));
     readfile($staticFile);
     exit;
 }
 
-header('Access-Control-Allow-Origin: *');
+$allowedOrigin = getenv('FRONTEND_URL') ?: '*';
+header('Access-Control-Allow-Origin: ' . $allowedOrigin);
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
@@ -30,22 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Load bootstrap
-require_once __DIR__ . '/../app/helpers/Bootstrap.php';
-
-// Load environment variables
-if (file_exists(__DIR__ . '/../.env')) {
-    $dotenv = parse_ini_file(__DIR__ . '/../.env');
-    foreach ($dotenv as $key => $value) {
-        if (!getenv($key)) {
-            putenv("$key=$value");
-        }
-    }
-}
+require_once $APP_ROOT . '/app/helpers/Bootstrap.php';
 
 // Autoloader for classes
-spl_autoload_register(function ($class) {
+spl_autoload_register(function ($class) use ($APP_ROOT) {
     $prefix = 'App\\';
-    $base_dir = __DIR__ . '/../app/';
+    $base_dir = $APP_ROOT . '/app/';
 
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
@@ -61,7 +66,7 @@ spl_autoload_register(function ($class) {
 });
 
 // Get router
-$router = require __DIR__ . '/../routes/api.php';
+$router = require $APP_ROOT . '/routes/api.php';
 
 // Get request method and path
 $method = $_SERVER['REQUEST_METHOD'];

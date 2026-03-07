@@ -72,6 +72,98 @@ npm run dev
 
 The frontend will be available at `http://localhost:5173`
 
+---
+
+## Deploying to Hostinger (Shared PHP Hosting)
+
+Hostinger's auto-deploy tool shows **"Unsupported framework or invalid project structure"** because the repo root contains neither a PHP entry point nor a `package.json`. Follow the steps below for a correct manual deployment.
+
+### Target file layout on Hostinger
+
+```
+public_html/              ← web root (Hostinger)
+├── .htaccess             ← SPA routing (copied from frontend/dist/)
+├── index.html            ← Vue build entry (from frontend/dist/)
+├── assets/               ← Vue build assets (from frontend/dist/)
+└── api/                  ← PHP backend
+    ├── .htaccess         ← PHP URL routing (from backend/public/)
+    ├── index.php         ← PHP entry point (from backend/public/)
+    ├── app/              ← PHP app code (from backend/app/)
+    ├── config/           ← PHP config (from backend/config/)
+    ├── routes/           ← PHP routes (from backend/routes/)
+    ├── uploads/          ← File uploads (from backend/public/uploads/)
+    └── .env              ← Backend secrets (create manually – do NOT commit)
+```
+
+### Step 1 – Build the Vue.js frontend
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+This creates `frontend/dist/` containing `index.html`, `assets/`, and `.htaccess`.
+
+### Step 2 – Upload files via Hostinger File Manager or FTP
+
+| Local path | Upload to `public_html/` |
+|---|---|
+| `frontend/dist/` (all contents) | `public_html/` (root) |
+| `backend/public/index.php` | `public_html/api/index.php` |
+| `backend/public/.htaccess` | `public_html/api/.htaccess` |
+| `backend/public/uploads/` | `public_html/api/uploads/` |
+| `backend/app/` | `public_html/api/app/` |
+| `backend/config/` | `public_html/api/config/` |
+| `backend/routes/` | `public_html/api/routes/` |
+
+> **Do NOT upload** `backend/.env` – create it fresh on the server (see Step 3).
+
+### Step 3 – Create the backend `.env` on Hostinger
+
+Create `public_html/api/.env` via File Manager with your production values:
+
+```
+APP_NAME="Hotel Management System"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_hostinger_db_name
+DB_USERNAME=your_hostinger_db_user
+DB_PASSWORD=your_hostinger_db_password
+
+JWT_SECRET=replace-with-a-long-random-string
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION=3600
+
+FRONTEND_URL=https://yourdomain.com
+```
+
+> **Important:** Set `FRONTEND_URL` to your actual domain. This is used for CORS.  
+> Set `APP_DEBUG=false` in production to avoid leaking error details.
+
+### Step 4 – Import the database
+
+In Hostinger hPanel → **Databases → phpMyAdmin**, import:
+
+1. `database/schema.sql`
+2. `database/seeds/demo_data.sql` *(optional – demo data only)*
+
+### Step 5 – Verify the deployment
+
+- Open `https://yourdomain.com` → Vue SPA should load.
+- Open `https://yourdomain.com/api/auth/login` in a REST client → should return JSON.
+
+### Fixing "Unsupported framework" in Hostinger's Git auto-deploy
+
+The root `composer.json` (already added to this repo) signals Hostinger that this is a PHP project. However, because Hostinger's PHP auto-deploy does not run `npm build`, **use manual upload (Steps 1–2 above) instead of Git auto-deploy** for this full-stack project.
+
+---
+
 ## Demo Login Credentials
 
 All demo users have password: `password123`

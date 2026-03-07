@@ -16,7 +16,7 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <h1 class="text-2xl font-bold text-black flex items-center gap-2">
           <span class="text-xl">??</span> System Settings
         </h1>
         <p class="text-sm text-gray-500 mt-1">Manage billing, notifications, security and logs for your system.</p>

@@ -1,0 +1,27 @@
+# Dependencies
+/frontend/node_modules/
+/vendor/
+
+# Build output (re-generated on deploy)
+/frontend/dist/
+
+# Environment files with secrets – never commit these
+/backend/.env
+/frontend/.env.production
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+*.log
+php-server.log
+
+# PHP uploads (user-generated content)
+/backend/public/uploads/avatars/*
+/backend/public/uploads/event-packages/*
+/backend/public/uploads/menu/*
+/backend/public/uploads/rooms/*
+# Keep the directories themselves
+!/backend/public/uploads/avatars/.gitkeep
+!/backend/public/uploads/event-packages/.gitkeep
+!/backend/public/uploads/menu/.gitkeep
+!/backend/public/uploads/rooms/.gitkeep

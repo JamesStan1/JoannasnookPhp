@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /api/
+
+    # Route all requests through index.php (skip existing files)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Deny direct access to sensitive files
+<FilesMatch "\.(env|log|sql|json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
