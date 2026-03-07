@@ -3,7 +3,7 @@
   "description": "Hotel Management System – PHP API + Vue.js frontend",
   "type": "project",
   "require": {
-    "php": ">=7.4"
+    "php": "^8.2"
   },
   "config": {
     "optimize-autoloader": true

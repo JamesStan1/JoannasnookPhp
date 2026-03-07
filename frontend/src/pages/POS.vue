@@ -214,9 +214,11 @@
 
         <!-- Cash Received -->
         <div v-if="!chargeToRoom && paymentMethod === 'cash'">
-          <label class="block text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Cash Received</label>
+          <label class="block text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Cash Received <span class="text-red-400">*</span></label>
           <input v-model.number="receivedAmount" type="number" min="0" step="1" placeholder="0.00"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"/>
+            @input="cashError = ''"
+            :class="['w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100', cashError ? 'border-red-400 ring-1 ring-red-300' : 'border-gray-200']"/>
+          <p v-if="cashError" class="mt-1 text-xs text-red-500 font-medium">{{ cashError }}</p>
           <div v-if="receivedAmount >= total && receivedAmount > 0" class="mt-1.5 flex justify-between text-xs bg-green-50 border border-green-200 rounded-lg px-3 py-1.5">
             <span class="text-green-700 font-medium">Change</span>
             <span class="text-green-700 font-bold">P{{ fmt(receivedAmount - total) }}</span>
@@ -352,6 +354,7 @@ const lastInvoiceId     = ref('')
 const lastTotal         = ref(0)
 const lastPaymentMethod = ref('')
 const lastReceiptData   = ref(null)
+const cashError         = ref('')
 
 const cashierName = computed(() => {
   const u = authStore.user || JSON.parse(localStorage.getItem('user') || '{}')
@@ -466,9 +469,11 @@ function printThermalReceipt(data) {
   ).join('')
 
   const win = window.open('', '_blank', 'width=380,height=680')
+  const logoUrl = window.location.origin + '/Joannaslogo.png'
   win.document.write('<!DOCTYPE html><html><head><title>Receipt ' + (data.invoice_id || '') + '</title>'
     + '<style>* { margin:0; padding:0; box-sizing:border-box; } body { font-family:"Courier New",monospace; font-size:12px; padding:16px; width:320px; background:#fff; } .center { text-align:center; } .bold { font-weight:bold; } .sep { border-top:1px dashed #999; margin:8px 0; } table { width:100%; border-collapse:collapse; } td { padding:2px 0; vertical-align:top; } td:last-child { width:70px; } .grand td { font-weight:bold; font-size:14px; padding-top:6px; } @media print { body { width:280px; } }</style>'
     + '</head><body>'
+    + '<div class="center" style="margin-bottom:6px"><img src="' + logoUrl + '" style="width:72px;height:72px;object-fit:contain" /></div>'
     + '<div class="center bold" style="font-size:16px;margin-bottom:2px">Joanna\'s Nook Bed &amp; Breakfast</div>'
     + '<div class="center" style="font-size:11px;color:#555">Official Receipt</div>'
     + '<div class="sep"></div>'
@@ -534,6 +539,11 @@ async function processPayment() {
     alert('Please select the room to charge.')
     return
   }
+  if (!chargeToRoom.value && paymentMethod.value === 'cash' && (!receivedAmount.value || Number(receivedAmount.value) <= 0)) {
+    cashError.value = 'Please enter the cash received amount before processing the payment.'
+    return
+  }
+  cashError.value = ''
 
   processing.value = true
   try {
