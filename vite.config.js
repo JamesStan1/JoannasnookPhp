@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { fileURLToPath, URL } from 'url'
+import path from 'path'
 
-// Root-level Vite config used by Hostinger for deployment.
-// Sets the project root to the `frontend/` subdirectory so all
-// source files, index.html, and assets are resolved from there.
-// Output is written to `dist/` at the repository root so Hostinger
-// can serve it without additional configuration.
+// Root-level Vite config — used by Hostinger's Node.js hosting to detect
+// the Vue + Vite framework and run the build.
+// The project root is set to `frontend/` so index.html and all source files
+// are resolved from there.  Output goes to `dist/` at the repository root,
+// which Hostinger serves directly.
 export default defineConfig({
-  root: fileURLToPath(new URL('./frontend', import.meta.url)),
+  root: path.resolve(__dirname, 'frontend'),
   plugins: [vue()],
   server: {
     port: 5173,
@@ -20,12 +20,12 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: fileURLToPath(new URL('./dist', import.meta.url)),
+    outDir: path.resolve(__dirname, 'dist'),
     emptyOutDir: true,
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./frontend/src', import.meta.url)),
+      '@': path.resolve(__dirname, 'frontend/src'),
     }
   }
 })
