@@ -46,11 +46,11 @@
         </button>
         <transition name="slide">
           <div v-show="sections.staff" class="sub-section">
-            <router-link to="/staff" class="sub-link" :class="{ 'sub-active': isActive('/staff', true) }">Staff List</router-link>
-            <router-link to="/staff/attendance" class="sub-link" :class="{ 'sub-active': isActive('/staff/attendance', true) }">Attendance</router-link>
-            <router-link to="/staff/payroll" class="sub-link" :class="{ 'sub-active': isActive('/staff/payroll', true) }">Payroll</router-link>
-            <router-link to="/staff/reports" class="sub-link" :class="{ 'sub-active': isActive('/staff/reports', true) }">Reports</router-link>
-            <router-link to="/staff/archived" class="sub-link" :class="{ 'sub-active': isActive('/staff/archived', true) }">Archived</router-link>
+            <router-link v-if="show.staffList" to="/staff" class="sub-link" :class="{ 'sub-active': isActive('/staff', true) }">Staff List</router-link>
+            <router-link v-if="show.staffAttendance" to="/staff/attendance" class="sub-link" :class="{ 'sub-active': isActive('/staff/attendance', true) }">Attendance</router-link>
+            <router-link v-if="show.staffPayroll" to="/staff/payroll" class="sub-link" :class="{ 'sub-active': isActive('/staff/payroll', true) }">Payroll</router-link>
+            <router-link v-if="show.staffReports" to="/staff/reports" class="sub-link" :class="{ 'sub-active': isActive('/staff/reports', true) }">Reports</router-link>
+            <router-link v-if="show.staffArchived" to="/staff/archived" class="sub-link" :class="{ 'sub-active': isActive('/staff/archived', true) }">Archived</router-link>
             <!-- Leave nested -->
             <div>
               <button @click.stop="toggle('leave')" class="nested-btn" :class="{ 'nested-open': sections.leave }">
@@ -61,9 +61,9 @@
               </button>
               <transition name="slide">
                 <div v-show="sections.leave" class="nested-section">
-                  <router-link to="/staff/leave/request" class="nested-link" :class="{ 'sub-active': isActive('/staff/leave/request', true) }">Request Leave</router-link>
-                  <router-link to="/staff/leave/history" class="nested-link" :class="{ 'sub-active': isActive('/staff/leave/history', true) }">Leave History</router-link>
-                  <router-link to="/staff/leave/approvals" class="nested-link" :class="{ 'sub-active': isActive('/staff/leave/approvals', true) }">Leave Approvals</router-link>
+                  <router-link v-if="show.staffLeaveRequest" to="/staff/leave/request" class="nested-link" :class="{ 'sub-active': isActive('/staff/leave/request', true) }">Request Leave</router-link>
+                  <router-link v-if="show.staffLeaveHistory" to="/staff/leave/history" class="nested-link" :class="{ 'sub-active': isActive('/staff/leave/history', true) }">Leave History</router-link>
+                  <router-link v-if="show.staffLeaveApprovals" to="/staff/leave/approvals" class="nested-link" :class="{ 'sub-active': isActive('/staff/leave/approvals', true) }">Leave Approvals</router-link>
                 </div>
               </transition>
             </div>
@@ -265,6 +265,8 @@ const isActive = (path, exact = false) => {
 // -- Role helpers --------------------------------------------------------------
 const role        = computed(() => authStore.userRole)
 const isAdmin     = computed(() => role.value === 'admin')
+const isManager   = computed(() => role.value === 'manager')
+const isAdminOrManager = computed(() => isAdmin.value || isManager.value)
 const isChef      = computed(() => role.value === 'chef')
 const isSecurity  = computed(() => role.value === 'security')
 const isHouseRole = computed(() => role.value === 'housekeeping')
@@ -272,25 +274,35 @@ const isFrontDesk = computed(() => role.value === 'front_desk')
 
 // Section / item visibility
 const show = computed(() => ({
-  dashboard:           isAdmin.value || isFrontDesk.value,
-  staff:               isAdmin.value,
-  reservation:         isAdmin.value || isFrontDesk.value || isSecurity.value,
-  roomManagement:      isAdmin.value || isFrontDesk.value || isSecurity.value,
-  roomEdit:            isAdmin.value,
-  roomArchived:        isAdmin.value,
-  events:              isAdmin.value || isFrontDesk.value,
-  reservationHistory:  isAdmin.value || isFrontDesk.value,
-  reservationApproval: isAdmin.value || isFrontDesk.value,
-  housekeeping:        isAdmin.value || isHouseRole.value,
-  inventory:           isAdmin.value || isFrontDesk.value,
-  pos:                 isAdmin.value || isFrontDesk.value || isChef.value,
-  posPage:             isAdmin.value || isFrontDesk.value,
-  posOrders:           isAdmin.value || isFrontDesk.value,
-  restaurantMenu:      isAdmin.value,
-  chefDashboard:       isAdmin.value || isChef.value,
-  posArchived:         isAdmin.value,
-  bills:               isAdmin.value,
-  settings:            isAdmin.value,
+  dashboard:           isAdminOrManager.value || isFrontDesk.value,
+  // Staff Management: visible to all authenticated users
+  staff:               !!role.value,
+  // Admin/manager see all staff sub-items; others only see Reports and Leave
+  staffList:           isAdminOrManager.value,
+  staffAttendance:     isAdminOrManager.value,
+  staffPayroll:        isAdminOrManager.value,
+  staffReports:        !!role.value,
+  staffArchived:       isAdminOrManager.value,
+  staffLeaveRequest:   !!role.value,
+  staffLeaveHistory:   !!role.value,
+  staffLeaveApprovals: isAdminOrManager.value,
+  reservation:         isAdminOrManager.value || isFrontDesk.value || isSecurity.value,
+  roomManagement:      isAdminOrManager.value || isFrontDesk.value || isSecurity.value,
+  roomEdit:            isAdminOrManager.value,
+  roomArchived:        isAdminOrManager.value,
+  events:              isAdminOrManager.value || isFrontDesk.value,
+  reservationHistory:  isAdminOrManager.value || isFrontDesk.value,
+  reservationApproval: isAdminOrManager.value || isFrontDesk.value,
+  housekeeping:        isAdminOrManager.value || isHouseRole.value,
+  inventory:           isAdminOrManager.value || isFrontDesk.value,
+  pos:                 isAdminOrManager.value || isFrontDesk.value || isChef.value,
+  posPage:             isAdminOrManager.value || isFrontDesk.value,
+  posOrders:           isAdminOrManager.value || isFrontDesk.value,
+  restaurantMenu:      isAdminOrManager.value,
+  chefDashboard:       isAdminOrManager.value || isChef.value,
+  posArchived:         isAdminOrManager.value,
+  bills:               isAdminOrManager.value,
+  settings:            isAdminOrManager.value,
 }))
 
 const autoOpen = (path) => {

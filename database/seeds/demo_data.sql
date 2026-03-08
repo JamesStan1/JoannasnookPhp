@@ -50,12 +50,14 @@ INSERT INTO inventory (name, category, current_stock, unit_price, minimum_stock,
 
 -- Insert sample settings
 INSERT INTO settings (`key`, value, created_at, updated_at) VALUES
-('hotel_name', 'Luxury Hotel & Resort', NOW(), NOW()),
-('hotel_phone', '+1-800-LUXURY-1', NOW(), NOW()),
-('hotel_email', 'info@luxuryhotel.com', NOW(), NOW()),
-('currency', 'USD', NOW(), NOW()),
-('tax_rate', '10', NOW(), NOW()),
+('hotel_name', 'Joanna\'s Nook Bed & Breakfast', NOW(), NOW()),
+('hotel_phone', '09123456789', NOW(), NOW()),
+('hotel_email', 'joannasnookban@gmail.com', NOW(), NOW()),
+('hotel_address', 'Balingasag, Misamis Oriental', NOW(), NOW()),
+('currency', '₱', NOW(), NOW()),
+('tax_rate', '12', NOW(), NOW()),
 ('check_in_time', '14:00', NOW(), NOW()),
-('check_out_time', '11:00', NOW(), NOW());
+('check_out_time', '12:00', NOW(), NOW())
+ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = NOW();
 
 -- Password hash is: password123 (for demo purposes)

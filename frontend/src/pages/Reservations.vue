@@ -137,7 +137,7 @@
                       </button>
                     </template>
                     <template v-else-if="res.status === 'checked_in'">
-                      <button @click="updateStatus(res.id, 'check-out')" title="Check Out"
+                      <button @click="handleCheckOut(res)" title="Check Out"
                         class="p-1.5 text-purple-600 hover:bg-purple-100 rounded-lg transition text-xs font-medium px-2">
                         CO
                       </button>
@@ -722,6 +722,25 @@
       </div>
     </div>
 
+    <!-- ====== CHECKOUT BLOCKED (unpaid balance) ====== -->
+    <div v-if="checkoutBlockedRes" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        </div>
+        <p class="text-sm font-semibold text-gray-800 mb-1">Cannot Check Out</p>
+        <p class="text-xs text-gray-500 mb-3">
+          <strong>{{ checkoutBlockedRes.guestName }}</strong> (Room {{ checkoutBlockedRes.roomNumber }}) still has an unpaid balance.
+        </p>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5">
+          <p class="text-xs text-orange-600 font-medium">Outstanding Balance</p>
+          <p class="text-xl font-bold text-orange-700">₱{{ formatMoney(checkoutBlockedRes.balance) }}</p>
+        </div>
+        <p class="text-xs text-gray-400 mb-5">Please settle the full remaining balance before completing the checkout.</p>
+        <button @click="checkoutBlockedRes = null" class="w-full py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition">Understood</button>
+      </div>
+    </div>
+
     <!-- ====== CANCEL CONFIRM ====== -->
     <div v-if="cancelConfirmRes" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
@@ -808,6 +827,7 @@ const idFileInput = ref(null)
 const walkInIdFile = ref(null)
 const roomModal = ref(false)
 const cancelConfirmRes = ref(null)
+const checkoutBlockedRes = ref(null)
 const selectedRes = ref(null)
 const editSaving = ref(false)
 const walkInSaving    = ref(false)
@@ -871,6 +891,15 @@ async function fetchHkTasks() {
     const res = await api.get('/housekeeping/pending-tasks')
     hkTasks.value = res.data?.data ?? res.data ?? []
   } catch (e) { console.error(e) } finally { hkLoading.value = false }
+}
+
+function handleCheckOut(res) {
+  const balance = Number(res.remaining_balance || 0) + Number(res.cafe_payment || 0)
+  if (balance > 0.01) {
+    checkoutBlockedRes.value = { guestName: res.guest_name, roomNumber: res.room_number, balance }
+    return
+  }
+  updateStatus(res.id, 'check-out')
 }
 
 async function updateStatus(id, action) {
@@ -1007,37 +1036,41 @@ function printContractAndBill(res) {
     @page { size: A4; margin: 20mm 18mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; color: #111; }
     body { padding: 32px 36px; }
-    .header { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid #1d4ed8; padding-bottom: 16px; margin-bottom: 20px; }
-    .header h1 { font-size: 22px; color: #1d4ed8; font-weight: 700; }
-    .header p  { font-size: 12px; color: #555; margin-top: 2px; }
-    .contract-title { text-align: center; font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1d4ed8; margin-bottom: 16px; }
-    .ref-badge { text-align: center; font-size: 13px; background: #eff6ff; color: #1d4ed8; padding: 6px 16px; border-radius: 20px; display: inline-block; font-family: monospace; font-weight: 700; }
-    .section { margin-bottom: 18px; }
-    .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
+    .header { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid #166534; padding-bottom: 16px; margin-bottom: 24px; }
+    .logo { height: 64px; width: auto; object-fit: contain; }
+    .header-info h1 { font-size: 20px; color: #166534; font-weight: 800; letter-spacing: 0.5px; }
+    .header-info p { font-size: 12px; color: #555; margin-top: 3px; }
+    .contract-title { text-align: center; font-size: 15px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #166534; margin-bottom: 6px; }
+    .contract-title-line { width: 80px; height: 3px; background: #166534; margin: 0 auto 20px; border-radius: 2px; }
+    .ref-badge { text-align: center; font-size: 13px; background: #f0fdf4; color: #166534; border: 1px solid #86efac; padding: 6px 16px; border-radius: 20px; display: inline-block; font-family: monospace; font-weight: 700; }
+    .section { margin-bottom: 20px; }
+    .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #166534; margin-bottom: 8px; border-bottom: 2px solid #dcfce7; padding-bottom: 4px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
-    .field label { font-size: 11px; color: #6b7280; }
-    .field p { font-size: 13px; font-weight: 500; margin-top: 1px; }
-    .amount-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 18px; }
-    .amount-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px solid #e5e7eb; }
-    .amount-row.total { font-weight: 700; font-size: 15px; color: #1d4ed8; border-bottom: none; margin-top: 6px; }
-    .tc-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; font-size: 11px; color: #374151; line-height: 1.7; }
+    .field label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field p { font-size: 13px; font-weight: 600; margin-top: 2px; }
+    .amount-box { background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 14px 18px; }
+    .amount-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px solid #dcfce7; }
+    .amount-row.total { font-weight: 700; font-size: 15px; color: #166534; border-bottom: none; margin-top: 6px; }
+    .tc-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; font-size: 11px; color: #374151; line-height: 1.8; }
     .tc-box li { margin-bottom: 4px; }
-    .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 32px; }
-    .sig-block { border-top: 1.5px solid #111; padding-top: 8px; }
+    .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; }
+    .sig-block { border-top: 1.5px solid #166534; padding-top: 8px; }
     .sig-block p { font-size: 12px; color: #374151; }
     .page2 { page-break-before: always; padding-top: 8px; }
-    .bill-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #e5e7eb; }
+    .bill-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #dcfce7; }
     .bill-row.subtotal { font-weight: 600; }
-    .bill-row.grand { font-weight: 700; font-size: 16px; color: #1d4ed8; border-bottom: none; margin-top: 8px; }
-    .footer-note { text-align: right; font-size: 11px; color: #9ca3af; margin-top: 20px; }
+    .bill-row.grand { font-weight: 700; font-size: 16px; color: #166534; border-bottom: none; margin-top: 8px; }
+    .footer-note { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 10px; }
     @media print { .print-btn { display: none !important; } }
   </style>
   </head><body>
   <!-- PAGE 1: CONTRACT -->
   <div class="header">
-    <div><h1>JOANNA'S NOOK BED &amp; BREAKFAST</h1><p>Reservation Contract &nbsp;|&nbsp; Generated ${today}</p></div>
+    <img src="${window.location.origin}/Joannaslogo.png" class="logo" alt="Joanna's Nook Logo"/>
+    <div class="header-info"><h1>JOANNA'S NOOK BED &amp; BREAKFAST</h1><p>Reservation Contract &nbsp;|&nbsp; Generated ${today}</p></div>
   </div>
   <p class="contract-title">Reservation Contract</p>
+  <div class="contract-title-line"></div>
   <div style="text-align:center;margin-bottom:20px"><span class="ref-badge">${res.reference_number}</span></div>
   <div class="section">
     <div class="section-title">Guest Information</div>
@@ -1080,9 +1113,11 @@ function printContractAndBill(res) {
   <!-- PAGE 2: BILLING SUMMARY -->
   <div class="page2">
     <div class="header">
-      <div><h1>JOANNA'S NOOK BED &amp; BREAKFAST</h1><p>Billing Summary &nbsp;|&nbsp; ${today}</p></div>
+      <img src="${window.location.origin}/Joannaslogo.png" class="logo" alt="Joanna's Nook Logo"/>
+      <div class="header-info"><h1>JOANNA'S NOOK BED &amp; BREAKFAST</h1><p>Billing Summary &nbsp;|&nbsp; ${today}</p></div>
     </div>
     <p class="contract-title">Billing Summary</p>
+    <div class="contract-title-line"></div>
     <div style="text-align:center;margin-bottom:20px"><span class="ref-badge">${res.reference_number}</span></div>
     <div class="section">
       <div class="section-title">Guest</div>
@@ -1109,7 +1144,7 @@ function printContractAndBill(res) {
     </div>
     <p class="footer-note">Joanna's Nook Bed &amp; Breakfast &nbsp;|&nbsp; ${res.reference_number} &nbsp;|&nbsp; ${today}</p>
   </div>
-  <br><button class="print-btn" onclick="window.print()" style="background:#1d4ed8;color:#fff;border:none;padding:10px 28px;border-radius:10px;cursor:pointer;font-size:14px">🖨 Print</button>
+  <br><button class="print-btn" onclick="window.print()" style="background:#166534;color:#fff;border:none;padding:10px 28px;border-radius:10px;cursor:pointer;font-size:14px">🖨 Print</button>
   <script>window.onload=()=>window.print()<\/script>
   </body></html>`)
   win.document.close()

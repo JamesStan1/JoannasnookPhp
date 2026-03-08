@@ -1,86 +1,117 @@
 <template>
   <div class="min-h-screen bg-white flex flex-col">
     <!-- Fixed Navigation Header -->
-    <header class="sticky top-0 z-50 bg-white bg-opacity-95 backdrop-blur-sm shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
+    <header class="sticky top-0 z-50 bg-white/97 backdrop-blur-md border-b border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+        <div class="flex justify-between items-center h-24">
           <!-- Hotel Name on the left -->
-          <div class="flex-shrink-0 flex items-center gap-2.5">
-            <img src="/Joannaslogo.png" alt="Joanna's Logo" class="h-16 w-16 object-contain rounded-xl" />
+          <div class="flex-shrink-0 flex items-center gap-3.5">
+            <img src="/Joannaslogo.png" alt="Joanna's Logo" class="h-14 w-14 object-contain" />
             <div class="leading-tight">
-              <div class="text-lg font-semibold tracking-widest text-gray-900">Joanna's Nook</div>
-              <div class="text-xs text-gray-500 tracking-wide">BED & BREAKFAST</div>
+              <div class="text-sm font-light tracking-[0.22em] text-gray-900 uppercase">Joanna's Nook</div>
+              <div class="text-[11px] text-gray-400 tracking-[0.4em] uppercase mt-1">Bed &amp; Breakfast</div>
             </div>
           </div>
 
           <!-- Navigation links on the right -->
-          <nav class="hidden md:flex items-center space-x-10">
-            <a href="#home" class="text-gray-700 hover:text-green-800 font-light transition duration-300">Home</a>
-            <a href="#services" class="text-gray-700 hover:text-green-800 font-light transition duration-300">Services</a>
-            <a href="#contact" class="text-gray-700 hover:text-green-800 font-light transition duration-300">Contact Us</a>
+          <nav class="hidden md:flex items-center gap-10">
+            <a href="#home" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Home</a>
+            <a href="#services" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Services</a>
+            <a href="#contact" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Contact</a>
             <button
               @click="navigateToLogin"
-              class="bg-green-800 hover:bg-green-900 text-white font-light py-2 px-6 rounded-full shadow-md transition duration-300"
+              class="text-[11px] border border-green-800 text-green-800 hover:bg-green-800 hover:text-white font-light py-2.5 px-7 transition duration-300 tracking-[0.18em] uppercase"
             >
               Staff Login
             </button>
           </nav>
 
           <!-- Mobile hamburger -->
-          <button @click="mobileNavOpen = !mobileNavOpen" class="md:hidden flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors" aria-label="Toggle menu">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <button @click="mobileNavOpen = !mobileNavOpen" class="md:hidden flex items-center justify-center p-2 text-gray-600 hover:text-green-800 transition-colors" aria-label="Toggle menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
       </div>
 
       <!-- Mobile nav menu -->
-      <div v-if="mobileNavOpen" class="md:hidden bg-white border-t border-gray-100 px-4 py-4 flex flex-col gap-4 shadow-lg">
-        <a href="#home" @click="mobileNavOpen=false" class="text-gray-700 hover:text-green-800 font-light py-2 border-b border-gray-100 transition">Home</a>
-        <a href="#services" @click="mobileNavOpen=false" class="text-gray-700 hover:text-green-800 font-light py-2 border-b border-gray-100 transition">Services</a>
-        <a href="#contact" @click="mobileNavOpen=false" class="text-gray-700 hover:text-green-800 font-light py-2 border-b border-gray-100 transition">Contact Us</a>
-        <button @click="navigateToLogin; mobileNavOpen=false" class="bg-green-800 hover:bg-green-900 text-white font-light py-2 px-6 rounded-full shadow-md transition">Staff Login</button>
+      <div v-if="mobileNavOpen" class="md:hidden bg-white border-t border-gray-100 px-6 py-5 flex flex-col gap-5">
+        <a href="#home" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Home</a>
+        <a href="#services" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Services</a>
+        <a href="#contact" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Contact</a>
+        <button @click="navigateToLogin; mobileNavOpen=false" class="text-[11px] border border-green-800 text-green-800 font-light py-3 px-6 tracking-[0.18em] uppercase text-center transition">Staff Login</button>
       </div>
     </header>
 
     <!-- Hero Section -->
-    <section id="home" class="relative h-[400px] md:h-[600px] bg-cover bg-center flex items-center justify-center overflow-hidden" style="background-image: url('/Backimagehomepage.jpg');">
-      <div class="absolute inset-0 bg-black bg-opacity-30"></div>
-      <div class="relative text-center px-4 max-w-3xl">
-        <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white mb-4 md:mb-6 tracking-tight">Experience comfort, luxury, and exceptional hospitality</h1>
-        <p class="text-lg md:text-xl text-gray-100 mb-10 font-light leading-relaxed">
-          Discover your sanctuary of relaxation with our premium accommodations and world-class amenities. Whether you're planning a restful getaway or an unforgettable celebration, our dedicated team ensures every moment exceeds your expectations.
+    <section id="home" class="relative h-[540px] md:h-[740px] lg:h-[88vh] bg-cover bg-center flex items-center justify-center overflow-hidden" style="background-image: url('/Backimagehomepage.jpg');">
+      <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.6) 100%);"></div>
+      <div class="relative text-center px-6 max-w-4xl mx-auto">
+        <!-- Ornamental divider -->
+        <div class="flex items-center justify-center gap-5 mb-10">
+          <div class="h-px w-20 bg-white/40"></div>
+          <span class="text-white/60 text-[12px] tracking-[0.45em] uppercase font-light">Est. Balingasag, Misamis Oriental</span>
+          <div class="h-px w-20 bg-white/40"></div>
+        </div>
+        <h1 class="text-4xl sm:text-5xl md:text-[64px] lg:text-[76px] font-extralight text-white mb-5 md:mb-7 tracking-wide leading-[1.12]">
+          Experience<br class="hidden sm:block" /><em class="font-light not-italic"> Comfort &amp; Luxury</em>
+        </h1>
+        <p class="text-xs md:text-sm text-white/75 mb-12 font-light leading-loose tracking-[0.2em] max-w-lg mx-auto uppercase">
+          Your sanctuary of relaxation — premium accommodations &amp; world-class hospitality
         </p>
         <button
           @click="scrollToSection('services')"
-          class="bg-green-800 hover:bg-green-900 text-white font-light py-4 px-10 rounded-full shadow-lg transition duration-300 text-lg inline-block"
+          class="inline-block border border-white/75 text-white hover:bg-white hover:text-green-900 font-light py-4 px-14 transition duration-500 text-[11px] tracking-[0.3em] uppercase"
         >
-          View Our Services
+          Explore Our Services
         </button>
+      </div>
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-60">
+        <div class="w-px h-8 bg-white"></div>
+        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/></svg>
       </div>
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-16 bg-white">
+    <section id="services" class="py-28 bg-white">
       <div class="max-w-5xl mx-auto px-4">
 
+        <!-- Section Title -->
+        <div class="text-center mb-24">
+          <p class="text-[16px] tracking-[0.45em] text-gray-400 uppercase mb-5">What We Offer</p>
+          <h2 class="text-3xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">Our Services</h2>
+          <div class="flex items-center justify-center gap-4">
+            <div class="h-px w-16 bg-gray-200"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-green-700"></div>
+            <div class="h-px w-16 bg-gray-200"></div>
+          </div>
+        </div>
+
         <!-- ── Room Reservations ── -->
-        <div class="mb-12">
-          <div class="text-center mb-6">
-            <h2 class="text-2xl font-semibold text-green-800">Room Reservations</h2>
-            <p class="text-sm text-gray-500 font-light mt-1">Book comfortable accommodations for your stay with modern amenities</p>
+        <div class="mb-24">
+          <div class="text-center mb-12">
+            <p class="text-sm tracking-[0.4em] text-gray-400 uppercase mb-3">Accommodations</p>
+            <h2 class="text-2xl font-extralight text-green-800 tracking-wider">Room Reservations</h2>
+            <p class="text-base text-gray-400 font-light mt-3 tracking-wider">Book comfortable accommodations for your stay with modern amenities</p>
+            <div class="flex items-center justify-center gap-3 mt-5">
+              <div class="h-px w-10 bg-gray-200"></div>
+              <div class="w-1 h-1 rounded-full bg-amber-400"></div>
+              <div class="h-px w-10 bg-gray-200"></div>
+            </div>
           </div>
 
           <!-- Room Carousel Wrapper -->
           <div v-if="roomGroups.length">
             <!-- Single Room Card -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col sm:flex-row">
+            <div class="bg-white border border-gray-100 shadow-xl overflow-hidden flex flex-col sm:flex-row">
               <!-- Image Carousel -->
               <div class="relative w-full sm:w-80 flex-shrink-0 bg-gray-100 overflow-hidden">
                 <img :src="roomGroups[serviceRoomIndex].images[roomGroups[serviceRoomIndex].activeImage]"
                   :alt="roomGroups[serviceRoomIndex].name"
-                  class="w-full h-full object-cover" style="min-height:300px"/>
+                  class="w-full h-full object-cover" style="min-height:300px"
+                  @error="$event.target.src = ROOM_PLACEHOLDER"/>
                 <button v-if="roomGroups[serviceRoomIndex].images.length > 1" @click="prevImage(roomGroups[serviceRoomIndex])"
                   class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 z-10">
                   <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -93,7 +124,7 @@
                   <span v-for="(img, i) in roomGroups[serviceRoomIndex].images" :key="i"
                     :class="['w-1.5 h-1.5 rounded-full transition-colors', i === roomGroups[serviceRoomIndex].activeImage ? 'bg-white' : 'bg-white/50']"/>
                 </div>
-                <div class="absolute top-0 left-0 bg-gray-800/70 text-white text-xs font-medium px-2 py-1 uppercase tracking-wide" style="font-size:10px">
+                <div class="absolute top-0 left-0 bg-black/60 text-white text-[9px] font-light px-3 py-1.5 uppercase tracking-[0.25em]">
                   {{ roomGroups[serviceRoomIndex].label }}
                 </div>
                 <!-- Availability badge -->
@@ -105,72 +136,80 @@
                 </div>
               </div>
               <!-- Info -->
-              <div class="flex-1 p-7 flex flex-col justify-between">
+              <div class="flex-1 p-9 flex flex-col justify-between">
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <h3 class="text-xl font-bold text-amber-700">{{ roomGroups[serviceRoomIndex].name }}</h3>
-                    <span class="text-sm text-gray-400 font-light">{{ serviceRoomIndex + 1 }} / {{ roomGroups.length }}</span>
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-light tracking-[0.18em] text-amber-700 uppercase">{{ roomGroups[serviceRoomIndex].name }}</h3>
+                    <span class="text-xs text-gray-400 font-light tracking-widest">{{ serviceRoomIndex + 1 }} / {{ roomGroups.length }}</span>
                   </div>
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-2xl font-bold text-amber-600">&#x20B1;{{ roomGroups[serviceRoomIndex].priceNum.toLocaleString() }}</span>
-                    <span class="text-sm text-gray-500 flex items-center gap-1">
+                  <div class="h-px bg-gray-100 mb-4"></div>
+                  <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl font-light text-amber-600">&#x20B1;{{ roomGroups[serviceRoomIndex].priceNum.toLocaleString() }}</span>
+                    <span class="text-sm text-gray-400 flex items-center gap-1 tracking-wider">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
                       {{ roomGroups[serviceRoomIndex].guests }} guests
                     </span>
                   </div>
-                  <p class="text-sm text-gray-500 font-light mb-4">{{ roomGroups[serviceRoomIndex].description }}</p>
-                  <p class="text-sm font-semibold text-gray-700 mb-2">Features:</p>
-                  <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-                    <span v-for="(f, i) in roomGroups[serviceRoomIndex].features" :key="i" class="text-sm text-gray-600 font-light flex items-center gap-1">
-                      <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <p class="text-sm text-gray-500 font-light mb-5 leading-loose">{{ roomGroups[serviceRoomIndex].description }}</p>
+                  <p class="text-[11px] font-light text-gray-400 tracking-[0.3em] uppercase mb-3">Room Features</p>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <span v-for="(f, i) in roomGroups[serviceRoomIndex].features" :key="i" class="text-sm text-gray-600 font-light flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                       {{ f }}
                     </span>
                   </div>
                 </div>
                 <button @click="openBookingForm(roomGroups[serviceRoomIndex])"
                   :disabled="roomGroups[serviceRoomIndex].availableCount === 0"
-                  class="mt-5 w-full bg-green-700 hover:bg-green-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-base font-medium py-3 rounded-lg transition-colors">
+                  class="mt-7 w-full border border-green-700 hover:bg-green-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed text-green-800 text-[11px] font-light py-3.5 tracking-[0.2em] uppercase transition-all duration-300">
                   {{ roomGroups[serviceRoomIndex].availableCount > 0 ? 'Reserve This Room' : 'No Rooms Available' }}
                 </button>
               </div>
             </div>
 
             <!-- Bottom Nav: Prev · Dots · Next -->
-            <div class="flex items-center justify-center gap-3 mt-4">
+            <div class="flex items-center justify-center gap-4 mt-6">
               <button @click="serviceRoomIndex = (serviceRoomIndex - 1 + roomGroups.length) % roomGroups.length"
-                class="w-9 h-9 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center text-gray-500 hover:border-green-400 hover:text-amber-600 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-green-700 hover:text-green-700 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
               </button>
               <div class="flex gap-2">
                 <button v-for="(group, i) in roomGroups" :key="group.name" type="button"
                   @click="serviceRoomIndex = i"
-                  :class="['h-2 rounded-full transition-all duration-300', i === serviceRoomIndex ? 'bg-green-600 w-6' : 'bg-gray-300 w-2 hover:bg-green-400']">
+                  :class="['h-1 transition-all duration-300', i === serviceRoomIndex ? 'bg-green-700 w-8' : 'bg-gray-200 w-4 hover:bg-green-400']">
                 </button>
               </div>
               <button @click="serviceRoomIndex = (serviceRoomIndex + 1) % roomGroups.length"
-                class="w-9 h-9 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center text-gray-500 hover:border-green-400 hover:text-amber-600 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-green-700 hover:text-green-700 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
               </button>
             </div>
           </div>
         </div>
 
         <!-- ── Event Reservations ── -->
-        <div class="mb-12">
-          <div class="text-center mb-6">
-            <h2 class="text-2xl font-semibold text-green-800">Event Reservations</h2>
-            <p class="text-sm text-gray-500 font-light mt-1">Host your special events with our comprehensive event packages</p>
+        <div class="mb-24">
+          <div class="text-center mb-12">
+            <p class="text-[11px] tracking-[0.4em] text-gray-400 uppercase mb-3">Celebrations &amp; Gatherings</p>
+            <h2 class="text-2xl font-extralight text-green-800 tracking-wider">Event Reservations</h2>
+            <p class="text-sm text-gray-400 font-light mt-3 tracking-wider">Host your special events with our comprehensive event packages</p>
+            <div class="flex items-center justify-center gap-3 mt-5">
+              <div class="h-px w-10 bg-gray-200"></div>
+              <div class="w-1 h-1 rounded-full bg-amber-400"></div>
+              <div class="h-px w-10 bg-gray-200"></div>
+            </div>
           </div>
 
           <!-- Package Carousel Wrapper -->
           <div v-if="eventPackages.length">
             <!-- Single Package Card -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col sm:flex-row">
+            <div class="bg-white border border-gray-100 shadow-xl overflow-hidden flex flex-col sm:flex-row">
               <!-- Image Carousel -->
               <div class="relative w-full sm:w-80 flex-shrink-0 bg-gray-100 overflow-hidden">
                 <img :src="eventPackages[serviceEventIndex].images[eventPackages[serviceEventIndex].activeImage]"
                   :alt="eventPackages[serviceEventIndex].name"
-                  class="w-full h-full object-cover" style="min-height:300px"/>
+                  class="w-full h-full object-cover" style="min-height:300px"
+                  @error="$event.target.src = '/Event%20Packages/Basic%20Package.jpg'"/>
                 <button v-if="eventPackages[serviceEventIndex].images.length > 1" @click="prevImage(eventPackages[serviceEventIndex])"
                   class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 z-10">
                   <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -185,73 +224,83 @@
                 </div>
               </div>
               <!-- Info -->
-              <div class="flex-1 p-7 flex flex-col justify-between">
+              <div class="flex-1 p-9 flex flex-col justify-between">
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <h3 class="text-xl font-bold text-amber-700">{{ eventPackages[serviceEventIndex].name }}</h3>
-                    <span class="text-sm text-gray-400 font-light">{{ serviceEventIndex + 1 }} / {{ eventPackages.length }}</span>
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-light tracking-[0.18em] text-amber-700 uppercase">{{ eventPackages[serviceEventIndex].name }}</h3>
+                    <span class="text-xs text-gray-400 font-light tracking-widest">{{ serviceEventIndex + 1 }} / {{ eventPackages.length }}</span>
                   </div>
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-2xl font-bold text-amber-600">&#x20B1;{{ eventPackages[serviceEventIndex].priceNum.toLocaleString() }}</span>
-                    <span class="text-sm text-gray-500 flex items-center gap-1">
+                  <div class="h-px bg-gray-100 mb-4"></div>
+                  <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl font-light text-amber-600">&#x20B1;{{ eventPackages[serviceEventIndex].priceNum.toLocaleString() }}</span>
+                    <span class="text-sm text-gray-400 flex items-center gap-1 tracking-wider">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
                       {{ eventPackages[serviceEventIndex].guests }} guests
                     </span>
                   </div>
-                  <p class="text-sm text-gray-500 font-light mb-4">{{ eventPackages[serviceEventIndex].description }}</p>
-                  <p class="text-sm font-semibold text-gray-700 mb-2">Package Includes:</p>
-                  <ul class="space-y-1">
-                    <li v-for="(inc, i) in eventPackages[serviceEventIndex].inclusions" :key="i" class="text-sm text-gray-600 font-light flex items-center gap-1">
-                      <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <p class="text-sm text-gray-500 font-light mb-5 leading-loose">{{ eventPackages[serviceEventIndex].description }}</p>
+                  <p class="text-[11px] font-light text-gray-400 tracking-[0.3em] uppercase mb-3">Package Includes</p>
+                  <ul class="space-y-2">
+                    <li v-for="(inc, i) in eventPackages[serviceEventIndex].inclusions" :key="i" class="text-sm text-gray-600 font-light flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                       {{ inc }}
                     </li>
                   </ul>
                 </div>
                 <button @click="openEventForm(eventPackages[serviceEventIndex].id)"
-                  class="mt-5 w-full bg-purple-600 hover:bg-purple-700 text-white text-base font-medium py-3 rounded-lg transition-colors">
+                  class="mt-7 w-full border border-purple-600 hover:bg-purple-600 hover:text-white text-purple-700 text-[11px] font-light py-3.5 tracking-[0.2em] uppercase transition-all duration-300">
                   Reserve This Package
                 </button>
               </div>
             </div>
 
             <!-- Bottom Nav: Prev · Dots · Next -->
-            <div class="flex items-center justify-center gap-3 mt-4">
+            <div class="flex items-center justify-center gap-4 mt-6">
               <button @click="serviceEventIndex = (serviceEventIndex - 1 + eventPackages.length) % eventPackages.length"
-                class="w-9 h-9 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center text-gray-500 hover:border-purple-400 hover:text-purple-600 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-purple-600 hover:text-purple-600 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
               </button>
               <div class="flex gap-2">
                 <button v-for="(pkg, i) in eventPackages" :key="pkg.id" type="button"
                   @click="serviceEventIndex = i"
-                  :class="['h-2 rounded-full transition-all duration-300', i === serviceEventIndex ? 'bg-purple-500 w-6' : 'bg-gray-300 w-2 hover:bg-purple-300']">
+                  :class="['h-1 transition-all duration-300', i === serviceEventIndex ? 'bg-purple-500 w-8' : 'bg-gray-200 w-4 hover:bg-purple-300']">
                 </button>
               </div>
               <button @click="serviceEventIndex = (serviceEventIndex + 1) % eventPackages.length"
-                class="w-9 h-9 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center text-gray-500 hover:border-purple-400 hover:text-purple-600 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-purple-600 hover:text-purple-600 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
               </button>
             </div>
           </div>
         </div>
 
         <!-- ── Why Choose Joanna's Nook ── -->
-        <div class="mb-4">
-          <h2 class="text-lg font-semibold text-green-800 mb-5">Why Choose Joanna's Nook?</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div>
-              <div class="text-2xl mb-1">🏨</div>
-              <p class="text-xs font-semibold text-amber-600 mb-1">Quality Accommodations</p>
-              <p class="text-xs text-gray-500 font-light leading-relaxed">Clean, comfortable rooms with modern amenities to ensure a pleasant stay.</p>
+        <div class="mb-4 py-20 border-t border-gray-100">
+          <div class="text-center mb-16">
+            <p class="text-xs tracking-[0.4em] text-gray-400 uppercase mb-4">Our Promise</p>
+            <h2 class="text-4xl font-extralight text-gray-800 tracking-wider">Why Choose Joanna's Nook?</h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-12">
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center">
+                <svg class="w-9 h-9 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              </div>
+              <p class="text-xs tracking-[0.3em] text-amber-600 uppercase mb-3">Quality Accommodations</p>
+              <p class="text-base text-gray-400 font-light leading-loose">Clean, comfortable rooms with modern amenities to ensure a pleasant stay.</p>
             </div>
-            <div>
-              <div class="text-2xl mb-1">🔥</div>
-              <p class="text-xs font-semibold text-amber-600 mb-1">Affordable Rates</p>
-              <p class="text-xs text-gray-500 font-light leading-relaxed">Competitive pricing with flexible payment options to suit your budget.</p>
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center">
+                <svg class="w-9 h-9 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <p class="text-xs tracking-[0.3em] text-amber-600 uppercase mb-3">Affordable Rates</p>
+              <p class="text-base text-gray-400 font-light leading-loose">Competitive pricing with flexible payment options to suit your budget.</p>
             </div>
-            <div>
-              <div class="text-2xl mb-1">⭐</div>
-              <p class="text-xs font-semibold text-amber-600 mb-1">Excellent Service</p>
-              <p class="text-xs text-gray-500 font-light leading-relaxed">Dedicated staff ready to assist you with all your needs during your stay.</p>
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center">
+                <svg class="w-9 h-9 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </div>
+              <p class="text-xs tracking-[0.3em] text-amber-600 uppercase mb-3">Excellent Service</p>
+              <p class="text-base text-gray-400 font-light leading-loose">Dedicated staff ready to assist you with all your needs during your stay.</p>
             </div>
           </div>
         </div>
@@ -752,13 +801,20 @@
 
 
     <!-- Find Us / Contact Section -->
-    <section id="contact" class="py-16 bg-white">
+    <section id="contact" class="py-24 bg-white border-t border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-semibold text-green-800 mb-8">Find Us</h2>
+        <div class="mb-14">
+          <p class="text-[11px] tracking-[0.4em] text-gray-400 uppercase mb-3">Visit Us</p>
+          <h2 class="text-3xl font-extralight text-green-800 tracking-wider">Find Us</h2>
+          <div class="flex items-center gap-4 mt-4">
+            <div class="h-px w-16 bg-gray-200"></div>
+            <div class="w-1 h-1 rounded-full bg-amber-400"></div>
+          </div>
+        </div>
         <div class="flex flex-col lg:flex-row gap-6">
 
           <!-- Map -->
-          <div class="flex-1 min-h-72 rounded-2xl overflow-hidden shadow border border-gray-200" style="min-height:380px;isolation:isolate;position:relative;z-index:0">
+          <div class="flex-1 min-h-72 overflow-hidden shadow-lg border border-gray-100" style="min-height:380px;isolation:isolate;position:relative;z-index:0">
             <div ref="mapRef" style="width:100%;height:100%;min-height:380px"></div>
           </div>
 
@@ -766,22 +822,23 @@
           <div class="w-full lg:w-80 flex flex-col gap-4">
 
             <!-- Contact Information -->
-            <div class="bg-white rounded-2xl border border-gray-200 shadow p-6">
-              <h3 class="text-base font-semibold text-amber-600 mb-4">Contact Information</h3>
+            <div class="bg-white border border-gray-100 shadow-lg p-7">
+              <p class="text-[11px] tracking-[0.35em] text-gray-400 uppercase mb-1">Get in Touch</p>
+              <h3 class="text-base font-light text-amber-600 tracking-wider mb-5">Contact Information</h3>
               <div class="space-y-4">
                 <!-- Address -->
                 <div class="flex gap-3">
-                  <div class="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <div class="w-8 h-8 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-amber-600 mb-0.5">Address</p>
-                    <p class="text-sm text-gray-700 mb-1">{{ contactInfo.hotel_address || 'Balingasag, Misamis Oriental' }}</p>
+                    <p class="text-[11px] tracking-[0.3em] text-amber-600 uppercase mb-1">Address</p>
+                    <p class="text-sm text-gray-700 mb-1.5">{{ contactInfo.hotel_address || 'Balingasag, Misamis Oriental' }}</p>
                     <a href="https://www.google.com/maps?q=8.74436558174729,124.781658936795" target="_blank"
-                      class="text-xs text-green-600 hover:text-green-800 flex items-center gap-1 transition">
+                      class="text-[10px] text-green-600 hover:text-green-800 flex items-center gap-1 tracking-wider transition">
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                       Get Directions
                     </a>
@@ -790,65 +847,65 @@
                 <div class="h-px bg-gray-100"></div>
                 <!-- Phone -->
                 <div class="flex gap-3">
-                  <div class="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  <div class="w-8 h-8 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-amber-600 mb-0.5">Phone</p>
+                    <p class="text-[11px] tracking-[0.3em] text-amber-600 uppercase mb-1">Phone</p>
                     <p class="text-sm text-gray-700">{{ contactInfo.hotel_phone || 'N/A' }}</p>
                   </div>
                 </div>
                 <div class="h-px bg-gray-100"></div>
                 <!-- Email -->
                 <div class="flex gap-3">
-                  <div class="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  <div class="w-8 h-8 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-amber-600 mb-0.5">Email</p>
+                    <p class="text-[11px] tracking-[0.3em] text-amber-600 uppercase mb-1">Email</p>
                     <p class="text-sm text-gray-700">{{ contactInfo.hotel_email || 'N/A' }}</p>
                   </div>
                 </div>
                 <div class="h-px bg-gray-100"></div>
                 <!-- Business Hours -->
                 <div class="flex gap-3">
-                  <div class="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  <div class="w-8 h-8 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-amber-600 mb-0.5">Business Hours</p>
-                    <p class="text-sm text-gray-700">Monday - Sunday: 24/7</p>
-                    <p class="text-sm text-gray-500">Front Desk Available Round the Clock</p>
+                    <p class="text-[11px] tracking-[0.3em] text-amber-600 uppercase mb-1">Business Hours</p>
+                    <p class="text-sm text-gray-700">Monday &ndash; Sunday: 24/7</p>
+                    <p class="text-sm text-gray-400 font-light">Front Desk Available Round the Clock</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Quick Links -->
-            <div class="bg-green-50 rounded-2xl border border-green-100 shadow p-5">
-              <h3 class="text-base font-semibold text-amber-600 mb-3">Quick Links</h3>
+            <div class="bg-green-50 border border-green-100 shadow p-6">
+              <h3 class="text-[11px] tracking-[0.35em] text-gray-400 uppercase mb-4">Quick Links</h3>
               <ul class="space-y-2">
                 <li>
-                  <a href="#services" class="flex items-center gap-2 text-sm text-green-800 hover:text-green-900 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <a href="#services" class="flex items-center gap-2 text-sm text-green-800 hover:text-green-900 tracking-wider transition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
                     View Our Services
                   </a>
                 </li>
                 <li>
-                  <button @click="showBookingModal = true" class="flex items-center gap-2 text-sm text-green-800 hover:text-green-900 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <button @click="showBookingModal = true" class="flex items-center gap-2 text-sm text-green-800 hover:text-green-900 tracking-wider transition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
                     Book a Room
                   </button>
                 </li>
                 <li>
-                  <button @click="showEventModal = true" class="flex items-center gap-2 text-sm text-green-800 hover:text-green-900 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <button @click="showEventModal = true" class="flex items-center gap-2 text-sm text-green-800 hover:text-green-900 tracking-wider transition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
                     Book an Event
                   </button>
                 </li>
@@ -856,8 +913,8 @@
             </div>
 
             <!-- Follow Us -->
-            <div class="bg-white rounded-2xl border border-gray-200 shadow p-5">
-              <h3 class="text-base font-semibold text-amber-600 mb-3">Follow Us</h3>
+            <div class="bg-white border border-gray-100 shadow p-6">
+              <h3 class="text-[11px] tracking-[0.35em] text-gray-400 uppercase mb-4">Follow Us</h3>
               <div class="flex gap-3">
                 <a href="#" target="_blank"
                   class="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center hover:bg-green-800 transition shadow">
@@ -883,40 +940,46 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-950 text-gray-400 py-12">
+    <footer class="bg-gray-950 text-gray-500 py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <!-- Footer logo/motto row -->
+        <div class="text-center mb-16 pb-16 border-b border-gray-800">
+          <p class="text-[11px] tracking-[0.5em] text-gray-600 uppercase mb-4">Balingasag, Misamis Oriental</p>
+          <h3 class="text-xl font-extralight text-white tracking-[0.3em] uppercase mb-3">Joanna's Nook</h3>
+          <p class="text-xs tracking-[0.3em] text-gray-500 uppercase">Bed &amp; Breakfast</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
           <div>
-            <h3 class="text-2xl font-light text-white mb-4 tracking-wide">Joanna's Nook Bed & Breakfast</h3>
-            <p class="font-light">Your premier destination for hospitality and unforgettable experiences in Balingasag.</p>
+            <p class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">About</p>
+            <p class="text-sm font-light leading-loose text-gray-500">Your premier destination for hospitality and unforgettable experiences in Balingasag.</p>
           </div>
           <div>
-            <h4 class="text-lg font-light text-white mb-4">Navigation</h4>
-            <ul class="space-y-2 font-light">
-              <li><a href="#home" class="hover:text-green-800 transition">Home</a></li>
-              <li><a href="#services" class="hover:text-green-800 transition">Services</a></li>
-              <li><a href="#contact" class="hover:text-green-800 transition">Contact</a></li>
+            <p class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">Navigation</p>
+            <ul class="space-y-3 font-light">
+              <li><a href="#home" class="text-sm tracking-wider hover:text-green-500 transition">Home</a></li>
+              <li><a href="#services" class="text-sm tracking-wider hover:text-green-500 transition">Services</a></li>
+              <li><a href="#contact" class="text-sm tracking-wider hover:text-green-500 transition">Contact</a></li>
             </ul>
           </div>
           <div>
-            <h4 class="text-lg font-light text-white mb-4">Contact</h4>
-            <p class="font-light">📞 {{ contactInfo.hotel_phone || 'N/A' }}</p>
-            <p class="font-light">📧 {{ contactInfo.hotel_email || 'N/A' }}</p>
-            <p class="font-light">📍 {{ contactInfo.hotel_address || '' }}</p>
+            <p class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">Contact</p>
+            <p class="text-sm font-light tracking-wider text-gray-500 mb-2">{{ contactInfo.hotel_phone || 'N/A' }}</p>
+            <p class="text-sm font-light tracking-wider text-gray-500 mb-2">{{ contactInfo.hotel_email || 'N/A' }}</p>
+            <p class="text-sm font-light tracking-wider text-gray-500">{{ contactInfo.hotel_address || '' }}</p>
           </div>
           <div class="flex flex-col items-center justify-center text-center">
-            <span class="text-sm text-gray-500 mb-3">Developed by</span>
+            <span class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">Developed by</span>
             <img
               src="/JSM Digital Logo.png"
               alt="JSM Digital"
-              class="w-20 h-20 rounded-full object-cover border-2 border-gray-700 shadow-lg mb-3"
+              class="w-16 h-16 object-cover mb-3 opacity-80"
               title="JSM Digital"
             />
-            <span class="text-lg text-gray-300 font-semibold"></span>
+            <span class="text-sm text-gray-500 font-light tracking-widest">JSM Digital</span>
           </div>
         </div>
-        <div class="border-t border-gray-800 pt-8 text-center font-light">
-          <p>© 2026 Joanna's Nook Bed & Breakfast. All rights reserved.</p>
+        <div class="border-t border-gray-800 pt-8 text-center">
+          <p class="text-xs font-light tracking-widest text-gray-600 uppercase">© 2026 Joanna's Nook Bed &amp; Breakfast &mdash; All Rights Reserved</p>
         </div>
       </div>
     </footer>
@@ -1224,12 +1287,20 @@ const roomGroups = computed(() => {
         ...r,
         roomList: [],
         availableCount: 0,
+        uploadedImages: [],
       }
     }
     map[r.name].roomList.push(r)
     if (r.status === 'available') map[r.name].availableCount++
+    if (r.uploadedImageUrl && !map[r.name].uploadedImages.includes(r.uploadedImageUrl)) {
+      map[r.name].uploadedImages.push(r.uploadedImageUrl)
+    }
   })
-  return Object.values(map)
+  return Object.values(map).map(g => ({
+    ...g,
+    images: g.uploadedImages.length > 0 ? g.uploadedImages : g.images,
+    activeImage: 0,
+  }))
 })
 
 // Room booking form
@@ -1360,29 +1431,14 @@ const eventComputedTotal = computed(() => {
 })
 
 // ── Image pools ──────────────────────────────────────────────────────────────
+// Local fallback used for all room types when no image has been uploaded yet
+const ROOM_PLACEHOLDER = '/Backimagehomepage.jpg'
 const roomImagePools = {
-  triple:   [
-    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80',
-    'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&q=80',
-    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=600&q=80',
-  ],
-  deluxe:   [
-    'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=600&q=80',
-    'https://images.unsplash.com/photo-1562438668-bcf0ca6578f0?w=600&q=80',
-    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&q=80',
-  ],
-  suite:    [
-    'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600&q=80',
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&q=80',
-  ],
-  standard: [
-    'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=600&q=80',
-    'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80',
-  ],
-  default:  [
-    'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80',
-    'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=600&q=80',
-  ],
+  triple:   [ROOM_PLACEHOLDER],
+  deluxe:   [ROOM_PLACEHOLDER],
+  suite:    [ROOM_PLACEHOLDER],
+  standard: [ROOM_PLACEHOLDER],
+  default:  [ROOM_PLACEHOLDER],
 }
 
 // Local event package images (files in /public/Event Packages/)
@@ -1443,13 +1499,13 @@ function getPackageInclusions(name, description) {
   return base
 }
 
-const BACKEND_URL = 'http://localhost:8000'
+// Derive the backend base URL from the same env var used by the API service
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '')
 
 function mapRoom(r) {
   const fallbackImages = getRoomImages(r.type)
-  const images = r.image_url
-    ? [`${BACKEND_URL}/${r.image_url}`]
-    : [fallbackImages[0]]
+  const uploadedImageUrl = r.image_url ? `${BACKEND_URL}/${r.image_url}` : null
+  const images = uploadedImageUrl ? [uploadedImageUrl] : [...fallbackImages]
   return {
     id: r.id,
     roomNumber: r.room_number,
@@ -1461,6 +1517,7 @@ function mapRoom(r) {
     description: r.description || `Comfortable ${r.type} room with modern amenities.`,
     features: getRoomFeatures(r.type, r.description),
     images,
+    uploadedImageUrl,
     activeImage: 0,
   }
 }
@@ -1469,7 +1526,7 @@ function mapPackage(p, idx) {
   const fallbackImages = getEventImages(p.package_name)
   const images = p.image_url
     ? [`${BACKEND_URL}/${p.image_url}`]
-    : [fallbackImages[0]]
+    : [...fallbackImages]
   return {
     id: p.id,
     name: p.package_name,

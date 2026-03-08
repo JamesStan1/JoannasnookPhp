@@ -79,7 +79,7 @@ class RoomController {
 
     public function update($id) {
         $user = \App\Middleware\AuthMiddleware::handle();
-        \App\Middleware\RoleMiddleware::handle($user, ['admin']);
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager']);
 
         $isMultipart = isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'multipart') !== false;
         if ($isMultipart) {

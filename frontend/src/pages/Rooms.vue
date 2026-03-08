@@ -243,16 +243,19 @@
                 class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Room Type *</label>
-              <select v-model="roomForm.type" required
-                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
-                <option value="">Select type...</option>
-                <option value="standard">Standard</option>
-                <option value="deluxe">Deluxe</option>
-                <option value="suite">Suite</option>
-                <option value="family">Family</option>
-                <option value="executive">Executive</option>
-              </select>
+              <label class="block text-xs text-gray-500 mb-1">Room Name / Type *</label>
+              <input v-model="roomForm.type" required list="room-type-suggestions" placeholder="e.g. Deluxe, Suite, Triple..."
+                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+              <datalist id="room-type-suggestions">
+                <option value="Standard"/>
+                <option value="Deluxe"/>
+                <option value="Suite"/>
+                <option value="Family"/>
+                <option value="Executive"/>
+                <option value="Triple"/>
+                <option value="Twin"/>
+                <option value="Single"/>
+              </datalist>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">

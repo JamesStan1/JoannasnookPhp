@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token') || null)
   const loading = ref(false)
   const error = ref(null)
+  const tokenVerified = ref(false)
 
   // Hydrate user immediately from localStorage on store creation
   const _savedUser = localStorage.getItem('user')
@@ -93,16 +94,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const verifyToken = async () => {
-    if (!token.value) return false
+    if (!token.value) {
+      tokenVerified.value = true
+      return false
+    }
 
     try {
       const response = await api.post('/auth/verify-token')
       user.value = response.data.data
       // Persist updated user data (including avatar) to localStorage
       localStorage.setItem('user', JSON.stringify(user.value))
+      tokenVerified.value = true
       return true
     } catch (err) {
       logout()
+      tokenVerified.value = true
       return false
     }
   }
@@ -122,6 +128,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     loading,
     error,
+    tokenVerified,
     isAuthenticated,
     userRole,
     roleHomePath,

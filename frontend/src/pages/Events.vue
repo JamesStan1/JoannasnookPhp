@@ -772,6 +772,25 @@
       </div>
     </div>
 
+    <!-- ===================== COMPLETION BLOCKED (unpaid balance) ===================== -->
+    <div v-if="eventCompletionBlockModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        </div>
+        <p class="text-sm font-semibold text-gray-800 mb-1">Cannot Complete Event</p>
+        <p class="text-xs text-gray-500 mb-3">
+          <strong>{{ eventCompletionBlockModal.clientName }}</strong> still has an unpaid balance.
+        </p>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5">
+          <p class="text-xs text-orange-600 font-medium">Outstanding Balance</p>
+          <p class="text-xl font-bold text-orange-700">&#x20b1;{{ Number(eventCompletionBlockModal.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}</p>
+        </div>
+        <p class="text-xs text-gray-400 mb-5">Please record the full payment before marking this event as completed.</p>
+        <button @click="eventCompletionBlockModal = null" class="w-full py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition">Understood</button>
+      </div>
+    </div>
+
     <!-- ===================== STATUS CONFIRM MODAL ===================== -->
     <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
@@ -972,6 +991,7 @@ const showDeleteModal = ref(false)
 const showStatusModal = ref(false)
 const showPaymentModal = ref(false)
 const showApproveEventModal = ref(false)
+const eventCompletionBlockModal = ref(null)
 const approveEventTarget = ref(null)
 const approveEventForm = ref({ payment_option: 'full_payment', down_payment: 0, payment_method: '', online_payment_type: '', payment_ref: '' })
 const approvingEvent = ref(false)
@@ -1310,6 +1330,13 @@ async function doEventApprove() {
 }
 
 function confirmStatusChange(ev, newStatus) {
+  if (newStatus === 'completed') {
+    const balance = Number(ev.total_amount || 0) - Number(ev.down_payment || 0)
+    if (balance > 0.01) {
+      eventCompletionBlockModal.value = { clientName: ev.client_name, balance }
+      return
+    }
+  }
   pendingStatus.value = { event: ev, newStatus }
   showStatusModal.value = true
 }

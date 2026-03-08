@@ -114,68 +114,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- Tasks Panel -->
+      <!-- Cleaning Queue Panel -->
       <div class="lg:col-span-2">
         <div class="card">
-          <h2 class="text-xl font-bold mb-4">My Tasks</h2>
-
-          <div v-if="loading" class="text-center py-8 text-gray-500">Loading tasks...</div>
-
-          <div v-else-if="tasks.length === 0" class="text-gray-600 text-center py-8">
-            No pending tasks
-          </div>
-
-          <div v-else class="space-y-4">
-            <div v-for="task in tasks" :key="task.id" class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-              <div class="flex justify-between items-start">
-                <div>
-                  <h3 class="text-lg font-bold">{{ task.task_type }}</h3>
-                  <p class="text-gray-600">Room {{ task.room_number }}</p>
-                  <p class="text-sm text-gray-500 mt-1 capitalize">{{ task.room_type }}</p>
-                  <p v-if="task.description" class="text-sm text-gray-600 mt-2">{{ task.description }}</p>
-                </div>
-                <span :class="getPriorityClass(task.priority)" class="badge">
-                  {{ task.priority }}
-                </span>
-              </div>
-              <button
-                v-if="task.status === 'assigned' || task.status === 'pending'"
-                @click="completeTask(task.id)"
-                class="btn-primary mt-4"
-              >
-                Mark as Complete
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stats & Cleaning Panel -->
-      <div class="space-y-6">
-
-        <!-- Quick Stats -->
-        <div class="card h-fit">
-          <h2 class="text-xl font-bold mb-4">Quick Stats</h2>
-          <div class="space-y-4">
-            <div class="border-b pb-4">
-              <p class="text-gray-600">Pending Tasks</p>
-              <p class="text-2xl font-bold">{{ pendingCount }}</p>
-            </div>
-            <div class="border-b pb-4">
-              <p class="text-gray-600">Rooms Need Cleaning</p>
-              <p class="text-2xl font-bold" :class="notifications.length > 0 ? 'text-amber-600' : 'text-green-600'">
-                {{ notifications.length }}
-              </p>
-            </div>
-            <div>
-              <p class="text-gray-600">Total Rooms (in tasks)</p>
-              <p class="text-2xl font-bold">{{ totalRooms }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Rooms Needing Cleaning (sidebar list) -->
-        <div class="card h-fit">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold">Cleaning Queue</h2>
             <span
@@ -218,6 +159,31 @@
               >
                 {{ cleaningRoomId === room.id ? 'Saving...' : '✓ Clean' }}
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats & Cleaning Panel -->
+      <div class="space-y-6">
+
+        <!-- Quick Stats -->
+        <div class="card h-fit">
+          <h2 class="text-xl font-bold mb-4">Quick Stats</h2>
+          <div class="space-y-4">
+            <div class="border-b pb-4">
+              <p class="text-gray-600">Pending Tasks</p>
+              <p class="text-2xl font-bold">{{ pendingCount }}</p>
+            </div>
+            <div class="border-b pb-4">
+              <p class="text-gray-600">Rooms Need Cleaning</p>
+              <p class="text-2xl font-bold" :class="notifications.length > 0 ? 'text-amber-600' : 'text-green-600'">
+                {{ notifications.length }}
+              </p>
+            </div>
+            <div>
+              <p class="text-gray-600">Total Rooms (in tasks)</p>
+              <p class="text-2xl font-bold">{{ totalRooms }}</p>
             </div>
           </div>
         </div>

@@ -187,6 +187,20 @@ class EventController {
         $allowed = ['pending', 'confirmed', 'completed', 'cancelled'];
         if (!in_array($newStatus, $allowed)) return error('Invalid status', 400);
 
+        // ── Balance check: prevent completion if there is an unpaid balance ────
+        if ($newStatus === 'completed') {
+            $totalAmount = (float)($event['total_amount'] ?? 0);
+            $downPayment = (float)($event['down_payment'] ?? 0);
+            $balance     = $totalAmount - $downPayment;
+            if ($balance > 0.01) {
+                return error(
+                    'Cannot mark as completed: there is an unpaid balance of ₱' . number_format($balance, 2) . '. Please record the full payment before completing this event.',
+                    422
+                );
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         if ($newStatus === 'confirmed') {
             $updateFields = [
                 'status'              => 'confirmed',

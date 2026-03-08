@@ -122,13 +122,50 @@ class ReservationController {
             return error('Reservation not found', 404);
         }
 
+        // ── Balance check: prevent checkout if there is an unpaid balance ──────
+        $db = $reservationModel->getDb();
+
+        // Check any existing bills for this reservation first
+        $billStmt = $db->prepare("
+            SELECT COALESCE(SUM(total_amount), 0) AS total_billed,
+                   COALESCE(SUM(paid_amount),  0) AS total_paid
+            FROM bills WHERE reservation_id = ?
+        ");
+        $billStmt->execute([$id]);
+        $billRow = $billStmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($billRow && (float)$billRow['total_billed'] > 0) {
+            // Bills exist — use them to determine outstanding balance
+            $balance = (float)$billRow['total_billed'] - (float)$billRow['total_paid'];
+        } else {
+            // No bills yet — calculate from room price × nights minus down payment
+            $rStmt = $db->prepare("SELECT price FROM rooms WHERE id = ? LIMIT 1");
+            $rStmt->execute([$reservation['room_id']]);
+            $roomRow = $rStmt->fetch(\PDO::FETCH_ASSOC);
+            $pricePerNight = (float)($roomRow['price'] ?? 0);
+
+            $checkIn  = new \DateTime($reservation['check_in_date']);
+            $checkOut = new \DateTime($reservation['check_out_date']);
+            $nights   = max(1, (int)$checkIn->diff($checkOut)->days);
+
+            $totalAmount = $pricePerNight * $nights;
+            $balance     = $totalAmount - (float)($reservation['down_payment'] ?? 0);
+        }
+
+        if ($balance > 0.01) {
+            return error(
+                'Cannot check out: there is an unpaid balance of ₱' . number_format($balance, 2) . '. Please settle the full amount before checking out.',
+                422
+            );
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         $reservationModel->updateStatus($id, 'checked_out');
 
         $roomModel = new Room();
         $roomModel->updateRoomStatus($reservation['room_id'], 'dirty');
 
         // ── Auto-generate room bill on checkout (if none exists yet) ──────────
-        $db = $reservationModel->getDb();
         $chk = $db->prepare("SELECT id FROM bills WHERE reservation_id = ? AND bill_type = 'room' LIMIT 1");
         $chk->execute([$id]);
         if (!$chk->fetch()) {

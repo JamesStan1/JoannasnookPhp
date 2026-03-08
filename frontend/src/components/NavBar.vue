@@ -57,6 +57,7 @@
           <transition name="dropdown">
             <div
               v-if="prStore.bellOpen"
+              ref="bellDropdownRef"
               :style="bellDropdownStyle"
               class="fixed bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden"
               style="z-index: 9999;"
@@ -104,7 +105,7 @@
                       <p class="text-sm text-white font-medium truncate">{{ r.guest_name }}</p>
                       <div class="flex items-center gap-2 mt-0.5">
                         <span class="text-[11px] text-gray-400 capitalize">{{ r.reservation_type }}</span>
-                        <span class="text-[11px] text-gray-600">·</span>
+                        <span class="text-[11px] text-gray-600">ï¿½</span>
                         <span class="text-[11px] text-gray-400">{{ r.reference_number }}</span>
                       </div>
                       <p v-if="r.check_in_date" class="text-[11px] text-gray-500 mt-0.5">
@@ -177,6 +178,7 @@
           <transition name="dropdown">
             <div
               v-if="dropdownOpen"
+              ref="dropdownMenuRef"
               :style="userDropdownStyle"
               class="fixed bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden"
               style="z-index: 9999;"
@@ -242,13 +244,15 @@ const user        = computed(() => authStore.user)
 const unreadCount = computed(() => leavesStore.unreadRejected.length)
 
 const dropdownOpen  = ref(false)
-const dropdownRef   = ref(null)
+const dropdownRef     = ref(null)
+const dropdownMenuRef = ref(null)
 const dropdownTop   = ref(0)
 const dropdownRight = ref(0)
 const navAvatarSrc  = ref(null)
 
 // Bell dropdown position refs
-const bellRef          = ref(null)
+const bellRef           = ref(null)
+const bellDropdownRef   = ref(null)
 const bellDropdownTop  = ref(0)
 const bellDropdownRight = ref(0)
 const isMobileBell     = ref(false)
@@ -343,10 +347,16 @@ const handleLogout = async () => {
 }
 
 const handleClickOutside = (e) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+  if (
+    dropdownRef.value && !dropdownRef.value.contains(e.target) &&
+    dropdownMenuRef.value && !dropdownMenuRef.value.contains(e.target)
+  ) {
     dropdownOpen.value = false
   }
-  if (bellRef.value && !bellRef.value.contains(e.target)) {
+  if (
+    bellRef.value && !bellRef.value.contains(e.target) &&
+    bellDropdownRef.value && !bellDropdownRef.value.contains(e.target)
+  ) {
     prStore.closeBell()
   }
 }

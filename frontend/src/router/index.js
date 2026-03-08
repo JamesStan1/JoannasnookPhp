@@ -7,10 +7,10 @@ import { useAuthStore } from '../stores/auth'
 const ALLOWED_PREFIXES = {
   admin:        null,
   manager:      null,
-  chef:         ['/chef'],
-  housekeeping: ['/housekeeping'],
-  security:     ['/rooms'],
-  front_desk:   ['/reservations', '/rooms', '/pos', '/inventory', '/events'],
+  chef:         ['/chef', '/staff/reports', '/staff/leave'],
+  housekeeping: ['/housekeeping', '/staff/reports', '/staff/leave'],
+  security:     ['/rooms', '/staff/reports', '/staff/leave'],
+  front_desk:   ['/reservations', '/rooms', '/pos', '/inventory', '/events', '/staff/reports', '/staff/leave'],
 }
 
 // Paths every authenticated user may always visit
@@ -46,7 +46,7 @@ const routes = [
   { path: '/staff', name: 'Staff', component: () => import('../pages/Staff.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/staff/attendance', name: 'Attendance', component: () => import('../pages/Attendance.vue'), meta: { requiresAuth: true, requiresAdmin: true, title: 'Attendance' } },
   { path: '/staff/payroll', name: 'Payroll', component: () => import('../pages/Payroll.vue'), meta: { requiresAuth: true, requiresAdmin: true, title: 'Payroll' } },
-  { path: '/staff/reports', name: 'StaffReports', component: () => import('../pages/StaffReports.vue'), meta: { requiresAuth: true, requiresAdmin: true, title: 'Staff Reports' } },
+  { path: '/staff/reports', name: 'StaffReports', component: () => import('../pages/StaffReports.vue'), meta: { requiresAuth: true, title: 'Staff Reports' } },
   { path: '/staff/archived', name: 'StaffArchived', component: () => import('../pages/ArchivedStaff.vue'), meta: { requiresAuth: true, requiresAdmin: true, title: 'Archived Staff' } },
   { path: '/staff/leave/request', name: 'LeaveRequest', component: () => import('../pages/LeaveRequest.vue'), meta: { requiresAuth: true, title: 'Request Leave' } },
   { path: '/staff/leave/history', name: 'LeaveHistory', component: () => import('../pages/LeaveHistory.vue'), meta: { requiresAuth: true, title: 'Leave History' } },
@@ -105,22 +105,27 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
+  // Verify token with the server exactly once per session (on first navigation)
+  if (!authStore.tokenVerified) {
+    await authStore.verifyToken()
+  }
+
   // 1. Not logged in — redirect to login for protected routes
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
     return
   }
 
-  // 2. Already logged in but visiting login/register — send to role home
-  if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register')) {
+  // 2. Already logged in but visiting login/register/homepage — send to role home
+  if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register' || to.path === '/')) {
     next(authStore.roleHomePath)
     return
   }
 
-  // 3. Admin-only page guard — only the 'admin' role may access these routes
+  // 3. Admin-only page guard — 'admin' and 'manager' may access these routes
   if (to.meta.requiresAdmin) {
     const role = authStore.userRole
-    if (role !== 'admin') {
+    if (role !== 'admin' && role !== 'manager') {
       next('/unauthorized')
       return
     }

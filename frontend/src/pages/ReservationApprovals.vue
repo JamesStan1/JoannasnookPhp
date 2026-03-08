@@ -229,7 +229,7 @@
                     </button>
                     <button v-if="res.status === 'approved'" @click="doAction(res.id, 'check-in')" title="Check In"
                       class="px-2.5 py-1 text-xs font-medium bg-green-50 text-green-800 hover:bg-green-100 rounded-lg transition">Check In</button>
-                    <button v-if="res.status === 'checked_in'" @click="doAction(res.id, 'check-out')" title="Check Out"
+                    <button v-if="res.status === 'checked_in'" @click="handleCheckOut(res)" title="Check Out"
                       class="px-2.5 py-1 text-xs font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg transition">Check Out</button>
                     <button v-if="['approved','checked_in','checked_out'].includes(res.status)"
                       @click="printContract(res)" title="Print Contract"
@@ -509,6 +509,25 @@
       </div>
     </div>
 
+    <!-- CHECKOUT BLOCKED (unpaid balance) -->
+    <div v-if="checkoutBlockedRes" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        </div>
+        <p class="text-sm font-semibold text-gray-800 mb-1">Cannot Check Out</p>
+        <p class="text-xs text-gray-500 mb-3">
+          <strong>{{ checkoutBlockedRes.guestName }}</strong> (Room {{ checkoutBlockedRes.roomNumber }}) still has an unpaid balance.
+        </p>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5">
+          <p class="text-xs text-orange-600 font-medium">Outstanding Balance</p>
+          <p class="text-xl font-bold text-orange-700">&#x20b1;{{ Number(checkoutBlockedRes.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}</p>
+        </div>
+        <p class="text-xs text-gray-400 mb-5">Please settle the full remaining balance before completing the checkout.</p>
+        <button @click="checkoutBlockedRes = null" class="w-full py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition">Understood</button>
+      </div>
+    </div>
+
     <!-- REJECT PENDING MODAL -->
     <div v-if="rejectPendingTarget" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
@@ -634,7 +653,7 @@
               class="px-4 py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition font-medium">
               Check In
             </button>
-            <button v-if="viewTarget.status === 'checked_in'" @click="doAction(viewTarget.id, 'check-out'); viewTarget = null"
+            <button v-if="viewTarget.status === 'checked_in'" @click="handleCheckOut(viewTarget); viewTarget = null"
               class="px-4 py-2 text-sm bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition font-medium">
               Check Out
             </button>
@@ -680,8 +699,10 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { useToastStore } from '../stores/toast'
+import { usePendingReservationsStore } from '../stores/pendingReservations'
 
-const toast = useToastStore()
+const toast   = useToastStore()
+const prStore = usePendingReservationsStore()
 const tabs = [
   { key: 'online',     label: '🌐 Online Requests' },
   { key: 'pending',    label: 'Pending' },
@@ -715,6 +736,7 @@ const search       = ref('')
 const dateFilter   = ref('')
 const viewTarget   = ref(null)
 const rejectTarget = ref(null)
+const checkoutBlockedRes = ref(null)
 
 // ── Tab counts ────────────────────────────────────────────────────────────────
 const tabCounts = computed(() => ({
@@ -839,6 +861,7 @@ async function doApprove() {
     approveTarget.value = null
     await fetchOnlineRequests()
     await fetchAll()
+    prStore.fetchPending()
     if (approved && approved.room_number) {
       // Room reservation — print contract
       toast.success(`Reservation approved! Guest: ${approved.guest_name} · Room ${approved.room_number}`)
@@ -871,12 +894,22 @@ async function doReject() {
     rejectPendingTarget.value = null
     rejectReason.value = ''
     await fetchOnlineRequests()
+    prStore.fetchPending()
   } catch (e) {
     toast.error(e.response?.data?.message || 'Failed to reject')
   } finally { rejecting.value = false }
 }
 
 // ── Confirmed reservation actions ─────────────────────────────────────────────
+function handleCheckOut(res) {
+  const balance = Number(res.remaining_balance || 0) + Number(res.cafe_payment || 0)
+  if (balance > 0.01) {
+    checkoutBlockedRes.value = { guestName: res.guest_name, roomNumber: res.room_number, balance }
+    return
+  }
+  doAction(res.id, 'check-out')
+}
+
 async function doAction(id, action) {
   try {
     await api.put(`/reservations/${id}/${action}`)

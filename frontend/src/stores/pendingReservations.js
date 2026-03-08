@@ -30,7 +30,7 @@ export const usePendingReservationsStore = defineStore('pendingReservations', ()
     }
   }
 
-  const startPolling = (intervalMs = 30000) => {
+  const startPolling = (intervalMs = 10000) => {
     if (!canApprove()) return
     fetchPending()
     if (pollTimer) clearInterval(pollTimer)
