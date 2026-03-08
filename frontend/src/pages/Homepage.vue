@@ -5,11 +5,11 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         <div class="flex justify-between items-center h-24">
           <!-- Hotel Name on the left -->
-          <div class="flex-shrink-0 flex items-center gap-3.5">
-            <img src="/Joannaslogo.png" alt="Joanna's Logo" class="h-14 w-14 object-contain" />
+          <div class="flex-shrink-0 flex items-center gap-4">
+            <img src="/Joannaslogo.png" alt="Joanna's Logo" class="h-20 w-20 object-contain" />
             <div class="leading-tight">
-              <div class="text-sm font-light tracking-[0.22em] text-gray-900 uppercase">Joanna's Nook</div>
-              <div class="text-[11px] text-gray-400 tracking-[0.4em] uppercase mt-1">Bed &amp; Breakfast</div>
+              <div class="text-base font-light tracking-[0.22em] text-gray-900 uppercase">Joanna's Nook</div>
+              <div class="text-xs text-gray-400 tracking-[0.4em] uppercase mt-1">Bed &amp; Breakfast</div>
             </div>
           </div>
 
@@ -80,8 +80,8 @@
 
         <!-- Section Title -->
         <div class="text-center mb-24">
-          <p class="text-[16px] tracking-[0.45em] text-gray-400 uppercase mb-5">What We Offer</p>
-          <h2 class="text-3xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">Our Services</h2>
+          <p class="text-lg tracking-[0.45em] text-gray-400 uppercase mb-5">What We Offer</p>
+          <h2 class="text-5xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">Our Services</h2>
           <div class="flex items-center justify-center gap-4">
             <div class="h-px w-16 bg-gray-200"></div>
             <div class="w-1.5 h-1.5 rounded-full bg-green-700"></div>
@@ -92,9 +92,9 @@
         <!-- ── Room Reservations ── -->
         <div class="mb-24">
           <div class="text-center mb-12">
-            <p class="text-sm tracking-[0.4em] text-gray-400 uppercase mb-3">Accommodations</p>
-            <h2 class="text-2xl font-extralight text-green-800 tracking-wider">Room Reservations</h2>
-            <p class="text-base text-gray-400 font-light mt-3 tracking-wider">Book comfortable accommodations for your stay with modern amenities</p>
+            <p class="text-base tracking-[0.4em] text-gray-400 uppercase mb-3">Accommodations</p>
+            <h2 class="text-4xl font-extralight text-green-800 tracking-wider">Room Reservations</h2>
+            <p class="text-lg text-gray-400 font-light mt-3 tracking-wider">Book comfortable accommodations for your stay with modern amenities</p>
             <div class="flex items-center justify-center gap-3 mt-5">
               <div class="h-px w-10 bg-gray-200"></div>
               <div class="w-1 h-1 rounded-full bg-amber-400"></div>
@@ -136,24 +136,24 @@
                 </div>
               </div>
               <!-- Info -->
-              <div class="flex-1 p-9 flex flex-col justify-between">
+              <div class="flex-1 p-11 flex flex-col justify-between">
                 <div>
-                  <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-base font-light tracking-[0.18em] text-amber-700 uppercase">{{ roomGroups[serviceRoomIndex].name }}</h3>
-                    <span class="text-xs text-gray-400 font-light tracking-widest">{{ serviceRoomIndex + 1 }} / {{ roomGroups.length }}</span>
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-light tracking-[0.18em] text-amber-700 uppercase">{{ roomGroups[serviceRoomIndex].name }}</h3>
+                    <span class="text-sm text-gray-400 font-light tracking-widest">{{ serviceRoomIndex + 1 }} / {{ roomGroups.length }}</span>
                   </div>
-                  <div class="h-px bg-gray-100 mb-4"></div>
-                  <div class="flex items-center gap-3 mb-4">
-                    <span class="text-2xl font-light text-amber-600">&#x20B1;{{ roomGroups[serviceRoomIndex].priceNum.toLocaleString() }}</span>
+                  <div class="h-px bg-gray-100 mb-5"></div>
+                  <div class="flex items-center gap-4 mb-5">
+                    <span class="text-3xl font-light text-amber-600">&#x20B1;{{ roomGroups[serviceRoomIndex].priceNum.toLocaleString() }}</span>
                     <span class="text-sm text-gray-400 flex items-center gap-1 tracking-wider">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
                       {{ roomGroups[serviceRoomIndex].guests }} guests
                     </span>
                   </div>
-                  <p class="text-sm text-gray-500 font-light mb-5 leading-loose">{{ roomGroups[serviceRoomIndex].description }}</p>
-                  <p class="text-[11px] font-light text-gray-400 tracking-[0.3em] uppercase mb-3">Room Features</p>
-                  <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                    <span v-for="(f, i) in roomGroups[serviceRoomIndex].features" :key="i" class="text-sm text-gray-600 font-light flex items-center gap-2">
+                  <p class="text-l text-gray-500 font-light mb-6 leading-loose">{{ roomGroups[serviceRoomIndex].description }}</p>
+                  <p class="text-l font-light text-gray-400 tracking-[0.3em] uppercase mb-4">Room Features</p>
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                    <span v-for="(f, i) in roomGroups[serviceRoomIndex].features" :key="i" class="text-base text-gray-600 font-light flex items-center gap-2">
                       <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                       {{ f }}
                     </span>
@@ -161,7 +161,7 @@
                 </div>
                 <button @click="openBookingForm(roomGroups[serviceRoomIndex])"
                   :disabled="roomGroups[serviceRoomIndex].availableCount === 0"
-                  class="mt-7 w-full border border-green-700 hover:bg-green-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed text-green-800 text-[11px] font-light py-3.5 tracking-[0.2em] uppercase transition-all duration-300">
+                  class="mt-8 w-full border border-green-700 hover:bg-green-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed text-green-800 text-xs font-light py-4 tracking-[0.2em] uppercase transition-all duration-300">
                   {{ roomGroups[serviceRoomIndex].availableCount > 0 ? 'Reserve This Room' : 'No Rooms Available' }}
                 </button>
               </div>
@@ -181,7 +181,7 @@
               </div>
               <button @click="serviceRoomIndex = (serviceRoomIndex + 1) % roomGroups.length"
                 class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-green-700 hover:text-green-700 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
+                <svg class="w-.5 h-.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
               </button>
             </div>
           </div>
@@ -190,9 +190,9 @@
         <!-- ── Event Reservations ── -->
         <div class="mb-24">
           <div class="text-center mb-12">
-            <p class="text-[11px] tracking-[0.4em] text-gray-400 uppercase mb-3">Celebrations &amp; Gatherings</p>
-            <h2 class="text-2xl font-extralight text-green-800 tracking-wider">Event Reservations</h2>
-            <p class="text-sm text-gray-400 font-light mt-3 tracking-wider">Host your special events with our comprehensive event packages</p>
+            <p class="text-base tracking-[0.4em] text-gray-400 uppercase mb-3">Celebrations &amp; Gatherings</p>
+            <h2 class="text-4xl font-extralight text-green-800 tracking-wider">Event Reservations</h2>
+            <p class="text-lg text-gray-400 font-light mt-3 tracking-wider">Host your special events with our comprehensive event packages</p>
             <div class="flex items-center justify-center gap-3 mt-5">
               <div class="h-px w-10 bg-gray-200"></div>
               <div class="w-1 h-1 rounded-full bg-amber-400"></div>
@@ -224,31 +224,31 @@
                 </div>
               </div>
               <!-- Info -->
-              <div class="flex-1 p-9 flex flex-col justify-between">
+              <div class="flex-1 p-11 flex flex-col justify-between">
                 <div>
-                  <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-base font-light tracking-[0.18em] text-amber-700 uppercase">{{ eventPackages[serviceEventIndex].name }}</h3>
-                    <span class="text-xs text-gray-400 font-light tracking-widest">{{ serviceEventIndex + 1 }} / {{ eventPackages.length }}</span>
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-light tracking-[0.18em] text-amber-700 uppercase">{{ eventPackages[serviceEventIndex].name }}</h3>
+                    <span class="text-sm text-gray-400 font-light tracking-widest">{{ serviceEventIndex + 1 }} / {{ eventPackages.length }}</span>
                   </div>
-                  <div class="h-px bg-gray-100 mb-4"></div>
-                  <div class="flex items-center gap-3 mb-4">
-                    <span class="text-2xl font-light text-amber-600">&#x20B1;{{ eventPackages[serviceEventIndex].priceNum.toLocaleString() }}</span>
+                  <div class="h-px bg-gray-100 mb-5"></div>
+                  <div class="flex items-center gap-4 mb-5">
+                    <span class="text-3xl font-light text-amber-600">&#x20B1;{{ eventPackages[serviceEventIndex].priceNum.toLocaleString() }}</span>
                     <span class="text-sm text-gray-400 flex items-center gap-1 tracking-wider">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
                       {{ eventPackages[serviceEventIndex].guests }} guests
                     </span>
                   </div>
-                  <p class="text-sm text-gray-500 font-light mb-5 leading-loose">{{ eventPackages[serviceEventIndex].description }}</p>
-                  <p class="text-[11px] font-light text-gray-400 tracking-[0.3em] uppercase mb-3">Package Includes</p>
-                  <ul class="space-y-2">
-                    <li v-for="(inc, i) in eventPackages[serviceEventIndex].inclusions" :key="i" class="text-sm text-gray-600 font-light flex items-center gap-2">
+                  <p class="text-base text-gray-500 font-light mb-6 leading-loose">{{ eventPackages[serviceEventIndex].description }}</p>
+                  <p class="text-xs font-light text-gray-400 tracking-[0.3em] uppercase mb-4">Package Includes</p>
+                  <ul class="space-y-3">
+                    <li v-for="(inc, i) in eventPackages[serviceEventIndex].inclusions" :key="i" class="text-base text-gray-600 font-light flex items-center gap-2">
                       <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                       {{ inc }}
                     </li>
                   </ul>
                 </div>
                 <button @click="openEventForm(eventPackages[serviceEventIndex].id)"
-                  class="mt-7 w-full border border-purple-600 hover:bg-purple-600 hover:text-white text-purple-700 text-[11px] font-light py-3.5 tracking-[0.2em] uppercase transition-all duration-300">
+                  class="mt-8 w-full border border-purple-600 hover:bg-purple-600 hover:text-white text-purple-700 text-xs font-light py-4 tracking-[0.2em] uppercase transition-all duration-300">
                   Reserve This Package
                 </button>
               </div>
