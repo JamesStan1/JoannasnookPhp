@@ -43,6 +43,7 @@
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
           <option value="manager">Manager</option>
+          <option value="it">IT</option>
           <option value="front_desk">Front Desk</option>
           <option value="housekeeping">Housekeeping</option>
           <option value="chef">Chef</option>
@@ -89,6 +90,7 @@
               <th class="text-left px-6 py-3.5 text-xs font-medium uppercase tracking-wider text-gray-500">Role</th>
               <th class="text-left px-6 py-3.5 text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
               <th class="text-left px-6 py-3.5 text-xs font-medium uppercase tracking-wider text-gray-500">Last Login</th>
+              <th v-if="canSetRate" class="text-left px-6 py-3.5 text-xs font-medium uppercase tracking-wider text-gray-500">Hourly Rate</th>
               <th class="text-left px-6 py-3.5 text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
             </tr>
           </thead>
@@ -124,6 +126,11 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-xs font-light text-gray-400">{{ u.last_login ? formatDate(u.last_login) : 'Never' }}</td>
+              <!-- Hourly Rate -->
+              <td v-if="canSetRate" class="px-6 py-4 text-sm font-light text-gray-600">
+                <span v-if="u.hourly_rate != null && u.hourly_rate !== ''" class="text-green-700 font-medium">₱{{ Number(u.hourly_rate).toFixed(2) }}/hr</span>
+                <span v-else class="text-gray-300 text-xs">Not set</span>
+              </td>
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
@@ -135,6 +142,17 @@
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                  </button>
+                  <!-- Set Hourly Rate (Manager / Admin only) -->
+                  <button
+                    v-if="canSetRate"
+                    @click="openRateModal(u)"
+                    class="p-1.5 rounded-lg text-gray-400 hover:text-green-700 hover:bg-green-50 transition"
+                    title="Set Hourly Rate"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </button>
                   <button
@@ -191,6 +209,10 @@
               <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Password</label>
               <input v-model="form.password" type="password" required placeholder="••••••••" class="form-input" />
             </div>
+            <div v-if="showEditModal && isIT">
+              <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">New Password <span class="text-gray-400 font-light normal-case">(leave blank to keep current)</span></label>
+              <input v-model="form.password" type="password" placeholder="••••••••" class="form-input" />
+            </div>
             <div>
               <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Phone</label>
               <input v-model="form.phone" type="text" placeholder="09XXXXXXXXX" class="form-input" />
@@ -201,6 +223,7 @@
                 <option value="">Select role</option>
                 <option value="admin">Admin</option>
                 <option value="manager">Manager</option>
+                <option value="it">IT</option>
                 <option value="front_desk">Front Desk</option>
                 <option value="housekeeping">Housekeeping</option>
                 <option value="chef">Chef</option>
@@ -245,6 +268,37 @@
       </div>
     </transition>
 
+    <!-- Set Hourly Rate Modal -->
+    <transition name="fade">
+      <div v-if="showRateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" @click.self="showRateModal = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6 lg:p-8" @click.stop>
+          <h2 class="text-xl font-light text-gray-900 mb-1">Set Hourly Rate</h2>
+          <p class="text-sm text-gray-500 font-light mb-5">{{ rateTarget?.name }}</p>
+          <form @submit.prevent="saveRate" class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Hourly Rate (₱)</label>
+              <input
+                v-model="rateForm.rate"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+                placeholder="e.g. 75.00"
+                class="form-input"
+              />
+            </div>
+            <div v-if="rateError" class="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg font-light">{{ rateError }}</div>
+            <div class="flex gap-3 pt-2">
+              <button type="submit" :disabled="rateLoading" class="flex-1 bg-green-800 hover:bg-green-900 disabled:bg-gray-300 text-white font-light py-2.5 rounded-lg transition text-sm">
+                {{ rateLoading ? 'Saving...' : 'Save Rate' }}
+              </button>
+              <button type="button" @click="showRateModal = false" class="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-700 font-light py-2.5 rounded-lg transition text-sm">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </transition>
+
     <!-- QR Code Modal -->
     <transition name="fade">
       <div v-if="showQrModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" @click.self="showQrModal = false">
@@ -273,6 +327,12 @@
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import QRCode from 'qrcode'
 import api from '../services/api'
+import { useAuthStore } from '../stores/auth'
+
+const authStore = useAuthStore()
+const isIT = computed(() => authStore.isIT)
+const isManager = computed(() => authStore.isManager)
+const canSetRate = computed(() => authStore.isAdmin || isManager.value)
 
 const users = ref([])
 const loading = ref(true)
@@ -305,6 +365,34 @@ const filteredUsers = computed(() => {
   })
 })
 
+// Hourly rate modal state
+const showRateModal = ref(false)
+const rateTarget = ref(null)
+const rateForm = reactive({ rate: '' })
+const rateLoading = ref(false)
+const rateError = ref('')
+
+const openRateModal = (u) => {
+  rateTarget.value = u
+  rateForm.rate = u.hourly_rate ?? ''
+  rateError.value = ''
+  showRateModal.value = true
+}
+
+const saveRate = async () => {
+  rateLoading.value = true
+  rateError.value = ''
+  try {
+    await api.post('/admin/payroll/rate', { user_id: rateTarget.value.id, rate: parseFloat(rateForm.rate) })
+    await loadUsers()
+    showRateModal.value = false
+  } catch (e) {
+    rateError.value = e.response?.data?.message || 'Failed to update hourly rate'
+  } finally {
+    rateLoading.value = false
+  }
+}
+
 const loadUsers = async () => {
   loading.value = true
   try {
@@ -328,6 +416,7 @@ const avatarColor = (name) => avatarColors[(name?.charCodeAt(0) ?? 0) % avatarCo
 const roleBadge = (role) => ({
   admin:       'bg-red-50 text-red-700',
   manager:     'bg-green-50 text-green-800',
+  it:          'bg-blue-50 text-blue-700',
   front_desk:  'bg-cyan-50 text-cyan-700',
   housekeeping:'bg-green-50 text-green-700',
   chef:        'bg-orange-50 text-orange-700',
@@ -361,7 +450,9 @@ const saveAdd = async () => {
 const saveEdit = async () => {
   formLoading.value = true; formError.value = ''
   try {
-    await api.put(`/admin/users/${editId.value}`, { name: form.name, email: form.email, phone: form.phone, role: form.role })
+    const payload = { name: form.name, email: form.email, phone: form.phone, role: form.role }
+    if (isIT.value && form.password) payload.password = form.password
+    await api.put(`/admin/users/${editId.value}`, payload)
     await loadUsers(); closeModal()
   } catch (e) {
     formError.value = e.response?.data?.message || 'Failed to update user'

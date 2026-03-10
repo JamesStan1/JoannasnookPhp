@@ -115,15 +115,44 @@
     </div>
 
     <!-- Forgot Password Modal -->
-    <div v-if="showForgotModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4" @click.self="showForgotModal = false">
+    <div v-if="showForgotModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4" @click.self="closeForgotModal">
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
         <h3 class="text-lg font-light text-gray-800 mb-1">Forgot Password?</h3>
-        <p class="text-sm text-gray-400 mb-6">Please contact the system administrator to reset your password.</p>
-        <div class="bg-green-50 border border-green-100 rounded-xl p-4 mb-6">
-          <p class="text-xs text-green-800 font-normal mb-0.5">Administrator</p>
-          <a href="mailto:admin@srcbhotel.com" class="text-sm text-green-800 hover:underline">admin@srcbhotel.com</a>
+        <p class="text-sm text-gray-400 mb-6">Submit a request and the IT team will assist you.</p>
+
+        <div v-if="forgotSuccess" class="bg-green-50 border border-green-100 rounded-xl p-4 mb-4">
+          <p class="text-sm text-green-800">Your request has been submitted. Please wait for the IT team to contact you.</p>
         </div>
-        <button @click="showForgotModal = false" class="w-full bg-green-800 hover:bg-green-900 text-white text-sm font-light py-2.5 rounded-lg transition">
+
+        <form v-else @submit.prevent="submitForgotRequest" class="space-y-4">
+          <div>
+            <label class="block text-sm font-light text-gray-700 mb-1">Your Name</label>
+            <input v-model="forgotName" type="text" required placeholder="e.g. Juan dela Cruz"
+              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-800 focus:ring-1 focus:ring-green-800" />
+          </div>
+          <div>
+            <label class="block text-sm font-light text-gray-700 mb-1">Email Address</label>
+            <input v-model="forgotEmail" type="email" required placeholder="your@email.com"
+              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-800 focus:ring-1 focus:ring-green-800" />
+          </div>
+          <div>
+            <label class="block text-sm font-light text-gray-700 mb-1">Message (optional)</label>
+            <textarea v-model="forgotMessage" rows="3" placeholder="Briefly describe your issue..."
+              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-800 focus:ring-1 focus:ring-green-800 resize-none"></textarea>
+          </div>
+          <div v-if="forgotError" class="text-sm text-red-600">{{ forgotError }}</div>
+          <div class="flex gap-3 pt-1">
+            <button type="button" @click="closeForgotModal"
+              class="flex-1 border border-gray-200 text-gray-600 text-sm py-2 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+            <button type="submit" :disabled="forgotLoading"
+              class="flex-1 bg-green-800 hover:bg-green-900 disabled:bg-gray-400 text-white text-sm font-light py-2 rounded-lg transition">
+              {{ forgotLoading ? 'Submitting...' : 'Submit Request' }}
+            </button>
+          </div>
+        </form>
+
+        <button v-if="forgotSuccess" @click="closeForgotModal"
+          class="w-full mt-4 bg-green-800 hover:bg-green-900 text-white text-sm font-light py-2.5 rounded-lg transition">
           Close
         </button>
       </div>
@@ -136,6 +165,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import api from '../services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -148,6 +178,40 @@ const showSuccess = ref(false)
 const error = ref(null)
 const rememberMe = ref(false)
 const showForgotModal = ref(false)
+
+// Forgot password form state
+const forgotName = ref('')
+const forgotEmail = ref('')
+const forgotMessage = ref('')
+const forgotLoading = ref(false)
+const forgotError = ref(null)
+const forgotSuccess = ref(false)
+
+const closeForgotModal = () => {
+  showForgotModal.value = false
+  forgotName.value = ''
+  forgotEmail.value = ''
+  forgotMessage.value = ''
+  forgotError.value = null
+  forgotSuccess.value = false
+}
+
+const submitForgotRequest = async () => {
+  forgotLoading.value = true
+  forgotError.value = null
+  try {
+    await api.post('/it/forgot-password-requests', {
+      name: forgotName.value,
+      email: forgotEmail.value,
+      message: forgotMessage.value || 'No additional details provided.',
+    })
+    forgotSuccess.value = true
+  } catch (err) {
+    forgotError.value = err.response?.data?.message || 'Failed to submit request. Please try again.'
+  } finally {
+    forgotLoading.value = false
+  }
+}
 
 const handleLogin = async () => {
   loading.value = true

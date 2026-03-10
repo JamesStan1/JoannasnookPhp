@@ -5,6 +5,9 @@
     # Do not re-rewrite if already pointing at api/index.php
     RewriteRule ^api/index\.php$ - [L]
 
+    # Serve uploaded files directly — never route through index.php
+    RewriteRule ^api/uploads/ - [L]
+
     # Route all /api/* requests directly to api/index.php
     # (more reliable on shared hosting than relying on the child .htaccess)
     RewriteRule ^api(/.*)?$ api/index.php [QSA,L]

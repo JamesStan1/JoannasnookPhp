@@ -337,7 +337,7 @@
         </div>
 
         <!-- System Logs Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div v-if="isIT" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div class="flex items-center justify-between mb-1">
             <h2 class="text-lg font-bold text-gray-800">System Logs</h2>
             <span class="text-xs text-amber-600 cursor-pointer hover:underline" @click="fetchSystemLogs">Overview</span>
@@ -482,8 +482,11 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api.js'
 import { useToastStore } from '../stores/toast'
+import { useAuthStore } from '../stores/auth'
 
 const toast = useToastStore()
+const authStore = useAuthStore()
+const isIT = computed(() => authStore.isIT)
 
 // -- Discounts confirm state ---------------------------------------------------
 const discountToRemove = ref(null)
@@ -776,7 +779,9 @@ function formatTime(dt) {
 
 // -- Init ----------------------------------------------------------------------
 onMounted(async () => {
-  await Promise.all([fetchDiscounts(), fetchAuditLogs(), fetchHolidays(), fetchSystemLogs()])
+  const tasks = [fetchDiscounts(), fetchAuditLogs(), fetchHolidays()]
+  if (isIT.value) tasks.push(fetchSystemLogs())
+  await Promise.all(tasks)
 
   // Load notification settings
   try {

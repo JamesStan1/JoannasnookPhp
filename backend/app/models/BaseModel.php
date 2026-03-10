@@ -12,6 +12,10 @@ class BaseModel {
         $this->db = \Database::connect();
     }
 
+    public function getDb() {
+        return $this->db;
+    }
+
     public function create($data) {
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));

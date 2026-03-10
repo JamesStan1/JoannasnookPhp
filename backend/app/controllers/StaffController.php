@@ -299,7 +299,7 @@ class StaffController {
 
     public function setHourlyRate() {
         $user = \App\Middleware\AuthMiddleware::handle();
-        \App\Middleware\RoleMiddleware::handle($user, ['admin']);
+        \App\Middleware\RoleMiddleware::handle($user, ['it','admin', 'manager']);
 
         $data = json_decode(file_get_contents('php://input'), true);
 

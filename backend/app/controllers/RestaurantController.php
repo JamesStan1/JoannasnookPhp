@@ -33,7 +33,7 @@ class RestaurantController {
         if (!in_array($file['type'], $allowed)) return null;
         $ext  = pathinfo($file['name'], PATHINFO_EXTENSION);
         $name = uniqid('dish_', true) . '.' . strtolower($ext);
-        $dir  = __DIR__ . '/../../public/uploads/menu/';
+        $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/menu/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
         move_uploaded_file($file['tmp_name'], $dir . $name);
         return 'uploads/menu/' . $name;

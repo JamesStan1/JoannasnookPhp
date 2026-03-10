@@ -198,7 +198,7 @@ class AuthController {
             default      => 'jpg',
         };
 
-        $uploadDir = __DIR__ . '/../../public/uploads/avatars/';
+        $uploadDir = rtrim(UPLOADS_BASE_PATH, '/') . '/avatars/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -242,7 +242,7 @@ class AuthController {
         $existing = $userModel->findById($userId);
 
         if (!empty($existing['avatar'])) {
-            $uploadDir = __DIR__ . '/../../public/uploads/avatars/';
+            $uploadDir = rtrim(UPLOADS_BASE_PATH, '/') . '/avatars/';
             $oldPath   = $uploadDir . basename($existing['avatar']);
             if (file_exists($oldPath)) {
                 @unlink($oldPath);

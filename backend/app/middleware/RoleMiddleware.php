@@ -8,9 +8,9 @@ class RoleMiddleware {
             $requiredRoles = [$requiredRoles];
         }
 
-        // Manager has the same access as admin across all modules
+        // Manager and IT have the same access as admin across all modules
         $effectiveRole = $user['role'];
-        if ($effectiveRole === 'manager' && in_array('admin', $requiredRoles)) {
+        if (($effectiveRole === 'manager' || $effectiveRole === 'it') && in_array('admin', $requiredRoles)) {
             return true;
         }
 

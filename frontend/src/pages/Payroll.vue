@@ -106,9 +106,9 @@
                   {{ row.hours_worked }}h
                 </span>
               </td>
-              <!-- Rate (editable) -->
+              <!-- Rate (editable by IT only) -->
               <td class="px-5 py-3.5 text-right">
-                <div v-if="editingRateId === row.user_id" class="flex items-center justify-end gap-1.5">
+                <div v-if="isIT && editingRateId === row.user_id" class="flex items-center justify-end gap-1.5">
                   <span class="text-gray-400 text-xs">₱</span>
                   <input
                     v-model.number="editingRateValue"
@@ -123,11 +123,11 @@
                   <button @click="saveRate(row)" class="text-green-600 hover:text-green-700 text-xs font-normal">✓</button>
                   <button @click="cancelEditRate" class="text-gray-400 hover:text-gray-600 text-xs">✕</button>
                 </div>
-                <div v-else class="flex items-center justify-end gap-1 group cursor-pointer" @click="startEditRate(row)">
+                <div v-else class="flex items-center justify-end gap-1" :class="isIT ? 'group cursor-pointer' : ''" @click="isIT ? startEditRate(row) : null">
                   <span :class="row.hourly_rate > 0 ? 'text-gray-700' : 'text-gray-300'">
                     ₱{{ formatMoney(row.hourly_rate) }}
                   </span>
-                  <svg class="w-3 h-3 text-gray-300 group-hover:text-amber-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isIT" class="w-3 h-3 text-gray-300 group-hover:text-amber-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.93l-3 1a1 1 0 01-1.273-1.273l1-3a4 4 0 01.93-1.414z"/>
                   </svg>
                 </div>
@@ -172,7 +172,7 @@
         </table></div>
       </div>
 
-      <p class="text-xs text-gray-400 mt-3">
+      <p v-if="isIT" class="text-xs text-gray-400 mt-3">
         Click the pencil icon next to a rate to edit it. Changes are saved immediately and applied to future payslips.
       </p>
     </div>
@@ -184,8 +184,11 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { useToastStore } from '../stores/toast'
+import { useAuthStore } from '../stores/auth'
 
 const toast = useToastStore()
+const authStore = useAuthStore()
+const isIT = computed(() => authStore.isIT)
 
 // --- Week state -----------------------------------------------
 function getMondayOf(dateStr) {

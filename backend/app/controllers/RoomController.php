@@ -29,7 +29,7 @@ class RoomController {
         if (!in_array($file['type'], $allowed)) return null;
         $ext  = pathinfo($file['name'], PATHINFO_EXTENSION);
         $name = uniqid('room_', true) . '.' . strtolower($ext);
-        $dir  = __DIR__ . '/../../public/uploads/rooms/';
+        $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/rooms/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
         move_uploaded_file($file['tmp_name'], $dir . $name);
         return 'uploads/rooms/' . $name;

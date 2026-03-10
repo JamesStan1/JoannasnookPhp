@@ -318,7 +318,9 @@ const loadNavAvatar = () => {
   // Prefer server-stored avatar from user object, then fall back to localStorage
   const serverAvatar = authStore.user?.avatar
   if (serverAvatar) {
-    navAvatarSrc.value = serverAvatar.startsWith('http') ? serverAvatar : `http://localhost:8000${serverAvatar}`
+    const _apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const _base = _apiUrl.startsWith('http') ? _apiUrl.replace(/\/api$/, '') : _apiUrl
+    navAvatarSrc.value = serverAvatar.startsWith('http') ? serverAvatar : `${_base}${serverAvatar}`
     return
   }
   const id = authStore.user?.id ?? 'guest'

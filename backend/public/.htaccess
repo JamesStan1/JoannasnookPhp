@@ -2,7 +2,10 @@
     RewriteEngine On
     RewriteBase /api/
 
-    # Route all requests through index.php (skip existing files)
+    # Always serve files in uploads/ directly — never route through index.php
+    RewriteRule ^uploads/ - [L]
+
+    # Route all other requests through index.php (skip existing files/dirs)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule .* index.php [QSA,L]

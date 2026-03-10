@@ -283,7 +283,8 @@ const imagePreview = ref('')
 
 const form = ref({ name: '', category: '', price: '', description: '', active: true })
 
-const IMG_BASE = 'http://localhost:8000/'
+const _imgApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+const IMG_BASE = (_imgApiUrl.startsWith('http') ? _imgApiUrl.replace(/\/api$/, '') : _imgApiUrl) + '/'
 function dishImageUrl(item) {
   if (!item.image_url) return ''
   // Absolute URL → use as-is; frontend public asset (starts with /) → use as-is;

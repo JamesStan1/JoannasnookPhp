@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
   const ROLE_HOME = {
     admin:        '/dashboard',
     manager:      '/dashboard',
+    it:           '/dashboard',
     chef:         '/chef/orders',
     housekeeping: '/housekeeping',
     security:     '/rooms',
@@ -35,10 +36,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   const roleHomePath = computed(() => ROLE_HOME[userRole.value] || '/dashboard')
 
-  const isFullAccess = computed(() => ['admin', 'manager'].includes(userRole.value))
+  const isFullAccess = computed(() => ['admin', 'manager', 'it'].includes(userRole.value))
 
   // True only for the Admin role — used to gate admin-only pages & actions
   const isAdmin = computed(() => userRole.value === 'admin')
+
+  // True only for the IT role — gates IT-exclusive features
+  const isIT = computed(() => userRole.value === 'it')
+
+  // True only for the Manager role — gates manager-exclusive features
+  const isManager = computed(() => userRole.value === 'manager')
 
   const login = async (email, password) => {
     loading.value = true
@@ -134,6 +141,8 @@ export const useAuthStore = defineStore('auth', () => {
     roleHomePath,
     isFullAccess,
     isAdmin,
+    isIT,
+    isManager,
     login,
     register,
     logout,

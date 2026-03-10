@@ -81,10 +81,18 @@ class AdminController {
 
     public function getAllUsers() {
         $user = \App\Middleware\AuthMiddleware::handle();
-        \App\Middleware\RoleMiddleware::handle($user, ['admin']);
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager']);
 
-        $userModel = new \App\Models\User();
-        $users = $userModel->find(['active' => 1]);
+        $db = (new \App\Models\User())->getDb();
+        $stmt = $db->prepare("
+            SELECT u.*, COALESCE(s.salary, NULL) AS hourly_rate
+            FROM users u
+            LEFT JOIN staff s ON s.user_id = u.id
+            WHERE u.active = 1
+            ORDER BY u.name ASC
+        ");
+        $stmt->execute();
+        $users = $stmt->fetchAll();
 
         return response($users, 200);
     }
@@ -210,6 +218,13 @@ class AdminController {
         \App\Middleware\RoleMiddleware::handle($user, ['admin']);
 
         $data = json_decode(file_get_contents('php://input'), true);
+
+        // Allow IT role to update email and password
+        if (!empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        } else {
+            unset($data['password']);
+        }
 
         $userModel = new \App\Models\User();
         $userModel->update($userId, $data);
@@ -912,7 +927,7 @@ class AdminController {
 
     public function getSystemLogs() {
         $user = \App\Middleware\AuthMiddleware::handle();
-        \App\Middleware\RoleMiddleware::handle($user, ['admin']);
+        \App\Middleware\RoleMiddleware::handle($user, ['it']);
 
         $db = \Database::connect();
 
@@ -933,6 +948,146 @@ class AdminController {
         $activeUsers = (int)$stmt2->fetch()['cnt'];
 
         return response(['logs' => $logs, 'active_users' => $activeUsers], 200);
+    }
+
+    // ── IT: Staff Hourly Rates ───────────────────────────────────────────────
+
+    public function getStaffHourlyRates() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $db = \Database::connect();
+        $stmt = $db->query("
+            SELECT
+                u.id,
+                u.name,
+                u.email,
+                u.role,
+                COALESCE(s.salary, 0) AS hourly_rate,
+                u.active
+            FROM users u
+            LEFT JOIN staff s ON s.user_id = u.id
+            WHERE u.active = 1
+              AND u.role NOT IN ('guest')
+            ORDER BY u.name ASC
+        ");
+        $staff = $stmt->fetchAll();
+        return response($staff, 200);
+    }
+
+    public function updateStaffHourlyRate($userId) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data['hourly_rate'])) {
+            return error('hourly_rate is required', 400);
+        }
+
+        $rate = (float) $data['hourly_rate'];
+        if ($rate < 0) {
+            return error('hourly_rate must be non-negative', 400);
+        }
+
+        $db = \Database::connect();
+
+        // Upsert into staff table (salary column stores hourly rate)
+        $stmt = $db->prepare("SELECT id FROM staff WHERE user_id = :uid");
+        $stmt->execute([':uid' => $userId]);
+        $existing = $stmt->fetch();
+
+        if ($existing) {
+            $db->prepare("UPDATE staff SET salary = :rate WHERE user_id = :uid")
+               ->execute([':rate' => $rate, ':uid' => $userId]);
+        } else {
+            $db->prepare("INSERT INTO staff (user_id, salary) VALUES (:uid, :rate)")
+               ->execute([':uid' => $userId, ':rate' => $rate]);
+        }
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'update', 'staff', "Hourly rate updated for user: $userId to $rate");
+
+        return response([], 200, 'Hourly rate updated');
+    }
+
+    // ── IT: Forgot Password Requests ────────────────────────────────────────
+
+    public function getForgotPasswordRequests() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $db = \Database::connect();
+        $stmt = $db->query("
+            SELECT
+                fpr.id,
+                fpr.name,
+                fpr.email,
+                fpr.message,
+                fpr.status,
+                fpr.created_at,
+                fpr.resolved_at,
+                COALESCE(u.name, NULL) AS resolved_by_name
+            FROM forgot_password_requests fpr
+            LEFT JOIN users u ON u.id = fpr.resolved_by
+            ORDER BY fpr.created_at DESC
+        ");
+        $requests = $stmt->fetchAll();
+        return response($requests, 200);
+    }
+
+    public function submitForgotPasswordRequest() {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($data['name']) || empty($data['email']) || empty($data['message'])) {
+            return error('name, email, and message are required', 400);
+        }
+
+        // Sanitize inputs
+        $name    = htmlspecialchars(strip_tags(trim($data['name'])),    ENT_QUOTES, 'UTF-8');
+        $email   = filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL);
+        $message = htmlspecialchars(strip_tags(trim($data['message'])), ENT_QUOTES, 'UTF-8');
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return error('Invalid email address', 400);
+        }
+
+        $db = \Database::connect();
+        $stmt = $db->prepare("
+            INSERT INTO forgot_password_requests (name, email, message, status, created_at)
+            VALUES (:name, :email, :message, 'pending', NOW())
+        ");
+        $stmt->execute([
+            ':name'    => $name,
+            ':email'   => $email,
+            ':message' => $message,
+        ]);
+
+        return response(['id' => $db->lastInsertId()], 201, 'Request submitted');
+    }
+
+    public function resolveForgotPasswordRequest($id) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $status = $data['status'] ?? 'resolved';
+
+        if (!in_array($status, ['resolved', 'dismissed'], true)) {
+            return error('status must be resolved or dismissed', 400);
+        }
+
+        $db = \Database::connect();
+        $stmt = $db->prepare("
+            UPDATE forgot_password_requests
+               SET status = :status, resolved_by = :by, resolved_at = NOW()
+             WHERE id = :id
+        ");
+        $stmt->execute([':status' => $status, ':by' => $user['user_id'], ':id' => $id]);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'update', 'forgot_password_requests', "Request $id marked $status");
+
+        return response([], 200, 'Request updated');
     }
 
     // ── Holidays ─────────────────────────────────────────────────────────────

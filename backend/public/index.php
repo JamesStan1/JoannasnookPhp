@@ -41,6 +41,15 @@ if (is_dir(__DIR__ . '/app')) {
     $APP_ROOT = __DIR__ . '/..';
 }
 
+// Define uploads base path once, reliably from APP_ROOT.
+// Hostinger: APP_ROOT = public_html/api  → uploads at public_html/api/uploads/
+// Local dev:  APP_ROOT = backend/        → uploads at backend/public/uploads/
+if (!defined('UPLOADS_BASE_PATH')) {
+    $_uploadsCandidate = $APP_ROOT . '/uploads/';
+    $_uploadsFallback  = $APP_ROOT . '/public/uploads/';
+    define('UPLOADS_BASE_PATH', is_dir($_uploadsCandidate) ? $_uploadsCandidate : $_uploadsFallback);
+}
+
 // Load environment variables (second pass, in case early load used parent .env).
 if (file_exists($APP_ROOT . '/.env')) {
     $dotenv = parse_ini_file($APP_ROOT . '/.env');

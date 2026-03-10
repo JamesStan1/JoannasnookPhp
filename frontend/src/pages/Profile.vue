@@ -304,7 +304,11 @@ const avatarKey = () => `avatar_${authStore.user?.id ?? 'guest'}`
 const resolveAvatarUrl = (path) => {
   if (!path) return null
   if (path.startsWith('http')) return path
-  return `http://localhost:8000${path}`
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+  // Absolute URL (local dev): strip /api to get server root → http://localhost:8000
+  // Relative URL (production): keep as-is → /api  so uploads resolve to /api/uploads/...
+  const base = apiUrl.startsWith('http') ? apiUrl.replace(/\/api$/, '') : apiUrl
+  return `${base}${path}`
 }
 
 const loadAvatar = () => {
@@ -329,9 +333,7 @@ const onAvatarChange = async (e) => {
   try {
     const formData = new FormData()
     formData.append('avatar', file)
-    const res = await api.post('/auth/avatar', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    const res = await api.post('/auth/avatar', formData)
     const avatarPath = res.data.data.avatar
     const avatarUrl  = resolveAvatarUrl(avatarPath)
     avatarSrc.value  = avatarUrl

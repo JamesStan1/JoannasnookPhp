@@ -18,7 +18,7 @@ class EventPackageController {
         if (!in_array($file['type'], $allowed)) return null;
         $ext  = pathinfo($file['name'], PATHINFO_EXTENSION);
         $name = uniqid('pkg_', true) . '.' . strtolower($ext);
-        $dir  = __DIR__ . '/../../public/uploads/event-packages/';
+        $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/event-packages/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
         move_uploaded_file($file['tmp_name'], $dir . $name);
         return 'uploads/event-packages/' . $name;

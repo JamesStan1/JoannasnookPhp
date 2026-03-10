@@ -209,7 +209,8 @@ const deletingPkg     = ref(null)
 const imageFile    = ref(null)
 const imagePreview = ref('')
 
-const IMG_BASE = 'http://localhost:8000/'
+const _imgApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+const IMG_BASE = (_imgApiUrl.startsWith('http') ? _imgApiUrl.replace(/\/api$/, '') : _imgApiUrl) + '/'
 function pkgImageUrl(pkg) {
   if (!pkg.image_url) return ''
   if (pkg.image_url.startsWith('http') || pkg.image_url.startsWith('/')) return pkg.image_url

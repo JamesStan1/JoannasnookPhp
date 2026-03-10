@@ -419,7 +419,8 @@ const roomForm = ref({ room_number: '', type: '', price: '', capacity: 2, descri
 const imageFile = ref(null)
 const imagePreview = ref('')
 
-const IMG_BASE = 'http://localhost:8000/'
+const _imgApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+const IMG_BASE = (_imgApiUrl.startsWith('http') ? _imgApiUrl.replace(/\/api$/, '') : _imgApiUrl) + '/'
 function roomImageUrl(room) {
   if (!room.image_url) return ''
   if (room.image_url.startsWith('http') || room.image_url.startsWith('/')) return room.image_url

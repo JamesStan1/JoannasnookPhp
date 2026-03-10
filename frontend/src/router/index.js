@@ -7,6 +7,7 @@ import { useAuthStore } from '../stores/auth'
 const ALLOWED_PREFIXES = {
   admin:        null,
   manager:      null,
+  it:           null,
   chef:         ['/chef', '/staff/reports', '/staff/leave'],
   housekeeping: ['/housekeeping', '/staff/reports', '/staff/leave'],
   security:     ['/rooms', '/staff/reports', '/staff/leave'],
@@ -19,6 +20,7 @@ const UNIVERSAL_PATHS = ['/profile', '/dashboard', '/unauthorized']
 const ROLE_HOME = {
   admin:        '/dashboard',
   manager:      '/dashboard',
+  it:           '/dashboard',
   chef:         '/chef/orders',
   housekeeping: '/housekeeping',
   security:     '/rooms',
@@ -27,7 +29,7 @@ const ROLE_HOME = {
 }
 
 function isAllowed(role, path) {
-  if (!role || role === 'admin' || role === 'manager') return true
+  if (!role || role === 'admin' || role === 'manager' || role === 'it') return true
   if (UNIVERSAL_PATHS.some(p => path === p || path.startsWith(p + '/'))) return true
   const prefixes = ALLOWED_PREFIXES[role]
   if (!prefixes) return true
@@ -123,10 +125,10 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // 3. Admin-only page guard — 'admin' and 'manager' may access these routes
+  // 3. Admin-only page guard — 'admin', 'manager', and 'it' may access these routes
   if (to.meta.requiresAdmin) {
     const role = authStore.userRole
-    if (role !== 'admin' && role !== 'manager') {
+    if (role !== 'admin' && role !== 'manager' && role !== 'it') {
       next('/unauthorized')
       return
     }

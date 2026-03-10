@@ -15,6 +15,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // For FormData payloads, remove the default Content-Type so the browser can
+  // set it automatically with the correct multipart boundary. Without the
+  // boundary, PHP's $_FILES will be empty and uploads will silently fail.
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
   return config
 })
 
