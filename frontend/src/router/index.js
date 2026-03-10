@@ -10,7 +10,7 @@ const ALLOWED_PREFIXES = {
   chef:         ['/chef', '/staff/reports', '/staff/leave'],
   housekeeping: ['/housekeeping', '/staff/reports', '/staff/leave'],
   security:     ['/rooms', '/staff/reports', '/staff/leave'],
-  front_desk:   ['/reservations', '/rooms', '/pos', '/inventory', '/events', '/staff/reports', '/staff/leave'],
+  front_desk:   ['/front-desk', '/reservations', '/rooms', '/pos', '/inventory', '/events', '/staff/reports', '/staff/leave'],
 }
 
 // Paths every authenticated user may always visit
@@ -22,7 +22,7 @@ const ROLE_HOME = {
   chef:         '/chef/orders',
   housekeeping: '/housekeeping',
   security:     '/rooms',
-  front_desk:   '/reservations',
+  front_desk:   '/front-desk',
   guest:        '/',
 }
 
@@ -41,6 +41,7 @@ const routes = [
 
   // Dashboard
   { path: '/dashboard', name: 'Dashboard', component: () => import('../pages/Dashboard.vue'), meta: { requiresAuth: true } },
+  { path: '/front-desk', name: 'FrontDeskDashboard', component: () => import('../pages/FrontDeskDashboard.vue'), meta: { requiresAuth: true, title: 'Front Desk Dashboard' } },
 
   // ── Staff Management ──
   { path: '/staff', name: 'Staff', component: () => import('../pages/Staff.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
@@ -131,7 +132,13 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  // 4. Role-based access check for authenticated users on protected routes
+  // 4. Block front_desk from the general dashboard — they have their own
+  if (authStore.isAuthenticated && to.path === '/dashboard' && authStore.userRole === 'front_desk') {
+    next('/front-desk')
+    return
+  }
+
+  // 5. Role-based access check for authenticated users on protected routes
   if (authStore.isAuthenticated && to.meta.requiresAuth) {
     const role = authStore.userRole
     if (!isAllowed(role, to.path)) {

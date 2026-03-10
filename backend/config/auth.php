@@ -2,9 +2,9 @@
 
 return [
     'jwt' => [
-        'secret' => getenv('JWT_SECRET') ?? 'your-secret-key',
-        'algorithm' => getenv('JWT_ALGORITHM') ?? 'HS256',
-        'expiration' => getenv('JWT_EXPIRATION') ?? 3600,
+        'secret'     => env('JWT_SECRET', 'your-secret-key'),
+        'algorithm'  => env('JWT_ALGORITHM', 'HS256'),
+        'expiration' => (int) env('JWT_EXPIRATION', 3600),
     ],
     'roles' => [
         'admin' => 'Admin',

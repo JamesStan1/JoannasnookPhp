@@ -5,11 +5,17 @@
     # Route all requests through index.php (skip existing files)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ index.php [QSA,L]
+    RewriteRule .* index.php [QSA,L]
 </IfModule>
 
-# Deny direct access to sensitive files
-<FilesMatch "\.(env|log|sql|json|lock)$">
+# Deny direct access to sensitive files (but allow .json for composer autoload)
+<FilesMatch "\.(env|log|sql|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block direct access to composer files specifically
+<FilesMatch "^(composer\.json|composer\.lock|package\.json|package-lock\.json)$">
     Order allow,deny
     Deny from all
 </FilesMatch>

@@ -3,14 +3,9 @@
     <div v-if="visible" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white">
       <!-- Logo -->
       <div class="flex flex-col items-center gap-5">
-        <div class="relative w-36 h-36 flex items-center justify-center">
-          <!-- Spinning ring -->
-          <svg class="absolute inset-0 w-full h-full animate-spin-slow" viewBox="0 0 144 144" fill="none">
-            <circle cx="72" cy="72" r="66" stroke="#dcfce7" stroke-width="5"/>
-            <path d="M72 6 A66 66 0 0 1 138 72" stroke="#166534" stroke-width="5" stroke-linecap="round"/>
-          </svg>
+        <div class="flex items-center justify-center">
           <!-- Logo image -->
-          <img src="/Joannaslogo.png" alt="Joanna's" class="w-28 h-28 rounded-2xl object-contain p-2 relative z-10" />
+          <img src="/Joannaslogo.png" alt="Joanna's" class="w-28 h-28 rounded-2xl object-contain p-2" />
         </div>
 
         <!-- Hotel name -->
@@ -40,14 +35,6 @@ defineProps({
 </script>
 
 <style scoped>
-.animate-spin-slow {
-  animation: spin 1.4s linear infinite;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
 .animate-progress {
   animation: progress 3s ease-in-out forwards;
 }

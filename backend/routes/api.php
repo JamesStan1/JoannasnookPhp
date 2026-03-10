@@ -268,4 +268,7 @@ $router->get('/api/admin/reports', 'ReportController', 'getAllReports');
 $router->put('/api/admin/reports/{id}/respond', 'ReportController', 'respondToReport');
 $router->put('/api/admin/reports/{id}/status', 'ReportController', 'updateReportStatus');
 
+// Front Desk Dashboard
+$router->get('/api/front-desk/dashboard', 'FrontDeskController', 'getDashboard');
+
 return $router;

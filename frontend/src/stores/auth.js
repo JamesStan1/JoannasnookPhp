@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
     chef:         '/chef/orders',
     housekeeping: '/housekeeping',
     security:     '/rooms',
-    front_desk:   '/reservations',
+    front_desk:   '/front-desk',
     guest:        '/',
   }
 

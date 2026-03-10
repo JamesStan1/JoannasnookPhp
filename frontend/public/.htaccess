@@ -2,8 +2,12 @@
     RewriteEngine On
     RewriteBase /
 
-    # Let the /api/ subdirectory handle its own requests
-    RewriteRule ^api/ - [L]
+    # Do not re-rewrite if already pointing at api/index.php
+    RewriteRule ^api/index\.php$ - [L]
+
+    # Route all /api/* requests directly to api/index.php
+    # (more reliable on shared hosting than relying on the child .htaccess)
+    RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
 
     # Serve existing files and directories directly
     RewriteCond %{REQUEST_FILENAME} !-f

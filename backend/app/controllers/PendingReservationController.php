@@ -60,7 +60,7 @@ class PendingReservationController {
     // ── Admin: Get all pending reservation requests ────────────────────────
     public function getAll() {
         $user = \App\Middleware\AuthMiddleware::handle();
-        \App\Middleware\RoleMiddleware::handle($user, ['admin']);
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager', 'front_desk']);
 
         $status = $_GET['status'] ?? null;
         $type   = $_GET['type']   ?? null;

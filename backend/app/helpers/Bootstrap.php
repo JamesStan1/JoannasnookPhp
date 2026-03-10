@@ -3,11 +3,24 @@
 // Composer autoloader (optional - project has custom autoloader)
 // require_once __DIR__ . '/../../vendor/autoload.php';
 
-// Load environment variables
+// Load environment variables into both $_ENV and putenv() so they are
+// accessible even on hosts that disable putenv() or override getenv().
 if (file_exists(__DIR__ . '/../../.env')) {
     $dotenv = parse_ini_file(__DIR__ . '/../../.env');
     foreach ($dotenv as $key => $value) {
-        putenv("$key=$value");
+        $_ENV[$key] = $value;
+        if (!ini_get('safe_mode')) @putenv("$key=$value");
+    }
+}
+
+// Helper: read an environment variable from $_ENV, getenv(), or $_SERVER.
+if (!function_exists('env')) {
+    function env(string $key, $default = null) {
+        if (isset($_ENV[$key]))    return $_ENV[$key];
+        $v = getenv($key);
+        if ($v !== false)          return $v;
+        if (isset($_SERVER[$key])) return $_SERVER[$key];
+        return $default;
     }
 }
 
@@ -31,7 +44,15 @@ class Database {
                     ]
                 );
             } catch (PDOException $e) {
-                die('Database connection failed: ' . $e->getMessage());
+                http_response_code(500);
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Database connection failed. Check your .env credentials.',
+                    'debug'   => (env('APP_DEBUG') === 'true' || env('APP_DEBUG') === true)
+                                    ? $e->getMessage() : null,
+                ]);
+                exit;
             }
         }
 

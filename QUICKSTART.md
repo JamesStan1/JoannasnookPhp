@@ -50,7 +50,7 @@ JWT_SECRET=your-secret-key-12345
 From backend directory:
 
 ```bash
-php -S localhost:8000 -t public
+php -S localhost:8000 -t public index.php
 ```
 
 Backend running at: `http://localhost:8000`

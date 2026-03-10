@@ -50,7 +50,7 @@ Note: You'll need to create a `composer.json` file or use PHP's built-in server 
 ### 5. Start PHP Development Server
 
 ```bash
-php -S localhost:8000 -t public
+php -S localhost:8000 -t public index.php
 ```
 
 The API will be available at `http://localhost:8000/api`

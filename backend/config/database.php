@@ -1,16 +1,16 @@
 <?php
 
 return [
-    'default' => getenv('DB_CONNECTION') ?? 'mysql',
+    'default' => env('DB_CONNECTION', 'mysql'),
     'connections' => [
         'mysql' => [
-            'driver' => 'mysql',
-            'host' => getenv('DB_HOST') ?? 'localhost',
-            'port' => getenv('DB_PORT') ?? 3306,
-            'database' => getenv('DB_DATABASE') ?? 'hotel_management',
-            'username' => getenv('DB_USERNAME') ?? 'root',
-            'password' => getenv('DB_PASSWORD') ?? '',
-            'charset' => 'utf8mb4',
+            'driver'    => 'mysql',
+            'host'      => env('DB_HOST', 'localhost'),
+            'port'      => env('DB_PORT', 3306),
+            'database'  => env('DB_DATABASE', 'hotel_management'),
+            'username'  => env('DB_USERNAME', 'root'),
+            'password'  => env('DB_PASSWORD', ''),
+            'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
         ],
     ],

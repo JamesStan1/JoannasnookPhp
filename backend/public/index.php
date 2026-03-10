@@ -1,7 +1,9 @@
 <?php
 
 // Load .env early so FRONTEND_URL is available for CORS before the full bootstrap.
-$_earlyEnv = __DIR__ . '/.env';
+// On Hostinger (deployed as api/index.php), .env lives alongside this file.
+// Locally (backend/public/index.php), .env lives one level up in backend/.
+$_earlyEnv = file_exists(__DIR__ . '/.env') ? __DIR__ . '/.env' : __DIR__ . '/../.env';
 if (file_exists($_earlyEnv)) {
     foreach (parse_ini_file($_earlyEnv) as $_k => $_v) {
         $_ENV[$_k] = $_v;
@@ -30,18 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Detect app root: supports root-level placement (app/ inside backend/),
-// same-directory placement (public_html/api/ with app/ alongside), and
-// legacy backend/public/ layout (app/ one level up).
-if (is_dir(__DIR__ . '/backend/app')) {
-    $APP_ROOT = __DIR__ . '/backend';
-} elseif (is_dir(__DIR__ . '/app')) {
+// Detect app root:
+//  - Hostinger deployment: app/ lives alongside this file (public_html/api/app/)
+//  - Local dev:            app/ lives one level up        (backend/app/)
+if (is_dir(__DIR__ . '/app')) {
     $APP_ROOT = __DIR__;
 } else {
     $APP_ROOT = __DIR__ . '/..';
 }
 
-// Load environment variables early so FRONTEND_URL is available for CORS headers.
+// Load environment variables (second pass, in case early load used parent .env).
 if (file_exists($APP_ROOT . '/.env')) {
     $dotenv = parse_ini_file($APP_ROOT . '/.env');
     foreach ($dotenv as $key => $value) {
@@ -50,15 +50,9 @@ if (file_exists($APP_ROOT . '/.env')) {
     }
 }
 
-// Serve static files directly when using PHP's built-in development server
+// Serve static files directly when using PHP's built-in development server.
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $staticFile  = __DIR__ . $requestPath;
-// If not found at __DIR__, also check under public/ subdirectory
-// (handles: php -S localhost:8000 index.php run from backend/ while uploads live in backend/public/)
-if (!is_file($staticFile)) {
-    $publicStatic = __DIR__ . '/public' . $requestPath;
-    if (is_file($publicStatic)) $staticFile = $publicStatic;
-}
 if ($requestPath !== '/' && $requestPath !== '/index.php' && is_file($staticFile)) {
     $ext  = strtolower(pathinfo($staticFile, PATHINFO_EXTENSION));
     $mime = [
@@ -108,8 +102,9 @@ $router = require $APP_ROOT . '/routes/api.php';
 
 // Get request method and path.
 // On shared hosting (e.g. Hostinger), Apache's mod_rewrite updates REQUEST_URI
-// to the rewritten script path when an internal rewrite happens. REDIRECT_URL
-// preserves the original client-requested URI — prefer it over REQUEST_URI.
+// to the rewritten script path (/api/index.php) when the parent public_html/.htaccess
+// routes /api/* to api/index.php internally. REDIRECT_URL is set by Apache to
+// the original client-requested URI before the rewrite, so prefer it.
 $method  = $_SERVER['REQUEST_METHOD'];
 $rawUri  = $_SERVER['REDIRECT_URL'] ?? $_SERVER['REQUEST_URI'] ?? '/';
 $path    = parse_url($rawUri, PHP_URL_PATH);
