@@ -101,8 +101,4 @@ class BaseModel {
         $result = $stmt->fetch();
         return $result['count'];
     }
-
-    public function getDb() {
-        return $this->db;
-    }
 }

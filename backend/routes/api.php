@@ -272,11 +272,15 @@ $router->put('/api/admin/reports/{id}/status', 'ReportController', 'updateReport
 $router->get('/api/front-desk/dashboard', 'FrontDeskController', 'getDashboard');
 
 // IT Dashboard routes
-$router->get('/api/it/system-logs',          'AdminController', 'getSystemLogs');
-$router->get('/api/it/staff-hourly-rates',   'AdminController', 'getStaffHourlyRates');
-$router->put('/api/it/staff-hourly-rates/{id}', 'AdminController', 'updateStaffHourlyRate');
-$router->get('/api/it/forgot-password-requests', 'AdminController', 'getForgotPasswordRequests');
-$router->post('/api/it/forgot-password-requests', 'AdminController', 'submitForgotPasswordRequest');
+$router->get('/api/it/system-logs',                        'AdminController', 'getSystemLogs');
+$router->get('/api/it/audit-logs',                         'AdminController', 'getITAuditLogs');
+$router->get('/api/it/staff-hourly-rates',                 'AdminController', 'getStaffHourlyRates');
+$router->put('/api/it/staff-hourly-rates/{id}',            'AdminController', 'updateStaffHourlyRate');
+$router->get('/api/it/forgot-password-requests',           'AdminController', 'getForgotPasswordRequests');
+$router->post('/api/it/forgot-password-requests',          'AdminController', 'submitForgotPasswordRequest');
 $router->put('/api/it/forgot-password-requests/{id}/resolve', 'AdminController', 'resolveForgotPasswordRequest');
+$router->put('/api/it/staff-password/{id}',                'AdminController', 'resetStaffPassword');
+$router->get('/api/it/reports',                            'AdminController', 'getITReports');
+$router->put('/api/it/reports/{id}/status',                'AdminController', 'updateITReportStatus');
 
 return $router;

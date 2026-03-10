@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
   const ROLE_HOME = {
     admin:        '/dashboard',
     manager:      '/dashboard',
-    it:           '/dashboard',
+    it:           '/it-dashboard',
     chef:         '/chef/orders',
     housekeeping: '/housekeeping',
     security:     '/rooms',

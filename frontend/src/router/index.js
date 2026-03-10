@@ -20,7 +20,7 @@ const UNIVERSAL_PATHS = ['/profile', '/dashboard', '/unauthorized']
 const ROLE_HOME = {
   admin:        '/dashboard',
   manager:      '/dashboard',
-  it:           '/dashboard',
+  it:           '/it-dashboard',
   chef:         '/chef/orders',
   housekeeping: '/housekeeping',
   security:     '/rooms',
@@ -43,6 +43,7 @@ const routes = [
 
   // Dashboard
   { path: '/dashboard', name: 'Dashboard', component: () => import('../pages/Dashboard.vue'), meta: { requiresAuth: true } },
+  { path: '/it-dashboard', name: 'ITDashboard', component: () => import('../pages/ITDashboard.vue'), meta: { requiresAuth: true, title: 'IT Dashboard' } },
   { path: '/front-desk', name: 'FrontDeskDashboard', component: () => import('../pages/FrontDeskDashboard.vue'), meta: { requiresAuth: true, title: 'Front Desk Dashboard' } },
 
   // ── Staff Management ──
@@ -137,6 +138,12 @@ router.beforeEach(async (to, from, next) => {
   // 4. Block front_desk from the general dashboard — they have their own
   if (authStore.isAuthenticated && to.path === '/dashboard' && authStore.userRole === 'front_desk') {
     next('/front-desk')
+    return
+  }
+
+  // 4b. Block IT from the general dashboard — they have their own
+  if (authStore.isAuthenticated && to.path === '/dashboard' && authStore.userRole === 'it') {
+    next('/it-dashboard')
     return
   }
 

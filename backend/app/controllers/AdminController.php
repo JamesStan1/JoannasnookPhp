@@ -931,14 +931,24 @@ class AdminController {
 
         $db = \Database::connect();
 
-        $stmt = $db->query("
+        $page  = max(1, (int)($_GET['page']  ?? 1));
+        $limit = max(1, min(100, (int)($_GET['limit'] ?? 10)));
+        $offset = ($page - 1) * $limit;
+
+        $stmt = $db->prepare("
             SELECT al.created_at AS time, COALESCE(u.name, 'System') AS user, al.action, al.module, al.details
             FROM audit_logs al
             LEFT JOIN users u ON u.id = al.user_id
             ORDER BY al.created_at DESC
-            LIMIT 50
+            LIMIT :limit OFFSET :offset
         ");
+        $stmt->bindValue(':limit',  $limit,  \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
         $logs = $stmt->fetchAll();
+
+        // Total count
+        $total = (int)$db->query("SELECT COUNT(*) as cnt FROM audit_logs")->fetch()['cnt'];
 
         // Active users last 24h
         $stmt2 = $db->query("
@@ -947,7 +957,59 @@ class AdminController {
         ");
         $activeUsers = (int)$stmt2->fetch()['cnt'];
 
-        return response(['logs' => $logs, 'active_users' => $activeUsers], 200);
+        return response([
+            'logs'        => $logs,
+            'active_users' => $activeUsers,
+            'total'       => $total,
+            'page'        => $page,
+            'limit'       => $limit,
+            'total_pages' => (int)ceil($total / $limit),
+        ], 200);
+    }
+
+    // ── IT: Reset Staff Password ─────────────────────────────────────────────
+
+    public function resetStaffPassword($userId) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($data['password'])) {
+            return error('password is required', 400);
+        }
+
+        $password = $data['password'];
+
+        if (strlen($password) < 8) {
+            return error('Password must be at least 8 characters', 400);
+        }
+
+        $db = \Database::connect();
+
+        // Verify target user exists and is active
+        $stmt = $db->prepare("SELECT id, name, role FROM users WHERE id = :id AND active = 1");
+        $stmt->execute([':id' => (int)$userId]);
+        $targetUser = $stmt->fetch();
+
+        if (!$targetUser) {
+            return error('User not found', 404);
+        }
+
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+        $db->prepare("UPDATE users SET password = :pw WHERE id = :id")
+           ->execute([':pw' => $hashed, ':id' => (int)$userId]);
+
+        $auditLog = new AuditLog();
+        $auditLog->log(
+            $user['user_id'],
+            'update',
+            'staff',
+            "Password reset for: {$targetUser['name']} (ID: {$targetUser['id']}) by IT staff (ID: {$user['user_id']})"
+        );
+
+        return response([], 200, 'Password reset successfully');
     }
 
     // ── IT: Staff Hourly Rates ───────────────────────────────────────────────
@@ -1166,5 +1228,136 @@ class AdminController {
         $db->exec("UPDATE discounts SET is_default = 0");
         $db->prepare("UPDATE discounts SET is_default = 1 WHERE id = :id")->execute([':id' => $id]);
         return response([], 200, 'Default discount set');
+    }
+
+    // ── IT: Audit Logs with filtering ────────────────────────────────────────
+
+    public function getITAuditLogs() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $db       = \Database::connect();
+        $page     = max(1, (int)($_GET['page']   ?? 1));
+        $limit    = max(1, min(100, (int)($_GET['limit'] ?? 20)));
+        $offset   = ($page - 1) * $limit;
+
+        $action   = trim($_GET['action']    ?? '');
+        $module   = trim($_GET['module']    ?? '');
+        $search   = trim($_GET['search']    ?? '');
+        $dateFrom = trim($_GET['date_from'] ?? '');
+        $dateTo   = trim($_GET['date_to']   ?? '');
+
+        $where  = ['1=1'];
+        $params = [];
+
+        if ($action !== '') {
+            $where[]           = 'al.action = :action';
+            $params[':action'] = $action;
+        }
+        if ($module !== '') {
+            $where[]           = 'al.module LIKE :module';
+            $params[':module'] = '%' . $module . '%';
+        }
+        if ($search !== '') {
+            $where[]           = '(u.name LIKE :search OR al.details LIKE :search2 OR al.module LIKE :search3)';
+            $params[':search']  = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
+        }
+        if ($dateFrom !== '') {
+            $where[]              = 'DATE(al.created_at) >= :date_from';
+            $params[':date_from'] = $dateFrom;
+        }
+        if ($dateTo !== '') {
+            $where[]            = 'DATE(al.created_at) <= :date_to';
+            $params[':date_to'] = $dateTo;
+        }
+
+        $whereStr = implode(' AND ', $where);
+
+        $countStmt = $db->prepare("SELECT COUNT(*) as cnt FROM audit_logs al LEFT JOIN users u ON u.id = al.user_id WHERE $whereStr");
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetch()['cnt'];
+
+        $params[':limit']  = $limit;
+        $params[':offset'] = $offset;
+
+        $stmt = $db->prepare("
+            SELECT al.id, al.created_at AS time,
+                   COALESCE(u.name, 'System') AS user,
+                   COALESCE(u.role, '') AS role,
+                   al.action, al.module, al.details
+            FROM audit_logs al
+            LEFT JOIN users u ON u.id = al.user_id
+            WHERE $whereStr
+            ORDER BY al.created_at DESC
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue(':limit',  $limit,  \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        foreach ($params as $key => $val) {
+            if ($key !== ':limit' && $key !== ':offset') {
+                $stmt->bindValue($key, $val);
+            }
+        }
+        $stmt->execute();
+        $logs = $stmt->fetchAll();
+
+        $modules = $db->query("SELECT DISTINCT module FROM audit_logs ORDER BY module")
+                      ->fetchAll(\PDO::FETCH_COLUMN);
+
+        return response([
+            'logs'        => $logs,
+            'total'       => $total,
+            'page'        => $page,
+            'limit'       => $limit,
+            'total_pages' => (int)ceil($total / max(1, $limit)),
+            'modules'     => $modules,
+        ], 200);
+    }
+
+    // ── IT: Reports ──────────────────────────────────────────────────────────
+
+    public function getITReports() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $status   = $_GET['status']   ?? null;
+        $category = $_GET['category'] ?? null;
+
+        $reportModel = new \App\Models\Report();
+        $reports     = $reportModel->getAllReports($status, $category);
+
+        $total     = count($reports);
+        $pending   = count(array_filter($reports, fn($r) => $r['status'] === 'pending'));
+        $in_review = count(array_filter($reports, fn($r) => $r['status'] === 'in_review'));
+        $resolved  = count(array_filter($reports, fn($r) => $r['status'] === 'resolved'));
+        $dismissed = count(array_filter($reports, fn($r) => $r['status'] === 'dismissed'));
+
+        return response([
+            'summary' => compact('total', 'pending', 'in_review', 'resolved', 'dismissed'),
+            'reports' => $reports,
+        ], 200);
+    }
+
+    public function updateITReportStatus($reportId) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['it', 'admin']);
+
+        $data   = json_decode(file_get_contents('php://input'), true);
+        $status = $data['status'] ?? null;
+
+        $allowed = ['pending', 'in_review', 'resolved', 'dismissed'];
+        if (!$status || !in_array($status, $allowed, true)) {
+            return error('Valid status required (pending, in_review, resolved, dismissed)', 400);
+        }
+
+        $reportModel = new \App\Models\Report();
+        $reportModel->updateStatus($reportId, $status);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'update', 'reports', "Report $reportId status changed to $status");
+
+        return response([], 200, 'Report status updated');
     }
 }
