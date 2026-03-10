@@ -1,5 +1,8 @@
 -- Hotel Management System Database Schema
 -- Run this script to create all necessary tables
+-- Safe to re-run: all CREATE TABLE use IF NOT EXISTS, all INSERTs use WHERE NOT EXISTS.
+
+SET FOREIGN_KEY_CHECKS=0;
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
@@ -9,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     qr_token VARCHAR(64) NULL UNIQUE,              -- QR-based attendance token
-    role ENUM('admin', 'manager', 'front_desk', 'housekeeping', 'chef', 'accountant', 'guest') NOT NULL,
+    role ENUM('admin', 'manager', 'front_desk', 'housekeeping', 'chef', 'accountant', 'it', 'guest') NOT NULL,
     active TINYINT DEFAULT 1,
     last_login DATETIME,
     created_at DATETIME NOT NULL,
@@ -27,6 +30,7 @@ CREATE TABLE IF NOT EXISTS rooms (
     price DECIMAL(10, 2) NOT NULL,
     capacity INT DEFAULT 2,
     description TEXT,
+    image_url VARCHAR(500) DEFAULT NULL,           -- Room photo
     status ENUM('available', 'occupied', 'dirty', 'maintenance', 'reserved') DEFAULT 'available',
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
@@ -44,6 +48,8 @@ CREATE TABLE IF NOT EXISTS reservations (
     number_of_guests INT DEFAULT 1,
     special_requests TEXT,
     down_payment DECIMAL(10, 2) DEFAULT 0,
+    payment_option VARCHAR(50) NOT NULL DEFAULT 'full_payment', -- full_payment or down_payment
+    reference_number VARCHAR(100) NULL,            -- GCash/Bank Transfer reference
     status ENUM('pending', 'approved', 'checked_in', 'checked_out', 'cancelled') DEFAULT 'pending',
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
@@ -91,16 +97,26 @@ CREATE TABLE IF NOT EXISTS menu_items (
 -- Orders table
 CREATE TABLE IF NOT EXISTS orders (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    cashier_id INT NULL,                           -- Staff who processed the POS sale
+    customer_name VARCHAR(255) NULL,               -- Walk-in customer name
     customer_id INT,
     order_type ENUM('restaurant','room_service','event','pos') DEFAULT 'pos',
-    total_amount DECIMAL(10, 2) NOT NULL,
+    payment_method VARCHAR(50) NULL,               -- cash, gcash, bank_transfer, etc.
+    received_amount DECIMAL(10,2) NULL,            -- Amount tendered by customer
     reference_number VARCHAR(100) NULL,            -- GCash/Bank Transfer reference
+    discount_type VARCHAR(50) NULL,                -- senior, pwd, promo, etc.
+    charge_to_room TINYINT(1) NOT NULL DEFAULT 0,  -- Charge order to a room bill
+    room_id INT NULL,                              -- Room to charge to (if charge_to_room)
+    room_number VARCHAR(50) NULL,
+    invoice_id VARCHAR(100) NULL,                  -- POS invoice identifier
+    total_amount DECIMAL(10, 2) NOT NULL,
     status ENUM('pending', 'in_progress', 'completed', 'cancelled') DEFAULT 'pending',
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES users(id),
     INDEX idx_status (status),
-    INDEX idx_order_type (order_type)
+    INDEX idx_order_type (order_type),
+    INDEX idx_invoice_id (invoice_id)
 );
 
 -- Order Items table
@@ -281,6 +297,8 @@ CREATE TABLE IF NOT EXISTS event_packages (
     id INT PRIMARY KEY AUTO_INCREMENT,
     package_name VARCHAR(255) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
+    max_guests INT DEFAULT 0,                      -- Maximum number of guests included
+    max_per_dish INT DEFAULT 0,                    -- Max servings per dish
     description TEXT,
     inclusions TEXT,
     image_url VARCHAR(500) NULL,
@@ -292,20 +310,35 @@ CREATE TABLE IF NOT EXISTS event_packages (
 -- Events table
 CREATE TABLE IF NOT EXISTS events (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    event_name VARCHAR(255) NULL,                  -- Optional event title/name
     event_type VARCHAR(100) NOT NULL,
     client_name VARCHAR(255) NOT NULL,
     client_email VARCHAR(255),
     client_phone VARCHAR(50),
+    client_address VARCHAR(255) NULL,
     event_date DATE NOT NULL,
     event_time TIME,
     venue VARCHAR(255),
     pax INT DEFAULT 1,
+    number_of_guests INT NOT NULL DEFAULT 1,       -- Total confirmed guests
+    additional_guests INT NOT NULL DEFAULT 0,      -- Extra guests beyond package
     package_id INT NULL,
+    package_set VARCHAR(255) NULL,                 -- Package set/menu choice
+    price_per_head DECIMAL(10,2) NOT NULL DEFAULT 0,
     total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
     down_payment DECIMAL(10, 2) DEFAULT 0,
     payment_status ENUM('pending', 'partial', 'paid') DEFAULT 'pending',
+    payment_option VARCHAR(50) NULL,               -- full_payment or down_payment
+    payment_method VARCHAR(100) NULL,              -- cash, gcash, bank_transfer
+    payment_ref VARCHAR(255) NULL,                 -- Payment reference number
+    online_payment_type VARCHAR(50) NULL,          -- gcash, maya, bank, etc.
     status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
     notes TEXT,
+    remarks TEXT NULL,
+    supervisor_id INT NULL,                        -- Assigned supervisor
+    booked_by VARCHAR(255) NULL,                   -- Name of person who booked
+    source VARCHAR(50) NULL DEFAULT 'walk_in',     -- walk_in, online, phone
+    created_by INT NULL,                           -- Staff who created the record
     deleted_at DATETIME NULL DEFAULT NULL,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
@@ -334,6 +367,13 @@ CREATE TABLE IF NOT EXISTS pending_reservations (
     pax INT DEFAULT 1,
     notes TEXT,
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    payment_option VARCHAR(50) NULL,               -- full_payment or down_payment
+    down_payment DECIMAL(10,2) DEFAULT 0,
+    approved_by INT NULL,                          -- Staff who approved/rejected
+    approved_at DATETIME NULL,
+    reservation_id INT NULL,                       -- Linked reservation after approval
+    rejection_reason TEXT NULL,
+    rejected_at DATETIME NULL,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL,
@@ -341,6 +381,36 @@ CREATE TABLE IF NOT EXISTS pending_reservations (
     INDEX idx_status (status),
     INDEX idx_reservation_type (reservation_type)
 );
+
+-- Chef Orders table (POS kitchen queue)
+CREATE TABLE IF NOT EXISTS chef_orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    pos_order_id INT NULL,                         -- Linked POS order
+    invoice_id VARCHAR(100) NULL,                  -- POS invoice identifier
+    item_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    notes TEXT NULL,
+    status ENUM('pending', 'preparing', 'ready', 'served') NOT NULL DEFAULT 'pending',
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (pos_order_id) REFERENCES orders(id) ON DELETE SET NULL,
+    INDEX idx_invoice_id (invoice_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at)
+);
+
+-- Forgot Password Requests table
+CREATE TABLE IF NOT EXISTS forgot_password_requests (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    name         VARCHAR(255)        NOT NULL,
+    email        VARCHAR(255)        NOT NULL,
+    message      TEXT                NOT NULL,
+    status       ENUM('pending','resolved','dismissed') NOT NULL DEFAULT 'pending',
+    resolved_by  INT                 NULL,
+    resolved_at  DATETIME            NULL,
+    created_at   DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_fpr_resolved_by FOREIGN KEY (resolved_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Holidays table
 CREATE TABLE IF NOT EXISTS holidays (
@@ -384,26 +454,28 @@ CREATE TABLE IF NOT EXISTS staff_reports (
     INDEX idx_created_at (created_at)
 );
 
--- Create indexes for better performance
-CREATE INDEX idx_reservation_dates ON reservations(check_in_date, check_out_date);
-CREATE INDEX idx_bill_created_at ON bills(created_at);
-CREATE INDEX idx_order_created_at ON orders(created_at);
+-- Additional composite indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_reservation_dates ON reservations(check_in_date, check_out_date);
+CREATE INDEX IF NOT EXISTS idx_bill_created_at ON bills(created_at);
+CREATE INDEX IF NOT EXISTS idx_order_created_at ON orders(created_at);
+
+SET FOREIGN_KEY_CHECKS=1;
 
 -- ============================================================
 -- Default Settings Seed
 -- ============================================================
 INSERT INTO settings (`key`, `value`, created_at, updated_at) VALUES
-  ('hotel_name',            'SRCB Hotel & Café',  NOW(), NOW()),
-  ('hotel_email',           'info@srcbhotel.com', NOW(), NOW()),
-  ('hotel_phone',           '09000000000',        NOW(), NOW()),
-  ('hotel_address',         'Brgy. Sample, City', NOW(), NOW()),
-  ('default_checkin_time',  '14:00',              NOW(), NOW()),
-  ('default_checkout_time', '12:00',              NOW(), NOW()),
-  ('tax_rate',              '12',                 NOW(), NOW()),
-  ('currency',              '₱',                 NOW(), NOW()),
-  ('email_notifications',   '1',                  NOW(), NOW()),
-  ('push_notifications',    '1',                  NOW(), NOW())
-ON DUPLICATE KEY UPDATE updated_at = updated_at;
+  ('hotel_name',            'Joanna\'s Nook Bed & Breakfast', NOW(), NOW()),
+  ('hotel_email',           'joannasnookban@gmail.com',       NOW(), NOW()),
+  ('hotel_phone',           '09123456789',                    NOW(), NOW()),
+  ('hotel_address',         'Balingasag, Misamis Oriental',   NOW(), NOW()),
+  ('default_checkin_time',  '14:00',                          NOW(), NOW()),
+  ('default_checkout_time', '12:00',                          NOW(), NOW()),
+  ('tax_rate',              '12',                             NOW(), NOW()),
+  ('currency',              '₱',                             NOW(), NOW()),
+  ('email_notifications',   '1',                              NOW(), NOW()),
+  ('push_notifications',    '1',                              NOW(), NOW())
+ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = NOW();
 
 -- ============================================================
 -- Cafe Food Menu Items Seed
@@ -716,3 +788,53 @@ WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE name = 'Corn Soup');
 INSERT INTO menu_items (name, category, description, price, image_url, active, created_at)
 SELECT 'Cream of Mushroom','Soup','Rich and velvety mushroom soup',180.00,'/Cafe Food/Cream of Mushroom.jpg',1,NOW()
 WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE name = 'Cream of Mushroom');
+
+-- ============================================================
+-- Default Staff Accounts Seed
+-- Default password for all accounts: Admin@1234
+-- (bcrypt hash, cost 12 — change all passwords after first login!)
+-- ============================================================
+INSERT INTO users (name, email, password, role, active, created_at, updated_at)
+SELECT 'Vic Madroño', 'vic.madrono@joannasnook.com',
+       '$2y$12$5HStRCp5yLbzsWtvYdAhXeDbeBJ2aX8ysMmkoQ0bJzWLm9jC7Wjy6',
+       'admin', 1, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'vic.madrono@joannasnook.com');
+
+INSERT INTO users (name, email, password, role, active, created_at, updated_at)
+SELECT 'Kimberly Jairol', 'kimberly.jairol@joannasnook.com',
+       '$2y$12$5HStRCp5yLbzsWtvYdAhXeDbeBJ2aX8ysMmkoQ0bJzWLm9jC7Wjy6',
+       'manager', 1, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'kimberly.jairol@joannasnook.com');
+
+INSERT INTO users (name, email, password, role, active, created_at, updated_at)
+SELECT 'Graciela Mieh Nilama', 'graciela.nilama@joannasnook.com',
+       '$2y$12$5HStRCp5yLbzsWtvYdAhXeDbeBJ2aX8ysMmkoQ0bJzWLm9jC7Wjy6',
+       'front_desk', 1, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'graciela.nilama@joannasnook.com');
+
+INSERT INTO users (name, email, password, role, active, created_at, updated_at)
+SELECT 'James Stanley Macaulay', 'james.macaulay@joannasnook.com',
+       '$2y$12$5HStRCp5yLbzsWtvYdAhXeDbeBJ2aX8ysMmkoQ0bJzWLm9jC7Wjy6',
+       'it', 1, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'james.macaulay@joannasnook.com');
+
+-- Link staff records to the seeded users
+INSERT INTO staff (user_id, department, hire_date, created_at)
+SELECT id, 'Administration', CURDATE(), NOW()
+FROM users WHERE email = 'vic.madrono@joannasnook.com'
+  AND NOT EXISTS (SELECT 1 FROM staff WHERE user_id = (SELECT id FROM users WHERE email = 'vic.madrono@joannasnook.com'));
+
+INSERT INTO staff (user_id, department, hire_date, created_at)
+SELECT id, 'Management', CURDATE(), NOW()
+FROM users WHERE email = 'kimberly.jairol@joannasnook.com'
+  AND NOT EXISTS (SELECT 1 FROM staff WHERE user_id = (SELECT id FROM users WHERE email = 'kimberly.jairol@joannasnook.com'));
+
+INSERT INTO staff (user_id, department, hire_date, created_at)
+SELECT id, 'Front Desk', CURDATE(), NOW()
+FROM users WHERE email = 'graciela.nilama@joannasnook.com'
+  AND NOT EXISTS (SELECT 1 FROM staff WHERE user_id = (SELECT id FROM users WHERE email = 'graciela.nilama@joannasnook.com'));
+
+INSERT INTO staff (user_id, department, hire_date, created_at)
+SELECT id, 'IT', CURDATE(), NOW()
+FROM users WHERE email = 'james.macaulay@joannasnook.com'
+  AND NOT EXISTS (SELECT 1 FROM staff WHERE user_id = (SELECT id FROM users WHERE email = 'james.macaulay@joannasnook.com'));

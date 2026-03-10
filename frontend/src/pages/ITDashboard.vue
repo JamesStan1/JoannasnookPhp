@@ -120,6 +120,16 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <!-- User Badge -->
+            <div class="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+              <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                {{ authStore.user?.name?.charAt(0)?.toUpperCase() || 'IT' }}
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-gray-800 leading-none">{{ authStore.user?.name || 'IT Staff' }}</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-wide">{{ authStore.userRole }}</p>
+              </div>
+            </div>
             <!-- Notification Bell -->
             <div class="relative" style="z-index: 40">
               <button @click="toggleNotifications"
@@ -211,9 +221,9 @@
                       System Logs
                     </button>
                     <span class="text-gray-300">|</span>
-                    <button @click.stop="scrollToSection('section-audit-logs'); showNotifications = false"
+                    <button @click.stop="scrollToSection('section-sales-audit-logs'); showNotifications = false"
                       class="text-xs text-blue-600 hover:text-blue-800 font-semibold hover:underline">
-                      Audit Logs
+                      Sales Logs
                     </button>
                     <span class="text-gray-300">|</span>
                     <button @click.stop="scrollToSection('section-reports'); showNotifications = false"
@@ -242,6 +252,42 @@
       </div>
     </div>
 
+    <!-- Sticky Section Navigation -->
+    <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8">
+        <div class="flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar">
+          <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider pr-1 flex-shrink-0 hidden sm:block">Jump to:</span>
+          <button @click="scrollToSection('section-system-logs')"
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition-all border border-blue-100 hover:border-blue-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            System Logs
+          </button>
+          <button @click="scrollToSection('section-staff-rates')"
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition-all border border-amber-100 hover:border-amber-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Staff Rates
+          </button>
+          <button @click="scrollToSection('section-forgot-password')"
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition-all border border-red-100 hover:border-red-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+            Password Requests
+            <span v-if="pendingRequests.length > 0" class="ml-0.5 text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full leading-none">{{ pendingRequests.length }}</span>
+          </button>
+          <button @click="scrollToSection('section-sales-audit-logs')"
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-green-700 bg-green-50 hover:bg-green-100 transition-all border border-green-100 hover:border-green-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+            Sales Logs
+          </button>
+          <button @click="scrollToSection('section-reports')"
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all border border-emerald-100 hover:border-emerald-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+            Reports
+            <span v-if="reportsSummary.pending > 0" class="ml-0.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">{{ reportsSummary.pending }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading && !systemLogs.length" class="flex flex-col items-center justify-center py-32">
       <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
@@ -253,7 +299,7 @@
       <!-- ══════════════════════════════════════════════════════════════════ -->
       <!-- STAT CARDS ROW                                                      -->
       <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
 
         <!-- Card 1: System Logs -->
         <button @click="scrollToSection('section-system-logs')"
@@ -271,25 +317,6 @@
             <p class="text-3xl font-extrabold text-gray-900 mb-1">{{ totalLogs.toLocaleString() }}</p>
             <p class="text-sm font-semibold text-gray-700">System Logs</p>
             <p class="text-xs text-gray-500 mt-0.5">{{ activeUsers }} active users (24h)</p>
-          </div>
-        </button>
-
-        <!-- Card 2: Audit Logs -->
-        <button @click="scrollToSection('section-audit-logs')"
-          class="group bg-white rounded-2xl border border-violet-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-5 text-left overflow-hidden relative">
-          <div class="absolute inset-0 bg-gradient-to-br from-violet-50 to-purple-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl"></div>
-          <div class="relative">
-            <div class="flex items-center justify-between mb-3">
-              <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
-              </div>
-              <span class="text-xs font-bold px-2 py-1 bg-violet-100 text-violet-700 rounded-full">Audit</span>
-            </div>
-            <p class="text-3xl font-extrabold text-gray-900 mb-1">{{ auditTotal.toLocaleString() }}</p>
-            <p class="text-sm font-semibold text-gray-700">Audit Logs</p>
-            <p class="text-xs text-gray-500 mt-0.5">Full activity trail</p>
           </div>
         </button>
 
@@ -335,7 +362,26 @@
           </div>
         </button>
 
-        <!-- Card 5: Reports -->
+        <!-- Card 5: Sales Audit Logs -->
+        <button @click="scrollToSection('section-sales-audit-logs')"
+          class="group bg-white rounded-2xl border border-green-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-5 text-left overflow-hidden relative">
+          <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-teal-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl"></div>
+          <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center shadow-md">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                </svg>
+              </div>
+              <span class="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded-full">Sales</span>
+            </div>
+            <p class="text-3xl font-extrabold text-gray-900 mb-1">{{ salesAuditLogs.length.toLocaleString() }}</p>
+            <p class="text-sm font-semibold text-gray-700">Sales Audit Logs</p>
+            <p class="text-xs text-gray-500 mt-0.5">POS, Room &amp; Event billing</p>
+          </div>
+        </button>
+
+        <!-- Card 6: Reports -->
         <button @click="scrollToSection('section-reports')"
           class="group bg-white rounded-2xl border border-emerald-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-5 text-left overflow-hidden relative">
           <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl"></div>
@@ -383,6 +429,31 @@
               <p class="text-2xl font-bold text-blue-600">{{ activeUsers }}</p>
             </div>
           </div>
+
+          <!-- Search / Filter Row -->
+          <div class="mt-4 flex flex-wrap gap-3 items-center">
+            <div class="flex-1 min-w-[200px]">
+              <input v-model="logSearch" type="text" placeholder="Search user, module, details..."
+                class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700" />
+            </div>
+            <div class="min-w-[130px]">
+              <select v-model="logActionFilter"
+                class="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700">
+                <option value="">All Actions</option>
+                <option value="login">Login</option>
+                <option value="create">Create</option>
+                <option value="update">Update</option>
+                <option value="delete">Delete</option>
+              </select>
+            </div>
+            <button v-if="logSearch || logActionFilter" @click="logSearch = ''; logActionFilter = ''"
+              class="px-3 py-2 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 text-sm font-semibold rounded-lg transition-all">
+              Clear
+            </button>
+            <p v-if="logSearch || logActionFilter" class="text-xs text-blue-600 font-medium whitespace-nowrap">
+              {{ filteredSystemLogs.length }} match(es) on this page
+            </p>
+          </div>
         </div>
 
         <!-- System Logs Table -->
@@ -398,7 +469,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
-              <tr v-for="(log, index) in systemLogs" :key="`${log.time}-${log.user}-${log.action}-${index}`"
+              <tr v-for="(log, index) in filteredSystemLogs" :key="`${log.time}-${log.user}-${log.action}-${index}`"
                 class="hover:bg-blue-50 transition-colors cursor-default">
                 <td class="px-6 py-4 text-gray-900 font-mono text-xs whitespace-nowrap">
                   {{ formatDateTime(log.time) }}
@@ -455,173 +526,12 @@
         </div>
 
         <!-- Empty State -->
-        <div v-if="systemLogs.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50">
+        <div v-if="filteredSystemLogs.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50">
           <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
           </svg>
-          <p class="text-lg font-medium text-gray-600 mb-1">No System Logs Available</p>
-          <p class="text-sm text-gray-500">Activity logs will appear here once users start interacting with the system.</p>
-        </div>
-      </div>
-
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- SECTION 2: AUDIT LOGS                                              -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div id="section-audit-logs" class="bg-white rounded-2xl border border-violet-100 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-        <!-- Card Header -->
-        <div class="px-6 py-5 bg-gradient-to-r from-violet-50 to-purple-100 border-b border-violet-200">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-gray-900">Audit Logs</h2>
-                <p class="text-sm text-gray-600 mt-0.5">{{ auditTotal.toLocaleString() }} total records • Page {{ auditPage }} of {{ auditTotalPages }}</p>
-              </div>
-            </div>
-            <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-violet-200">
-              <p class="text-xs text-gray-600 font-medium">Total Records</p>
-              <p class="text-2xl font-bold text-violet-600">{{ auditTotal.toLocaleString() }}</p>
-            </div>
-          </div>
-
-          <!-- Filters Row -->
-          <div class="mt-4 flex flex-wrap gap-3 items-end">
-            <!-- Action filter -->
-            <div class="flex-1 min-w-[130px]">
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Action Type</label>
-              <select v-model="auditFilterAction"
-                class="w-full px-3 py-2 bg-white border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-700">
-                <option value="">All Actions</option>
-                <option value="login">Login</option>
-                <option value="create">Create</option>
-                <option value="update">Update</option>
-                <option value="delete">Delete</option>
-              </select>
-            </div>
-            <!-- Module filter -->
-            <div class="flex-1 min-w-[130px]">
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Module</label>
-              <select v-model="auditFilterModule"
-                class="w-full px-3 py-2 bg-white border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-700">
-                <option value="">All Modules</option>
-                <option v-for="mod in auditModules" :key="mod" :value="mod">{{ mod }}</option>
-              </select>
-            </div>
-            <!-- Date From -->
-            <div class="flex-1 min-w-[130px]">
-              <label class="block text-xs font-semibold text-gray-600 mb-1">From Date</label>
-              <input v-model="auditFilterDateFrom" type="date"
-                class="w-full px-3 py-2 bg-white border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-700"/>
-            </div>
-            <!-- Date To -->
-            <div class="flex-1 min-w-[130px]">
-              <label class="block text-xs font-semibold text-gray-600 mb-1">To Date</label>
-              <input v-model="auditFilterDateTo" type="date"
-                class="w-full px-3 py-2 bg-white border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-700"/>
-            </div>
-            <!-- Search -->
-            <div class="flex-1 min-w-[150px]">
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Search</label>
-              <input v-model="auditSearch" type="text" placeholder="User, module, details..."
-                class="w-full px-3 py-2 bg-white border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 text-gray-700"/>
-            </div>
-            <!-- Apply / Reset -->
-            <div class="flex gap-2">
-              <button @click="loadAuditLogs(1)"
-                class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg shadow transition-all">
-                Apply
-              </button>
-              <button @click="resetAuditFilters"
-                class="px-4 py-2 bg-white border border-violet-200 text-violet-700 hover:bg-violet-50 text-sm font-semibold rounded-lg shadow transition-all">
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Audit Logs Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b-2 border-gray-200">
-              <tr>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Timestamp</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">User</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Action</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Module</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Details</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 bg-white">
-              <tr v-for="(log, idx) in auditLogs" :key="`al-${log.id || idx}`"
-                class="hover:bg-violet-50 transition-colors cursor-default">
-                <td class="px-6 py-4 text-gray-900 font-mono text-xs whitespace-nowrap">
-                  {{ formatDateTime(log.time) }}
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-xs font-semibold text-violet-700">
-                      {{ log.user.charAt(0).toUpperCase() }}
-                    </div>
-                    <div>
-                      <p class="font-medium text-gray-900 text-xs">{{ log.user }}</p>
-                      <p v-if="log.role" class="text-[10px] text-gray-500 uppercase">{{ log.role }}</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span :class="['text-xs px-3 py-1.5 rounded-full font-semibold shadow-sm', actionBadgeClass(log.action)]">
-                    {{ log.action.toUpperCase() }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-medium">{{ log.module }}</span>
-                </td>
-                <td class="px-6 py-4 text-gray-600 text-xs max-w-xs truncate" :title="log.details">
-                  {{ log.details || '—' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        <div v-if="auditTotal > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-wrap gap-3">
-          <p class="text-sm text-gray-600">
-            Showing <span class="font-semibold text-gray-900">{{ (auditPage - 1) * auditLogsPerPage + 1 }}–{{ Math.min(auditPage * auditLogsPerPage, auditTotal) }}</span>
-            of <span class="font-semibold text-gray-900">{{ auditTotal }}</span> records
-          </p>
-          <div class="flex items-center gap-2">
-            <button @click="prevAuditPage" :disabled="auditPage === 1"
-              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-violet-200 text-violet-700 hover:bg-violet-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-              </svg>
-              Prev
-            </button>
-            <span class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg">
-              {{ auditPage }} / {{ auditTotalPages }}
-            </span>
-            <button @click="nextAuditPage" :disabled="auditPage >= auditTotalPages"
-              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-violet-200 text-violet-700 hover:bg-violet-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
-              Next
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="auditLogs.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50">
-          <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-          </svg>
-          <p class="text-lg font-medium text-gray-600 mb-1">No Audit Logs Found</p>
-          <p class="text-sm text-gray-500">Try adjusting your filters or check back later.</p>
+          <p class="text-lg font-medium text-gray-600 mb-1">{{ logSearch || logActionFilter ? 'No Logs Match Your Filter' : 'No System Logs Available' }}</p>
+          <p class="text-sm text-gray-500">{{ logSearch || logActionFilter ? 'Try a different search term or clear your filters.' : 'Activity logs will appear here once users start interacting with the system.' }}</p>
         </div>
       </div>
 
@@ -864,7 +774,152 @@
       </div>
 
       <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- SECTION 5: REPORTS                                                  -->
+      <!-- SECTION 5: SALES AUDIT LOGS (from Settings / Admin)               -->
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <div id="section-sales-audit-logs" class="bg-white rounded-2xl border border-green-100 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+        <!-- Card Header -->
+        <div class="px-6 py-5 bg-gradient-to-r from-green-50 to-teal-100 border-b border-green-200">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center shadow-md">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-900">Sales Audit Logs</h2>
+                <p class="text-sm text-gray-600 mt-0.5">All completed sales transactions — POS, room, and event billing</p>
+              </div>
+            </div>
+            <button @click="fetchSalesAuditLogs"
+              class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <div class="mt-4 flex flex-wrap gap-3">
+            <input v-model="salesAuditSearch" @input="debouncedFetchSalesAuditLogs"
+              type="text" placeholder="Search transaction ID or customer..."
+              class="flex-1 min-w-[180px] px-3 py-2 bg-white border border-green-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700" />
+            <input v-model="salesAuditEmployee" @input="debouncedFetchSalesAuditLogs"
+              type="text" placeholder="Filter by employee..."
+              class="flex-1 min-w-[150px] px-3 py-2 bg-white border border-green-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700" />
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-500 whitespace-nowrap">From</span>
+              <input v-model="salesAuditDateFrom" @change="fetchSalesAuditLogs" type="date"
+                class="px-3 py-2 bg-white border border-green-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700" />
+              <span class="text-xs text-gray-500">To</span>
+              <input v-model="salesAuditDateTo" @change="fetchSalesAuditLogs" type="date"
+                class="px-3 py-2 bg-white border border-green-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700" />
+            </div>
+            <button @click="clearSalesAuditFilters"
+              class="px-4 py-2 bg-white border border-green-200 text-green-700 hover:bg-green-50 text-sm font-semibold rounded-lg shadow transition-all">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Sales Audit Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b-2 border-gray-200">
+              <tr>
+                <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Transaction ID</th>
+                <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date &amp; Time</th>
+                <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Customer</th>
+                <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Employee</th>
+                <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Payment Method</th>
+                <th class="px-4 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Amount</th>
+                <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+              <tr v-if="salesAuditLoading">
+                <td colspan="7" class="text-center py-10 text-gray-400">
+                  <div class="flex items-center justify-center gap-2">
+                    <div class="w-5 h-5 border-2 border-green-300 border-t-green-600 rounded-full animate-spin"></div>
+                    Loading...
+                  </div>
+                </td>
+              </tr>
+              <tr v-else-if="pagedSalesAuditLogs.length === 0 && !salesAuditLoading">
+                <td colspan="7" class="text-center py-12 text-gray-400">No sales records found.</td>
+              </tr>
+              <tr v-for="row in pagedSalesAuditLogs" :key="row.id + '-' + row.source"
+                class="hover:bg-green-50 transition-colors cursor-default">
+                <td class="px-4 py-3 font-mono text-xs text-green-800 whitespace-nowrap">{{ row.transaction_id || ('#' + row.id) }}</td>
+                <td class="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">{{ formatDateTime(row.created_at) }}</td>
+                <td class="px-4 py-3 font-medium text-gray-800 text-xs">{{ row.name }}</td>
+                <td class="px-4 py-3 text-gray-700 text-xs">
+                  <span class="inline-flex items-center gap-1">
+                    <svg class="w-3 h-3 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    {{ row.employee || 'N/A' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600 capitalize">{{ row.payment_method || 'N/A' }}</span>
+                </td>
+                <td class="px-4 py-3 text-right font-semibold text-gray-800 text-xs">₱{{ parseFloat(row.sales || 0).toFixed(2) }}</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="text-xs px-2.5 py-1 rounded-full font-semibold shadow-sm"
+                    :class="{
+                      'bg-purple-100 text-purple-700': row.source === 'POS',
+                      'bg-green-100 text-green-800': row.source === 'Room',
+                      'bg-amber-100 text-amber-700': row.source === 'Event'
+                    }">
+                    {{ row.source }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="salesAuditLogs.length > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-wrap gap-3">
+          <p class="text-sm text-gray-600">
+            Showing <span class="font-semibold text-gray-900">{{ salesAuditFrom }}–{{ salesAuditTo }}</span>
+            of <span class="font-semibold text-gray-900">{{ salesAuditLogs.length }}</span> records
+          </p>
+          <div class="flex items-center gap-2">
+            <button @click="salesAuditPage--" :disabled="salesAuditPage <= 1"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Prev
+            </button>
+            <span class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg">
+              {{ salesAuditPage }} / {{ salesAuditTotalPages }}
+            </span>
+            <button @click="salesAuditPage++" :disabled="salesAuditPage >= salesAuditTotalPages"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              Next
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="salesAuditLogs.length === 0 && !salesAuditLoading" class="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50">
+          <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+          </svg>
+          <p class="text-lg font-medium text-gray-600 mb-1">No Sales Records Found</p>
+          <p class="text-sm text-gray-500">Try adjusting your filters or check back later.</p>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- SECTION 6: REPORTS                                                  -->
       <!-- ══════════════════════════════════════════════════════════════════ -->
       <div id="section-reports" class="bg-white rounded-2xl border border-emerald-100 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
         <!-- Card Header -->
@@ -1011,6 +1066,17 @@
       </div>
 
     </div>
+
+    <!-- Back to Top -->
+    <transition name="fade">
+      <button v-if="showBackToTop" @click="scrollToTop"
+        class="fixed bottom-6 right-6 z-40 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110"
+        title="Back to top">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+        </svg>
+      </button>
+    </transition>
   </div>
 </template>
 
@@ -1044,19 +1110,42 @@ const logPage = ref(1)
 const logsPerPage = 10
 const totalLogPages = ref(1)
 const totalLogs = ref(0)
+const logSearch = ref('')
+const logActionFilter = ref('')
 
-// Audit Logs
-const auditLogs = ref([])
-const auditPage = ref(1)
-const auditLogsPerPage = 20
-const auditTotalPages = ref(1)
-const auditTotal = ref(0)
-const auditModules = ref([])
-const auditFilterAction = ref('')
-const auditFilterModule = ref('')
-const auditFilterDateFrom = ref('')
-const auditFilterDateTo = ref('')
-const auditSearch = ref('')
+const filteredSystemLogs = computed(() => {
+  let logs = systemLogs.value
+  if (logActionFilter.value) {
+    logs = logs.filter(l => l.action === logActionFilter.value)
+  }
+  if (logSearch.value) {
+    const q = logSearch.value.toLowerCase()
+    logs = logs.filter(l =>
+      l.user?.toLowerCase().includes(q) ||
+      l.module?.toLowerCase().includes(q) ||
+      l.details?.toLowerCase().includes(q)
+    )
+  }
+  return logs
+})
+
+// Sales Audit Logs (from Settings / Admin)
+const salesAuditLogs = ref([])
+const salesAuditSearch = ref('')
+const salesAuditEmployee = ref('')
+const salesAuditDateFrom = ref('')
+const salesAuditDateTo = ref('')
+const salesAuditLoading = ref(false)
+const salesAuditPage = ref(1)
+const SALES_AUDIT_PER_PAGE = 10
+
+const salesAuditTotalPages = computed(() => Math.max(1, Math.ceil(salesAuditLogs.value.length / SALES_AUDIT_PER_PAGE)))
+const pagedSalesAuditLogs = computed(() => {
+  const start = (salesAuditPage.value - 1) * SALES_AUDIT_PER_PAGE
+  return salesAuditLogs.value.slice(start, start + SALES_AUDIT_PER_PAGE)
+})
+const salesAuditFrom = computed(() => salesAuditLogs.value.length === 0 ? 0 : (salesAuditPage.value - 1) * SALES_AUDIT_PER_PAGE + 1)
+const salesAuditTo = computed(() => Math.min(salesAuditPage.value * SALES_AUDIT_PER_PAGE, salesAuditLogs.value.length))
 
 // Reports
 const reports = ref([])
@@ -1277,36 +1366,39 @@ const loadForgotPasswordRequests = async () => {
   }
 }
 
-const loadAuditLogs = async (page = 1) => {
+const fetchSalesAuditLogs = async () => {
+  salesAuditLoading.value = true
+  salesAuditPage.value = 1
   try {
-    const params = { page, limit: auditLogsPerPage }
-    if (auditFilterAction.value)   params.action    = auditFilterAction.value
-    if (auditFilterModule.value)   params.module    = auditFilterModule.value
-    if (auditFilterDateFrom.value) params.date_from = auditFilterDateFrom.value
-    if (auditFilterDateTo.value)   params.date_to   = auditFilterDateTo.value
-    if (auditSearch.value)         params.search    = auditSearch.value
-    const response = await api.get('/it/audit-logs', { params })
-    auditLogs.value       = response.data.data.logs        || []
-    auditTotal.value      = response.data.data.total       || 0
-    auditTotalPages.value = response.data.data.total_pages || 1
-    auditPage.value       = page
-    if (response.data.data.modules?.length) auditModules.value = response.data.data.modules
+    const res = await api.get('/admin/audit-logs', {
+      params: {
+        search:    salesAuditSearch.value,
+        employee:  salesAuditEmployee.value,
+        date_from: salesAuditDateFrom.value,
+        date_to:   salesAuditDateTo.value,
+      }
+    })
+    salesAuditLogs.value = res.data.data || []
   } catch (err) {
-    console.error('Failed to load audit logs:', err)
-    showError('Failed to load audit logs')
+    console.error('Failed to load sales audit logs:', err)
+    showError('Failed to load sales audit logs')
+  } finally {
+    salesAuditLoading.value = false
   }
 }
 
-const prevAuditPage = () => { if (auditPage.value > 1) loadAuditLogs(auditPage.value - 1) }
-const nextAuditPage = () => { if (auditPage.value < auditTotalPages.value) loadAuditLogs(auditPage.value + 1) }
+let _salesAuditDebounce = null
+const debouncedFetchSalesAuditLogs = () => {
+  clearTimeout(_salesAuditDebounce)
+  _salesAuditDebounce = setTimeout(fetchSalesAuditLogs, 350)
+}
 
-const resetAuditFilters = () => {
-  auditFilterAction.value   = ''
-  auditFilterModule.value   = ''
-  auditFilterDateFrom.value = ''
-  auditFilterDateTo.value   = ''
-  auditSearch.value         = ''
-  loadAuditLogs(1)
+const clearSalesAuditFilters = () => {
+  salesAuditSearch.value   = ''
+  salesAuditEmployee.value = ''
+  salesAuditDateFrom.value = ''
+  salesAuditDateTo.value   = ''
+  fetchSalesAuditLogs()
 }
 
 const loadReports = async () => {
@@ -1336,10 +1428,10 @@ const loadAll = async () => {
   try {
     await Promise.all([
       loadSystemLogs(),
-      loadAuditLogs(),
       loadStaffRates(),
       loadForgotPasswordRequests(),
       loadReports(),
+      fetchSalesAuditLogs(),
     ])
     lastUpdated.value = new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' })
     showSuccess('Dashboard data refreshed successfully')
@@ -1409,8 +1501,14 @@ const submitPasswordReset = async () => {
   }
 }
 
+const showBackToTop = ref(false)
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
 onMounted(async () => {
   await loadAll()
+  window.addEventListener('scroll', () => {
+    showBackToTop.value = window.scrollY > 400
+  })
 })
 </script>
 
@@ -1457,6 +1555,14 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 </style>
 

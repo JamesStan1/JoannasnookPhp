@@ -223,7 +223,7 @@
                 <option value="">Select role</option>
                 <option value="admin">Admin</option>
                 <option value="manager">Manager</option>
-                <option value="it">IT</option>
+                <option v-if="isIT" value="it">IT</option>
                 <option value="front_desk">Front Desk</option>
                 <option value="housekeeping">Housekeeping</option>
                 <option value="chef">Chef</option>
