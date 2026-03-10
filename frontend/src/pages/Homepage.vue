@@ -916,13 +916,13 @@
             <div class="bg-white border border-gray-100 shadow p-6">
               <h3 class="text-[11px] tracking-[0.35em] text-gray-400 uppercase mb-4">Follow Us</h3>
               <div class="flex gap-3">
-                <a href="#" target="_blank"
+                <a href="https://www.facebook.com/joannasnook.inquire" target="_blank" rel="noopener noreferrer"
                   class="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center hover:bg-green-800 transition shadow">
                   <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
                   </svg>
                 </a>
-                <a href="#" target="_blank"
+                <a href="https://www.instagram.com/joannasnookofficial/" target="_blank" rel="noopener noreferrer"
                   class="w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition shadow"
                   style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
