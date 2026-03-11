@@ -13,7 +13,8 @@ ALTER TABLE orders
 -- Add missing columns to reservations table
 ALTER TABLE reservations
   ADD COLUMN IF NOT EXISTS payment_option VARCHAR(50) NOT NULL DEFAULT 'full_payment' AFTER down_payment,
-  ADD COLUMN IF NOT EXISTS reference_number VARCHAR(100) NULL AFTER payment_option;
+  ADD COLUMN IF NOT EXISTS reference_number VARCHAR(100) NULL AFTER payment_option,
+  ADD COLUMN IF NOT EXISTS remarks TEXT NULL AFTER special_requests;
 
 -- Add missing columns to pending_reservations table (required by approve/reject endpoints)
 ALTER TABLE pending_reservations

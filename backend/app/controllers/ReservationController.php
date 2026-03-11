@@ -293,24 +293,31 @@ class ReservationController {
         if (!empty($data['guest_id'])) {
             $guestId = $data['guest_id'];
         } else {
-            // Create a temporary guest user
-            $guestData = [
-                'name'       => $data['guest_name'],
-                'email'      => $data['guest_email'] ?? ('walkin_' . time() . '@srcbhotel.com'),
-                'password'   => password_hash('walkin' . time(), PASSWORD_DEFAULT),
-                'role'       => 'guest',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-            $guestId = $userModel->create($guestData);
+            // Try to find an existing user by email first to avoid duplicate-key errors
+            $email = !empty($data['guest_email']) ? $data['guest_email'] : null;
+            $existingGuest = $email ? $userModel->findByEmail($email) : null;
+
+            if ($existingGuest) {
+                $guestId = $existingGuest['id'];
+            } else {
+                // Create a new guest user
+                $guestData = [
+                    'name'       => $data['guest_name'],
+                    'email'      => $email ?? ('walkin_' . time() . '@srcbhotel.com'),
+                    'password'   => password_hash('walkin' . time(), PASSWORD_DEFAULT),
+                    'role'       => 'guest',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+                $guestId = $userModel->create($guestData);
+            }
         }
 
-        // Update guest profile with extra fields
-        $userModel->update($guestId, array_filter([
-            'contact_number' => $data['contact_number'] ?? null,
-            'address'        => $data['address'] ?? null,
-            'nationality'    => $data['nationality'] ?? null,
-        ]));
+        // Update guest profile with extra fields that exist on the users table
+        $profileUpdate = array_filter(['phone' => $data['contact_number'] ?? null]);
+        if (!empty($profileUpdate)) {
+            $userModel->update($guestId, $profileUpdate);
+        }
 
         $reservationData = [
             'guest_id'         => $guestId,
@@ -350,7 +357,7 @@ class ReservationController {
 
         $db = \Database::connect();
         $like = '%' . $q . '%';
-        $stmt = $db->prepare("SELECT id, name, email, contact_number, address, nationality FROM users WHERE role = 'guest' AND active = 1 AND (name LIKE :n OR email LIKE :e OR contact_number LIKE :p) LIMIT 10");
+        $stmt = $db->prepare("SELECT id, name, email, phone AS contact_number FROM users WHERE role = 'guest' AND active = 1 AND (name LIKE :n OR email LIKE :e OR phone LIKE :p) LIMIT 10");
         $stmt->execute([':n' => $like, ':e' => $like, ':p' => $like]);
         return response($stmt->fetchAll(), 200);
     }

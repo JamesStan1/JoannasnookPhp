@@ -388,7 +388,7 @@
               </div>
             </div>
           </div>
-          <div v-if="approveTarget.reservation_type === 'room'">
+          <div>
             <p class="text-xs font-medium text-gray-600 mb-2">Payment Option</p>
             <div class="grid grid-cols-2 gap-2">
               <div @click="approveForm.payment_option = 'full_payment'"
@@ -398,9 +398,9 @@
                   <div :class="approveForm.payment_option === 'full_payment' ? 'border-blue-500 bg-green-600' : 'border-gray-300'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                     <svg v-if="approveForm.payment_option === 'full_payment'" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                   </div>
-                  <span class="text-xs font-semibold text-gray-800">Full at Checkout</span>
+                  <span class="text-xs font-semibold text-gray-800">{{ approveTarget.reservation_type === 'event' ? 'Full After Event' : 'Full at Checkout' }}</span>
                 </div>
-                <p class="text-xs text-gray-400 ml-6">Pay total upon checkout</p>
+                <p class="text-xs text-gray-400 ml-6">{{ approveTarget.reservation_type === 'event' ? 'Pay total after the event' : 'Pay total upon checkout' }}</p>
               </div>
               <div @click="approveForm.payment_option = 'downpayment'"
                 :class="approveForm.payment_option === 'downpayment' ? 'border-blue-500 bg-green-50' : 'border-gray-200'"
@@ -409,18 +409,12 @@
                   <div :class="approveForm.payment_option === 'downpayment' ? 'border-blue-500 bg-green-600' : 'border-gray-300'" class="w-4 h-4 rounded-full border-2 flex items-center justify-center">
                     <svg v-if="approveForm.payment_option === 'downpayment'" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                   </div>
-                  <span class="text-xs font-semibold text-gray-800">Downpayment</span>
+                  <span class="text-xs font-semibold text-gray-800">Down Payment</span>
                 </div>
                 <p class="text-xs text-gray-400 ml-6">Partial now, rest later</p>
               </div>
             </div>
             <div v-if="approveForm.payment_option === 'downpayment'" class="mt-3 space-y-3">
-              <!-- Amount -->
-              <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Downpayment Amount (&#x20B1;)</label>
-                <input v-model="approveForm.down_payment" type="number" min="0" step="0.01" placeholder="0.00"
-                  class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
-              </div>
               <!-- Payment Method -->
               <div>
                 <p class="text-xs font-medium text-gray-600 mb-1.5">Payment Method</p>
@@ -438,7 +432,7 @@
                       </div>
                     </div>
                   </div>
-                  <div @click="approveForm.payment_method = 'online'"
+                  <div @click="approveForm.payment_method = 'online'; approveForm.online_payment_type = ''; approveForm.payment_ref = ''"
                     :class="approveForm.payment_method === 'online' ? 'border-blue-500 bg-green-50' : 'border-gray-200'"
                     class="border-2 rounded-xl p-3 cursor-pointer transition">
                     <div class="flex items-center gap-2">
@@ -446,18 +440,24 @@
                         <svg v-if="approveForm.payment_method === 'online'" class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                       </div>
                       <div>
-                        <p class="text-xs font-semibold text-gray-800">Online</p>
+                        <p class="text-xs font-semibold text-gray-800">Online Payment</p>
                         <p class="text-xs text-gray-400">GCash / Bank</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <!-- Cash: amount paid -->
+              <div v-if="approveForm.payment_method === 'cash'">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Amount Paid (&#x20B1;) <span class="text-red-400">*</span></label>
+                <input v-model="approveForm.down_payment" type="number" min="0" step="0.01" placeholder="0.00"
+                  class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+              </div>
               <!-- Online sub-options -->
               <div v-if="approveForm.payment_method === 'online'" class="space-y-2">
                 <p class="text-xs font-medium text-gray-600 mb-1.5">Online Payment Type</p>
                 <div class="grid grid-cols-2 gap-2">
-                  <div @click="approveForm.online_payment_type = 'gcash'"
+                  <div @click="approveForm.online_payment_type = 'gcash'; approveForm.payment_ref = ''"
                     :class="approveForm.online_payment_type === 'gcash' ? 'border-blue-500 bg-green-50' : 'border-gray-200'"
                     class="border-2 rounded-xl p-3 cursor-pointer transition">
                     <div class="flex items-center gap-2">
@@ -470,7 +470,7 @@
                       </div>
                     </div>
                   </div>
-                  <div @click="approveForm.online_payment_type = 'bank_transfer'"
+                  <div @click="approveForm.online_payment_type = 'bank_transfer'; approveForm.payment_ref = ''"
                     :class="approveForm.online_payment_type === 'bank_transfer' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'"
                     class="border-2 rounded-xl p-3 cursor-pointer transition">
                     <div class="flex items-center gap-2">
@@ -484,15 +484,22 @@
                     </div>
                   </div>
                 </div>
-                <!-- Reference Number -->
-                <div v-if="approveForm.online_payment_type">
-                  <label class="block text-xs font-medium text-gray-600 mb-1">
-                    {{ approveForm.online_payment_type === 'gcash' ? 'GCash' : 'Bank Transfer' }} Reference Number
-                    <span class="text-red-400">*</span>
-                  </label>
-                  <input v-model="approveForm.payment_ref" type="text"
-                    :placeholder="approveForm.online_payment_type === 'gcash' ? 'e.g. 123456789012' : 'e.g. TRF-20260227-001'"
-                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 font-mono" />
+                <!-- Amount + Reference Number -->
+                <div v-if="approveForm.online_payment_type" class="space-y-2">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Amount Paid (&#x20B1;) <span class="text-red-400">*</span></label>
+                    <input v-model="approveForm.down_payment" type="number" min="0" step="0.01" placeholder="0.00"
+                      class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                      {{ approveForm.online_payment_type === 'gcash' ? 'GCash' : 'Bank Transfer' }} Reference Number
+                      <span class="text-red-400">*</span>
+                    </label>
+                    <input v-model="approveForm.payment_ref" type="text"
+                      :placeholder="approveForm.online_payment_type === 'gcash' ? 'e.g. 123456789012' : 'e.g. TRF-20260227-001'"
+                      class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 font-mono" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -835,19 +842,33 @@ async function doApprove() {
   try {
     if (approveForm.value.payment_option === 'downpayment') {
       if (!approveForm.value.payment_method) {
-        toast.warning('Please select a payment method for the downpayment.')
+        toast.warning('Please select a payment method for the down payment.')
         approving.value = false
         return
+      }
+      if (approveForm.value.payment_method === 'cash') {
+        if (!approveForm.value.down_payment || Number(approveForm.value.down_payment) <= 0) {
+          toast.warning('Please enter the amount paid.')
+          approving.value = false
+          return
+        }
       }
       if (approveForm.value.payment_method === 'online' && !approveForm.value.online_payment_type) {
         toast.warning('Please select GCash or Bank Transfer.')
         approving.value = false
         return
       }
-      if (approveForm.value.payment_method === 'online' && approveForm.value.online_payment_type && !approveForm.value.payment_ref.trim()) {
-        toast.warning('Please enter the reference number for the online payment.')
-        approving.value = false
-        return
+      if (approveForm.value.payment_method === 'online' && approveForm.value.online_payment_type) {
+        if (!approveForm.value.down_payment || Number(approveForm.value.down_payment) <= 0) {
+          toast.warning('Please enter the amount paid.')
+          approving.value = false
+          return
+        }
+        if (!approveForm.value.payment_ref.trim()) {
+          toast.warning('Please enter the reference number for the online payment.')
+          approving.value = false
+          return
+        }
       }
     }
     const res = await api.put(`/pending-reservations/${approveTarget.value.id}/approve`, {

@@ -251,6 +251,7 @@ $router->get('/api/events/stats', 'EventController', 'getStats');
 $router->get('/api/events/booked-dates', 'EventController', 'getBookedDates');
 $router->get('/api/events/by-date', 'EventController', 'getByDate');
 $router->get('/api/events/archived', 'EventController', 'getArchived');
+$router->get('/api/events/check-conflict', 'EventController', 'checkConflict');
 $router->get('/api/events', 'EventController', 'getAll');
 $router->post('/api/events', 'EventController', 'create');
 $router->get('/api/events/{id}', 'EventController', 'getById');

@@ -107,6 +107,29 @@ class Event extends BaseModel {
         return $stmt->fetchAll();
     }
 
+    /**
+     * Check whether a non-cancelled, non-deleted event already occupies the
+     * given date + time slot.  Pass $excludeId when editing an existing event
+     * so the event being edited does not conflict with itself.
+     */
+    public function hasConflict($date, $time, $excludeId = null) {
+        $sql = "SELECT id FROM {$this->table}
+                WHERE event_date = ?
+                  AND event_time = ?
+                  AND status != 'cancelled'
+                  AND deleted_at IS NULL";
+        $params = [$date, $time];
+
+        if ($excludeId !== null) {
+            $sql .= ' AND id != ?';
+            $params[] = $excludeId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (bool)$stmt->fetch();
+    }
+
     public function softDelete($id) {
         $stmt = $this->db->prepare("UPDATE {$this->table} SET deleted_at = ? WHERE id = ?");
         return $stmt->execute([date('Y-m-d H:i:s'), $id]);

@@ -93,7 +93,7 @@
         <div class="mt-8 pt-6 border-t border-gray-100 text-center">
           <p class="text-sm text-gray-600 font-light">
             Don't have an account?
-            <a href="mailto:admin@srcbhotel.com" class="text-green-800 hover:text-amber-700 font-medium transition">Contact administrator</a>
+            <button type="button" @click="showForgotModal = true" class="text-green-800 hover:text-amber-700 font-medium transition">Contact administrator</button>
           </p>
         </div>
       </div>

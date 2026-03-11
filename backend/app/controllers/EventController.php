@@ -62,6 +62,20 @@ class EventController {
         return response($event, 200);
     }
 
+    public function checkConflict() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager', 'front_desk']);
+
+        $date      = $_GET['date']       ?? '';
+        $time      = $_GET['time']       ?? '';
+        $excludeId = isset($_GET['exclude_id']) ? (int)$_GET['exclude_id'] : null;
+
+        if (!$date || !$time) return error('date and time are required', 400);
+
+        $conflict = $this->eventModel->hasConflict($date, $time, $excludeId);
+        return response(['conflict' => $conflict], 200);
+    }
+
     public function create() {
         $user = \App\Middleware\AuthMiddleware::handle();
         \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager', 'front_desk']);
@@ -72,6 +86,11 @@ class EventController {
         $required = ['event_type', 'client_name', 'event_date', 'event_time', 'number_of_guests'];
         foreach ($required as $field) {
             if (empty($data[$field])) return error("Field '$field' is required", 400);
+        }
+
+        // Duplicate date+time check
+        if ($this->eventModel->hasConflict($data['event_date'], $data['event_time'])) {
+            return error('This date and time slot is already booked by another customer. Please choose a different schedule.', 409);
         }
 
         $pricePerHead = (float)($data['price_per_head'] ?? 0);
@@ -134,6 +153,13 @@ class EventController {
         $guests       = isset($data['number_of_guests']) ? (int)$data['number_of_guests']   : (int)$event['number_of_guests'];
         $totalAmount  = isset($data['total_amount'])     ? (float)$data['total_amount']      : $pricePerHead * $guests;
         $downPayment  = isset($data['down_payment'])     ? (float)$data['down_payment']      : (float)$event['down_payment'];
+
+        // Duplicate date+time check (exclude the event being updated)
+        $newDate = $data['event_date'] ?? $event['event_date'];
+        $newTime = $data['event_time'] ?? $event['event_time'];
+        if ($this->eventModel->hasConflict($newDate, $newTime, (int)$id)) {
+            return error('This date and time slot is already booked by another customer. Please choose a different schedule.', 409);
+        }
 
         $updateData = [
             'event_name'       => trim($data['event_name']     ?? $event['event_name']    ?? ''),

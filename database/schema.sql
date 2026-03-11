@@ -34,8 +34,10 @@ CREATE TABLE IF NOT EXISTS rooms (
     status ENUM('available', 'occupied', 'dirty', 'maintenance', 'reserved') DEFAULT 'available',
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
+    deleted_at DATETIME NULL DEFAULT NULL,         -- Soft delete
     INDEX idx_status (status),
-    INDEX idx_room_number (room_number)
+    INDEX idx_room_number (room_number),
+    INDEX idx_rooms_deleted_at (deleted_at)
 );
 
 -- Reservations table
@@ -47,6 +49,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     check_out_date DATE NOT NULL,
     number_of_guests INT DEFAULT 1,
     special_requests TEXT,
+    remarks TEXT NULL,
     down_payment DECIMAL(10, 2) DEFAULT 0,
     payment_option VARCHAR(50) NOT NULL DEFAULT 'full_payment', -- full_payment or down_payment
     reference_number VARCHAR(100) NULL,            -- GCash/Bank Transfer reference
@@ -351,21 +354,31 @@ CREATE TABLE IF NOT EXISTS events (
 -- Pending Reservations table (online/walk-in requests awaiting approval)
 CREATE TABLE IF NOT EXISTS pending_reservations (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    reference_number VARCHAR(100) NULL,            -- Auto-generated PR-XXXXXXXX reference
     reservation_type ENUM('room', 'event') DEFAULT 'room',
     guest_name VARCHAR(255) NOT NULL,
     guest_email VARCHAR(255),
     guest_contact VARCHAR(50),
+    guest_address VARCHAR(255) NULL,
+    guest_country VARCHAR(100) NULL,
     room_id INT NULL,
     check_in_date DATE NULL,
     check_out_date DATE NULL,
     number_of_guests INT DEFAULT 1,
+    event_name VARCHAR(255) NULL,
+    event_type VARCHAR(100) NULL,
     special_requests TEXT,
+    remarks TEXT NULL,
     event_package_id INT NULL,
+    buffet_set VARCHAR(100) NULL,
+    supervisor VARCHAR(255) NULL,
+    selected_foods TEXT NULL,
     event_date DATE NULL,
     event_time TIME NULL,
     venue VARCHAR(255) NULL,
     pax INT DEFAULT 1,
     notes TEXT,
+    estimated_total DECIMAL(10,2) NOT NULL DEFAULT 0,
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     payment_option VARCHAR(50) NULL,               -- full_payment or down_payment
     down_payment DECIMAL(10,2) DEFAULT 0,

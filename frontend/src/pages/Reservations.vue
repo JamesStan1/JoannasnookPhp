@@ -449,16 +449,28 @@
 
         <form @submit.prevent="submitWalkIn" class="p-5 space-y-4 overflow-y-auto flex-1">
 
-          <!-- Select Package (Room) -->
+          <!-- Select Available Room -->
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Select Rooms</label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Select Available Room <span class="text-red-500">*</span></label>
             <select v-model="walkInForm.room_id" required
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-              <option value="">Select Rooms</option>
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+              <option value="" disabled>-- Select a room --</option>
               <option v-for="r in availableRooms" :key="r.id" :value="r.id">
-                Room {{ r.room_number }} — {{ r.type }} (₱{{ formatMoney(r.price) }}/night)
+                Room {{ r.room_number }} — {{ r.type }} — ✓ Available (₱{{ formatMoney(r.price) }}/night)
               </option>
             </select>
+          </div>
+
+          <!-- Room Preview Card -->
+          <div v-if="walkInRoom" class="flex gap-3 bg-green-50 border border-green-100 rounded-xl p-3">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-amber-700">Room {{ walkInRoom.room_number }} — {{ walkInRoom.type }}</p>
+              <p class="text-xs text-gray-500 font-light leading-relaxed">{{ walkInRoom.description || 'Comfortable room with modern amenities.' }}</p>
+              <div class="flex justify-between items-center mt-1">
+                <span class="text-xs text-gray-500">Capacity: {{ walkInRoom.capacity }} guests</span>
+                <span class="text-sm font-bold text-green-800">₱{{ formatMoney(walkInRoom.price) }}/night</span>
+              </div>
+            </div>
           </div>
 
           <!-- Returning Customer -->
@@ -470,8 +482,8 @@
             </div>
             <div class="flex gap-2">
               <input v-model="walkInGuestSearch" type="text"
-                placeholder="Search by name, email, or phone number"
-                class="flex-1 border border-green-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                placeholder="Search by email or phone number"
+                class="flex-1 border border-green-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
               <button type="button" @click="searchGuest"
                 class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg transition">Search</button>
             </div>
@@ -489,73 +501,71 @@
           <!-- Name + Email -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Customer Name *</label>
-              <input v-model="walkInForm.guest_name" type="text" required placeholder="Customer Name"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <label class="block text-xs font-medium text-gray-600 mb-1">Customer Name <span class="text-red-500">*</span></label>
+              <input v-model="walkInForm.guest_name" type="text" required placeholder="Full name"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Email *</label>
-              <input v-model="walkInForm.guest_email" type="email" required placeholder="Email"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <label class="block text-xs font-medium text-gray-600 mb-1">Email <span class="text-red-500">*</span></label>
+              <input v-model="walkInForm.guest_email" type="email" required placeholder="email@example.com"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
           </div>
 
           <!-- Contact + Address -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Contact Number *</label>
-              <input v-model="walkInForm.contact_number" type="text" required placeholder="Contact Number"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <label class="block text-xs font-medium text-gray-600 mb-1">Contact Number <span class="text-red-500">*</span></label>
+              <input v-model="walkInForm.contact_number" type="text" required placeholder="09XX XXX XXXX"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Address *</label>
-              <input v-model="walkInForm.address" type="text" required placeholder="Address"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <label class="block text-xs font-medium text-gray-600 mb-1">Address <span class="text-red-500">*</span></label>
+              <input v-model="walkInForm.address" type="text" required placeholder="Street, City"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
           </div>
 
-          <!-- Nationality + Additional Guests -->
+          <!-- Country + Additional Guests -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Nationality</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Select Country</label>
               <select v-model="walkInForm.nationality"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">Select Nationality</option>
-                <option>Filipino</option>
-                <option>American</option>
-                <option>British</option>
-                <option>Australian</option>
-                <option>Japanese</option>
-                <option>Korean</option>
-                <option>Chinese</option>
-                <option>Singaporean</option>
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+                <option value="">Select Country</option>
+                <option>Philippines</option>
+                <option>United States</option>
+                <option>Japan</option>
+                <option>South Korea</option>
+                <option>Australia</option>
+                <option>Singapore</option>
                 <option>Other</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Additional Guests</label>
-              <input v-model="walkInForm.number_of_guests" type="number" min="1"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-              <p class="text-xs text-gray-400 mt-0.5">Please choose a room package first</p>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Additional Guests (Max: {{ walkInRoom?.capacity || 0 }})</label>
+              <input v-model="walkInForm.number_of_guests" type="number" min="0" :max="walkInRoom?.capacity || undefined" placeholder="0"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
           </div>
 
           <!-- Check-in + Check-out -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Check-in Date *</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Check-In Date <span class="text-red-500">*</span></label>
               <input v-model="walkInForm.check_in_date" type="date" required :min="today"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Check-out Date *</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Check-Out Date <span class="text-red-500">*</span></label>
               <input v-model="walkInForm.check_out_date" type="date" required :min="walkInForm.check_in_date || today"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
             </div>
           </div>
 
           <!-- ID Upload -->
           <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ID Upload</label>
             <div class="flex items-center gap-2">
               <input type="file" ref="idFileInput" @change="handleIdFile" accept="image/*" class="hidden" />
               <div class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-500 cursor-pointer"
@@ -571,22 +581,25 @@
 
           <!-- Additional Requests -->
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-medium text-gray-600">Additional Requests</label>
-              <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-            </div>
-            <textarea v-model="walkInForm.special_requests" rows="2" placeholder="Additional Requests"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"></textarea>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Additional Requests</label>
+            <textarea v-model="walkInForm.special_requests" rows="3" placeholder="Any special requests..."
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"></textarea>
           </div>
 
           <!-- Remarks -->
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-medium text-gray-600">Remarks</label>
-              <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-            </div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Remarks</label>
             <textarea v-model="walkInForm.remarks" rows="2"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"></textarea>
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"></textarea>
+          </div>
+
+          <!-- Estimated Total -->
+          <div class="bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex justify-between items-center">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Estimated Total</p>
+              <p class="text-xs text-gray-400">{{ walkInNights }} Night{{ walkInNights !== 1 ? 's' : '' }}</p>
+            </div>
+            <p class="text-xl font-bold text-amber-600">₱{{ ((walkInRoom?.price || 0) * walkInNights).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</p>
           </div>
 
           <!-- Payment Options -->
@@ -626,36 +639,61 @@
               <div v-if="walkInForm.payment_option === 'downpayment'" class="mt-3">
                 <label class="block text-xs font-medium text-gray-600 mb-1">Downpayment Amount (₱)</label>
                 <input v-model="walkInForm.down_payment" type="number" min="0" step="0.01" placeholder="0.00"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
               </div>
             </div>
           </div>
 
           <!-- Terms & Conditions -->
-          <div class="border border-yellow-300 bg-yellow-50 rounded-xl p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span class="text-xs font-bold text-yellow-800 uppercase tracking-wide">Terms & Conditions of Stay</span>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Terms and Conditions <span class="text-red-500">*</span></label>
+            <div ref="walkInTermsBoxRef" @scroll="handleWalkInTermsScroll" class="border border-gray-200 rounded-lg p-3 h-32 overflow-y-auto text-xs text-gray-600 leading-relaxed space-y-2 bg-gray-50">
+              <p class="font-semibold text-gray-700">Valid ID Requirement</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>A clear photo or scanned copy of a valid government-issued ID must be presented upon check-in.</li>
+                <li>The reservation name must match the name on the ID.</li>
+                <li>If booking for another person, an authorization letter and their ID must be provided.</li>
+              </ul>
+              <p class="font-semibold text-gray-700">Verification &amp; Confirmation</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>All reservations are subject to management approval and ID verification.</li>
+                <li>Check-in time is 2:00 PM. Check-out time is 12:00 PM.</li>
+                <li>Late check-out may incur additional charges subject to room availability.</li>
+              </ul>
+              <p class="font-semibold text-gray-700">House Rules</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Proper courtesy must be observed at all times. The privacy of other guests must be respected.</li>
+                <li>Money, valuables, and important documents must be kept in the safety deposit box. The hotel shall not be liable for items lost.</li>
+                <li>Gambling and possession of illegal drugs are not allowed within hotel premises.</li>
+                <li>Smoking inside the room is not allowed. A fine of ₱5,000.00 for fumigation shall be charged for non-compliance.</li>
+              </ul>
+              <p class="font-semibold text-gray-700">Cancellation Policy</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Cancellations made 48 hours before check-in are eligible for a full refund.</li>
+                <li>Cancellations made within 24 hours are non-refundable.</li>
+              </ul>
             </div>
-            <ul class="text-xs text-yellow-900 space-y-1 list-disc list-inside leading-relaxed">
-              <li>A valid identification card must be presented upon check-in.</li>
-              <li>All guests arriving must register with the Hotels Front Desk. Check-in time is 2:00 p.m. and check-out time is 12:00 noon.</li>
-              <li>Should you wish to stay beyond the designated check-out time, please inform the Front Desk. Early check-in and check-out is subject to additional charge and room availability.</li>
-              <li>Proper courtesy must be observed at all times. The privacy of other guests must be respected.</li>
-              <li>Money, valuables, and important documents must be kept in the safety deposit box located inside your room. The hotel shall not be liable for items lost in any form.</li>
-              <li>Gambling and possession of illegal drugs are not allowed within the hotel premises.</li>
-              <li>Pets, firearms, and explosives should not be brought out or transferred to another room to avoid unnecessary damages.</li>
-              <li>Amenities are provided for your comfort during your stay. Should you wish to request additional items, please call the Front Desk.</li>
-              <li>Smoking inside the room and bringing food with a strong odor are not allowed. A fine of ₱5,000.00 for fumigation shall be charged for non-compliance.</li>
-              <li>By affixing your signature (whether personally, through an agent, or a representative), you hereby agree to the terms and conditions set forth herein and consent to the collection and processing of your data by the hotel in accordance with the Data Privacy Act and the regulations of the National Privacy Commission (NPC).</li>
-            </ul>
+            <p class="text-xs mt-1" :class="walkInTermsScrolled ? 'text-green-500' : 'text-red-400'">{{ walkInTermsScrolled ? '✓ You have read all the terms. You may now check the boxes below.' : 'Please scroll through and read all Terms and Conditions to enable the checkboxes.' }}</p>
+          </div>
+
+          <!-- Required Agreements -->
+          <div class="space-y-2">
+            <p class="text-xs font-medium text-gray-600">Required Agreements <span class="text-red-500">*</span></p>
+            <label class="flex items-start gap-2" :class="walkInTermsScrolled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'">
+              <input type="checkbox" v-model="walkInAgreedPrivacy" :disabled="!walkInTermsScrolled" class="mt-0.5 rounded accent-green-700 disabled:cursor-not-allowed" />
+              <span class="text-xs text-gray-600">I have read and accept the <span class="text-amber-600 underline">Data Privacy &amp; Policy</span></span>
+            </label>
+            <label class="flex items-start gap-2" :class="walkInTermsScrolled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'">
+              <input type="checkbox" v-model="walkInAgreedTerms" :disabled="!walkInTermsScrolled" class="mt-0.5 rounded accent-green-700 disabled:cursor-not-allowed" />
+              <span class="text-xs text-gray-600">I have read and agree to the <span class="text-amber-600 underline">Terms &amp; Conditions of Stay</span></span>
+            </label>
           </div>
 
           <!-- Buttons -->
           <div class="flex gap-3 justify-end pt-1">
             <button type="button" @click="walkInModal = false"
               class="px-5 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-            <button type="submit" :disabled="walkInSaving"
+            <button type="submit" :disabled="walkInSaving || !walkInAgreedPrivacy || !walkInAgreedTerms"
               class="px-6 py-2 text-sm bg-green-700 text-white rounded-xl hover:bg-green-800 transition disabled:opacity-60 font-medium">
               {{ walkInSaving ? 'Creating...' : 'Create Reservation' }}
             </button>
@@ -825,6 +863,10 @@ const walkInGuestSearch = ref('')
 const guestResults = ref([])
 const idFileInput = ref(null)
 const walkInIdFile = ref(null)
+const walkInTermsBoxRef = ref(null)
+const walkInTermsScrolled = ref(false)
+const walkInAgreedPrivacy = ref(false)
+const walkInAgreedTerms = ref(false)
 const roomModal = ref(false)
 const cancelConfirmRes = ref(null)
 const checkoutBlockedRes = ref(null)
@@ -955,7 +997,17 @@ function openWalkInModal() {
   walkInGuestSearch.value = ''
   guestResults.value = []
   walkInIdFile.value = null
+  walkInTermsScrolled.value = false
+  walkInAgreedPrivacy.value = false
+  walkInAgreedTerms.value = false
   walkInModal.value = true
+}
+
+function handleWalkInTermsScroll(e) {
+  const el = e.target
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) {
+    walkInTermsScrolled.value = true
+  }
 }
 
 async function searchGuest() {

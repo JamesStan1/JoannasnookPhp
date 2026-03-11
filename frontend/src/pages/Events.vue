@@ -343,6 +343,13 @@
               </div>
             </div>
 
+            <!-- Client Name -->
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Client Name: <span class="text-red-500">*</span></label>
+              <input v-model="form.client_name" type="text" placeholder="Full name of client" required
+                class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
+            </div>
+
             <!-- Event Name + Event Type -->
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -407,7 +414,7 @@
               </div>
             </div>
 
-            <!-- Contact Number + Address -->
+            <!-- Contact Number + Email -->
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Contact Number:</label>
@@ -415,8 +422,22 @@
                   class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
               </div>
               <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Email:</label>
+                <input v-model="form.client_email" type="email" placeholder="client@email.com"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
+              </div>
+            </div>
+
+            <!-- Address + Venue -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Address:</label>
                 <input v-model="form.client_address" type="text" placeholder="Customer Address"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Venue:</label>
+                <input v-model="form.venue" type="text" placeholder="e.g. Main Hall"
                   class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
               </div>
             </div>
@@ -457,6 +478,43 @@
               </div>
             </div>
 
+            <!-- Buffet Set -->
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-2">Buffet Set <span class="text-gray-400 font-normal">(optional)</span></label>
+              <div class="grid grid-cols-4 gap-2">
+                <div v-for="s in buffetSets" :key="s.id"
+                  @click="form.selected_set_id = s.id; form.selected_set = s; form.selected_foods = []; if (!form.package_id) form.package_set = s.label"
+                  :class="['border rounded-xl p-2 cursor-pointer transition-all text-center', form.selected_set_id === s.id ? 'border-blue-500 bg-green-50 ring-2 ring-blue-300' : 'border-gray-200 hover:border-green-300']">
+                  <p class="text-xs font-semibold text-gray-700">{{ s.label }}</p>
+                  <p class="text-xs text-amber-600 font-medium mt-0.5">₱{{ s.price.toLocaleString() }}</p>
+                  <p class="text-xs text-gray-400">{{ s.desc }}</p>
+                </div>
+              </div>
+              <!-- Food Picker -->
+              <div v-if="form.selected_set" class="mt-3 border border-green-100 rounded-xl bg-green-50/50 p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-xs font-semibold text-green-800">Select your dishes for {{ form.selected_set.label }}</p>
+                  <span :class="['text-xs font-bold px-2 py-0.5 rounded-full', form.selected_foods.length > Number(form.selected_set.desc.match(/\d+/)[0]) ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-800']">
+                    {{ form.selected_foods.length }} / {{ form.selected_set.desc.match(/\d+/)[0] }} selected
+                  </span>
+                </div>
+                <div v-for="cat in form.selected_set.foods" :key="cat.category" class="mb-3">
+                  <p class="text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">{{ cat.category }}</p>
+                  <div class="grid grid-cols-2 gap-1">
+                    <label v-for="item in cat.items" :key="item" class="flex items-center gap-2 cursor-pointer group">
+                      <input type="checkbox" :value="item" v-model="form.selected_foods"
+                        :disabled="!form.selected_foods.includes(item) && form.selected_foods.length >= Number(form.selected_set.desc.match(/\d+/)[0])"
+                        class="w-3.5 h-3.5 rounded accent-green-700 disabled:opacity-40" />
+                      <span :class="['text-xs', form.selected_foods.includes(item) ? 'text-green-800 font-medium' : 'text-gray-600 group-hover:text-gray-800']">{{ item }}</span>
+                    </label>
+                  </div>
+                </div>
+                <p v-if="form.selected_foods.length >= Number(form.selected_set.desc.match(/\d+/)[0])" class="text-xs text-orange-500 mt-1">
+                  Maximum dishes reached. Deselect a dish to choose a different one.
+                </p>
+              </div>
+            </div>
+
             <!-- Customer ID -->
             <div>
               <label class="block text-xs font-medium text-gray-600 mb-1">Customer ID:</label>
@@ -466,18 +524,7 @@
                   @click="eventIdInput.click()">
                   {{ eventIdFile ? eventIdFile.name : 'Choose File  No file chosen' }}
                 </div>
-                <button type="button" @click="eventIdInput.click()"
-                  class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg transition whitespace-nowrap">Take Photo</button>
               </div>
-            </div>
-
-            <!-- E-Signature -->
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">E-Signature:</label>
-              <button type="button"
-                class="bg-green-700 hover:bg-green-800 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition">
-                E-Signature
-              </button>
             </div>
 
             <!-- Additional Requests -->
@@ -494,6 +541,41 @@
                 class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"></textarea>
             </div>
 
+            <!-- Estimated Total -->
+            <div class="bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex justify-between items-center">
+              <p class="text-xs text-gray-500 font-medium">Estimated Total</p>
+              <p class="text-xl font-bold text-green-800">₱{{ eventFormComputedTotal.toLocaleString(undefined, { minimumFractionDigits: 2 }) }}</p>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Terms and Conditions <span class="text-red-500">*</span></label>
+              <div ref="eventFormTermsBoxRef" @scroll="handleEventFormTermsScroll" class="border border-gray-200 rounded-lg p-3 h-32 overflow-y-auto text-xs text-gray-600 leading-relaxed space-y-2 bg-gray-50">
+                <p class="font-semibold text-gray-700">1. Valid ID Identification Required</p>
+                <p>All guests are required to present a valid government-issued ID upon check-in. The uploaded ID will be used for reservation verification and must match the guest information provided.</p>
+                <p class="font-semibold text-gray-700">2. Identity Verification</p>
+                <p>The management reserves the right to verify the authenticity of submitted identification documents. Failure to provide valid identification may result in cancellation of the reservation without refund.</p>
+                <p class="font-semibold text-gray-700">3. Event Confirmation</p>
+                <p>All event reservations are subject to confirmation by management. The event date and time are subject to venue availability. Cancellations must be made 72 hours before the event date.</p>
+                <p class="font-semibold text-gray-700">4. Payment Terms</p>
+                <p>A down payment is required to secure the reservation. The remaining balance must be settled on or before the event date.</p>
+              </div>
+              <p class="text-xs mt-1" :class="eventFormTermsScrolled ? 'text-green-500' : 'text-red-400'">{{ eventFormTermsScrolled ? '✓ You have read all the terms. You may now check the boxes below.' : 'Please scroll through and read all Terms and Conditions to enable the checkboxes.' }}</p>
+            </div>
+
+            <!-- Required Agreements -->
+            <div class="space-y-2">
+              <p class="text-xs font-medium text-gray-600">Required Agreements <span class="text-red-500">*</span></p>
+              <label class="flex items-start gap-2" :class="eventFormTermsScrolled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'">
+                <input type="checkbox" v-model="eventFormAgreedPrivacy" :disabled="!eventFormTermsScrolled" class="mt-0.5 rounded accent-green-700 disabled:cursor-not-allowed" />
+                <span class="text-xs text-gray-600">I have read and accept the <span class="text-amber-600 underline">Data Privacy &amp; Policy</span></span>
+              </label>
+              <label class="flex items-start gap-2" :class="eventFormTermsScrolled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'">
+                <input type="checkbox" v-model="eventFormAgreedTerms" :disabled="!eventFormTermsScrolled" class="mt-0.5 rounded accent-green-700 disabled:cursor-not-allowed" />
+                <span class="text-xs text-gray-600">I have read and agree to the <span class="text-amber-600 underline">Terms &amp; Conditions of the Event</span></span>
+              </label>
+            </div>
+
             <p v-if="formError" class="text-sm text-red-500">{{ formError }}</p>
           </div>
         </div>
@@ -501,7 +583,7 @@
         <!-- Footer -->
         <div class="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 shrink-0">
           <button @click="closeModals" class="px-5 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-          <button @click="submitForm" :disabled="saving"
+          <button @click="submitForm" :disabled="saving || !eventFormAgreedPrivacy || !eventFormAgreedTerms"
             class="px-5 py-2 bg-green-700 hover:bg-green-800 text-white rounded-lg text-sm font-medium transition disabled:opacity-50">
             {{ saving ? 'Saving...' : (showEditModal ? 'Save Changes' : 'Create Reservation') }}
           </button>
@@ -1039,15 +1121,83 @@ const eventGuestManual = ref(false)
 const eventIdInput = ref(null)
 const eventIdFile = ref(null)
 
+// T&C agreements for add/edit modal
+const eventFormTermsBoxRef = ref(null)
+const eventFormTermsScrolled = ref(false)
+const eventFormAgreedPrivacy = ref(false)
+const eventFormAgreedTerms = ref(false)
+
+function handleEventFormTermsScroll(e) {
+  const el = e.target
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) {
+    eventFormTermsScrolled.value = true
+  }
+}
+
+// Buffet sets (matching homepage)
+const buffetSets = [
+  {
+    id: 1, label: 'Set A', price: 500, desc: 'Up to 5 dishes',
+    foods: [
+      { category: 'Appetizer',  items: ['Lumpiang Shanghai', 'Spring Rolls'] },
+      { category: 'Main (Meat)', items: ['Chicken Adobo', 'Pork BBQ', 'Lechon Kawali'] },
+      { category: 'Vegetables', items: ['Pinakbet', 'Chopsuey'] },
+      { category: 'Noodles',   items: ['Pansit Bihon'] },
+      { category: 'Dessert',   items: ['Leche Flan', 'Fruit Salad'] },
+    ]
+  },
+  {
+    id: 2, label: 'Set B', price: 650, desc: 'Up to 6 dishes',
+    foods: [
+      { category: 'Appetizer',  items: ['Lumpiang Shanghai', 'Spring Rolls', 'Dynamite Lumpia'] },
+      { category: 'Main (Meat)', items: ['Chicken Adobo', 'Pork BBQ', 'Lechon Kawali', 'Beef Caldereta'] },
+      { category: 'Main (Seafood)', items: ['Grilled Bangus', 'Sweet & Sour Fish'] },
+      { category: 'Vegetables', items: ['Pinakbet', 'Chopsuey', 'Laing'] },
+      { category: 'Noodles',   items: ['Pansit Bihon', 'Pansit Canton'] },
+      { category: 'Dessert',   items: ['Leche Flan', 'Buko Pandan', 'Fruit Salad'] },
+    ]
+  },
+  {
+    id: 3, label: 'Set C', price: 800, desc: 'Up to 7 dishes',
+    foods: [
+      { category: 'Appetizer',  items: ['Lumpiang Shanghai', 'Spring Rolls', 'Dynamite Lumpia', 'Kuchay Dumplings'] },
+      { category: 'Main (Meat)', items: ['Chicken Adobo', 'Pork BBQ', 'Lechon Kawali', 'Beef Caldereta', 'Chicken Inasal', 'Kare-Kare'] },
+      { category: 'Main (Seafood)', items: ['Grilled Bangus', 'Sweet & Sour Fish', 'Sinigang na Hipon'] },
+      { category: 'Vegetables', items: ['Pinakbet', 'Chopsuey', 'Laing'] },
+      { category: 'Pasta/Noodles', items: ['Pansit Bihon', 'Pansit Canton', 'Spaghetti'] },
+      { category: 'Dessert',   items: ['Leche Flan', 'Buko Pandan', 'Halo-Halo', 'Fruit Salad'] },
+    ]
+  },
+  {
+    id: 4, label: 'Set D', price: 950, desc: 'Up to 8 dishes',
+    foods: [
+      { category: 'Appetizer',  items: ['Lumpiang Shanghai', 'Spring Rolls', 'Dynamite Lumpia', 'Kuchay Dumplings'] },
+      { category: 'Main (Meat)', items: ['Chicken Adobo', 'Pork BBQ', 'Lechon Kawali', 'Beef Caldereta', 'Chicken Inasal', 'Kare-Kare', 'Crispy Pata'] },
+      { category: 'Main (Seafood)', items: ['Grilled Bangus', 'Sweet & Sour Fish', 'Sinigang na Hipon', 'Steamed Fish w/ Tausi'] },
+      { category: 'Vegetables', items: ['Pinakbet', 'Chopsuey', 'Laing', 'Ginisang Gulay'] },
+      { category: 'Pasta/Noodles', items: ['Pansit Bihon', 'Pansit Canton', 'Spaghetti', 'Carbonara'] },
+      { category: 'Dessert',   items: ['Leche Flan', 'Buko Pandan', 'Halo-Halo', 'Fruit Salad', 'Mango Float'] },
+    ]
+  },
+]
+
 // Form
 const defaultForm = () => ({
   event_name: '', event_type: '', client_name: '', client_email: '', client_phone: '',
   client_address: '', event_date: '', event_time: '', number_of_guests: 0,
   additional_guests: 0, booked_by: '', supervisor_id: '', package_id: null,
   venue: '', package_set: '', price_per_head: 0, total_amount: 0, down_payment: 0,
-  status: 'pending', notes: '', remarks: ''
+  status: 'pending', notes: '', remarks: '',
+  selected_set_id: null, selected_set: null, selected_foods: [],
 })
 const form = ref(defaultForm())
+
+const eventFormComputedTotal = computed(() => {
+  const pkgPrice = Number(form.value.price_per_head) || 0
+  const setPrice = form.value.selected_set?.price || 0
+  const guests   = Number(form.value.number_of_guests) || 0
+  return pkgPrice + (setPrice * guests)
+})
 
 // ---- Calendar logic ----
 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -1197,7 +1347,13 @@ function selectPackage(pkg) {
   form.value.package_id = pkg.id
   form.value.package_set = pkg.name
   form.value.price_per_head = pkg.price
-  computeTotal()
+  form.value.number_of_guests = Number(pkg.max_guests) || 0
+  form.value.total_amount = Number(pkg.price) || 0
+  form.value.down_payment = Math.round(form.value.total_amount * 0.30 * 100) / 100
+  // Reset buffet selection when package changes
+  form.value.selected_set_id = null
+  form.value.selected_set = null
+  form.value.selected_foods = []
 }
 
 async function searchEventGuest() {
@@ -1241,6 +1397,9 @@ function closeModals() {
   eventGuestSearch.value = ''
   eventGuestResults.value = []
   eventIdFile.value = null
+  eventFormTermsScrolled.value = false
+  eventFormAgreedPrivacy.value = false
+  eventFormAgreedTerms.value = false
 }
 
 function viewEvent(ev) {
@@ -1270,9 +1429,13 @@ function editEvent(ev) {
     down_payment: ev.down_payment,
     status: ev.status || 'pending',
     notes: ev.notes || '',
-    remarks: ev.remarks || ''
+    remarks: ev.remarks || '',
+    selected_set_id: null, selected_set: null, selected_foods: [],
   }
   editingId.value = ev.id
+  eventFormTermsScrolled.value = false
+  eventFormAgreedPrivacy.value = false
+  eventFormAgreedTerms.value = false
   showEditModal.value = true
 }
 
@@ -1344,22 +1507,49 @@ function confirmStatusChange(ev, newStatus) {
 // ---- Submit ----
 async function submitForm() {
   formError.value = ''
+  if (!form.value.client_name) {
+    formError.value = 'Client name is required.'
+    return
+  }
   if (!form.value.event_type || !form.value.event_date || !form.value.event_time) {
     formError.value = 'Please fill in event type, date and time.'
     return
   }
+  if (!form.value.number_of_guests || Number(form.value.number_of_guests) < 1) {
+    formError.value = 'Number of guests must be at least 1.'
+    return
+  }
+
+  // Duplicate date+time check before submitting
+  try {
+    const excludeParam = showEditModal.value && editingId.value ? `&exclude_id=${editingId.value}` : ''
+    const conflictRes = await api.get(`/events/check-conflict?date=${form.value.event_date}&time=${form.value.event_time}${excludeParam}`)
+    if (conflictRes.data?.data?.conflict) {
+      formError.value = 'This date and time slot is already booked by another customer. Please choose a different schedule.'
+      return
+    }
+  } catch {
+    // If the check endpoint fails, let the server-side validation handle it
+  }
+
   saving.value = true
   try {
+    const payload = {
+      ...form.value,
+      total_amount: eventFormComputedTotal.value,
+      buffet_set: form.value.selected_set?.label || null,
+      selected_foods: form.value.selected_foods,
+    }
     if (showEditModal.value) {
-      await api.put(`/events/${editingId.value}`, form.value)
+      await api.put(`/events/${editingId.value}`, payload)
     } else {
-      await api.post('/events', form.value)
+      await api.post('/events', payload)
     }
     toast.success(showEditModal.value ? 'Event updated successfully' : 'Event created successfully')
     closeModals()
     await refresh()
   } catch (e) {
-    formError.value = e.response?.data?.error || 'Failed to save. Please try again.'
+    formError.value = e.response?.data?.message || e.response?.data?.error || 'Failed to save. Please try again.'
   } finally {
     saving.value = false
   }
