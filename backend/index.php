@@ -41,6 +41,14 @@ if (is_dir(__DIR__ . '/backend/app')) {
     $APP_ROOT = __DIR__ . '/..';
 }
 
+// Define uploads base path (used by controllers for file uploads).
+// On Hostinger: APP_ROOT/uploads/  — On local dev: APP_ROOT/public/uploads/
+if (!defined('UPLOADS_BASE_PATH')) {
+    $_uploadsCandidate = $APP_ROOT . '/uploads/';
+    $_uploadsFallback  = $APP_ROOT . '/public/uploads/';
+    define('UPLOADS_BASE_PATH', is_dir($_uploadsCandidate) ? $_uploadsCandidate : $_uploadsFallback);
+}
+
 // Load environment variables early so FRONTEND_URL is available for CORS headers.
 if (file_exists($APP_ROOT . '/.env')) {
     $dotenv = parse_ini_file($APP_ROOT . '/.env');

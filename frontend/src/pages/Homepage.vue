@@ -1499,8 +1499,12 @@ function getPackageInclusions(name, description) {
   return base
 }
 
-// Derive the backend base URL from the same env var used by the API service
-const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '')
+// Derive the backend base URL from the same env var used by the API service.
+// When VITE_API_URL is a relative path (e.g. /api on production), keep it as-is
+// so that image URLs resolve to /api/uploads/... correctly.
+// When it is an absolute http URL (local dev), strip the trailing /api segment.
+const _apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+const BACKEND_URL = _apiUrl.startsWith('http') ? _apiUrl.replace(/\/api$/, '') : _apiUrl
 
 function mapRoom(r) {
   const fallbackImages = getRoomImages(r.type)
