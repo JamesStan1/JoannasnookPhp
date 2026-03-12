@@ -297,6 +297,11 @@ class ReservationController {
             $email = !empty($data['guest_email']) ? $data['guest_email'] : null;
             $existingGuest = $email ? $userModel->findByEmail($email) : null;
 
+            // Reject if the email belongs to a staff account
+            if ($existingGuest && $existingGuest['role'] !== 'guest') {
+                return error('This email address belongs to a staff account and cannot be used for a guest reservation.', 422);
+            }
+
             if ($existingGuest) {
                 $guestId = $existingGuest['id'];
             } else {

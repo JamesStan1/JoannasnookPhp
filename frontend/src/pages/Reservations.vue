@@ -508,7 +508,10 @@
             <div>
               <label class="block text-xs font-medium text-gray-600 mb-1">Email <span class="text-red-500">*</span></label>
               <input v-model="walkInForm.guest_email" type="email" required placeholder="email@example.com"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
+                :class="walkInEmailError ? 'border-red-400 focus:ring-red-300' : 'border-gray-200 focus:ring-green-400'"
+                class="w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:ring-2"
+                @input="walkInEmailError = ''"/>
+              <p v-if="walkInEmailError" class="text-xs text-red-500 mt-1">{{ walkInEmailError }}</p>
             </div>
           </div>
 
@@ -573,9 +576,20 @@
                 {{ walkInIdFile ? walkInIdFile.name : 'Choose File   No file chosen' }}
               </div>
               <button type="button" @click="idFileInput.click()"
-                class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg transition whitespace-nowrap">
+                class="border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm px-3 py-2 rounded-lg transition whitespace-nowrap">
+                Browse
+              </button>
+              <button type="button" @click="openCameraModal"
+                class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-2 rounded-lg transition whitespace-nowrap flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
                 Capture ID
               </button>
+            </div>
+            <!-- Captured image preview -->
+            <div v-if="capturedIdPreview" class="mt-2 relative inline-block">
+              <img :src="capturedIdPreview" class="h-20 rounded-lg border border-green-200 object-cover" />
+              <button type="button" @click="capturedIdPreview = null; walkInIdFile = null"
+                class="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button>
             </div>
           </div>
 
@@ -702,6 +716,39 @@
       </div>
     </div>
 
+    <!-- ====== CAMERA CAPTURE MODAL ====== -->
+    <div v-if="cameraModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h3 class="text-base font-semibold text-gray-800">Capture ID</h3>
+          <button type="button" @click="closeCameraModal" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="relative bg-black rounded-xl overflow-hidden" style="aspect-ratio:4/3">
+            <video ref="cameraVideoRef" autoplay playsinline muted class="w-full h-full object-cover"></video>
+            <canvas ref="cameraCanvasRef" class="hidden"></canvas>
+            <div v-if="cameraError" class="absolute inset-0 flex flex-col items-center justify-center text-white text-sm text-center px-4">
+              <svg class="w-10 h-10 mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+              {{ cameraError }}
+            </div>
+          </div>
+          <div class="flex gap-3 justify-center">
+            <button type="button" @click="snapPhoto"
+              class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="13" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+              Take Photo
+            </button>
+            <button type="button" @click="closeCameraModal"
+              class="border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2.5 rounded-lg text-sm transition">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ====== ADD/EDIT ROOM MODAL ====== -->
     <div v-if="roomModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
@@ -822,7 +869,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import { useToastStore } from '../stores/toast'
@@ -863,6 +910,12 @@ const walkInGuestSearch = ref('')
 const guestResults = ref([])
 const idFileInput = ref(null)
 const walkInIdFile = ref(null)
+const capturedIdPreview = ref(null)
+const cameraModal = ref(false)
+const cameraVideoRef = ref(null)
+const cameraCanvasRef = ref(null)
+const cameraStream = ref(null)
+const cameraError = ref('')
 const walkInTermsBoxRef = ref(null)
 const walkInTermsScrolled = ref(false)
 const walkInAgreedPrivacy = ref(false)
@@ -873,6 +926,7 @@ const checkoutBlockedRes = ref(null)
 const selectedRes = ref(null)
 const editSaving = ref(false)
 const walkInSaving    = ref(false)
+const walkInEmailError = ref('')
 const walkInResult    = ref(null)
 const walkInPrintModal = ref(false)
 const roomSaving = ref(false)
@@ -997,7 +1051,8 @@ function openWalkInModal() {
   walkInGuestSearch.value = ''
   guestResults.value = []
   walkInIdFile.value = null
-  walkInTermsScrolled.value = false
+  capturedIdPreview.value = null
+  walkInEmailError.value = ''
   walkInAgreedPrivacy.value = false
   walkInAgreedTerms.value = false
   walkInModal.value = true
@@ -1031,9 +1086,49 @@ function fillGuest(g) {
 
 function handleIdFile(e) {
   walkInIdFile.value = e.target.files[0] || null
+  capturedIdPreview.value = null
+}
+
+async function openCameraModal() {
+  cameraError.value = ''
+  cameraModal.value = true
+  await nextTick()
+  try {
+    cameraStream.value = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    if (cameraVideoRef.value) {
+      cameraVideoRef.value.srcObject = cameraStream.value
+    }
+  } catch (err) {
+    cameraError.value = 'Camera access denied or not available. Please allow camera permissions and try again.'
+  }
+}
+
+function closeCameraModal() {
+  if (cameraStream.value) {
+    cameraStream.value.getTracks().forEach(t => t.stop())
+    cameraStream.value = null
+  }
+  cameraModal.value = false
+}
+
+function snapPhoto() {
+  const video = cameraVideoRef.value
+  const canvas = cameraCanvasRef.value
+  if (!video || !canvas) return
+  canvas.width = video.videoWidth || 640
+  canvas.height = video.videoHeight || 480
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
+  capturedIdPreview.value = dataUrl
+  // Convert dataURL to File so upload still works
+  canvas.toBlob(blob => {
+    if (blob) walkInIdFile.value = new File([blob], 'captured_id.jpg', { type: 'image/jpeg' })
+  }, 'image/jpeg', 0.9)
+  closeCameraModal()
 }
 
 async function submitWalkIn() {
+  walkInEmailError.value = ''
   walkInSaving.value = true
   try {
     const res = await api.post('/admin/reservations/walk-in', walkInForm.value)
@@ -1045,7 +1140,14 @@ async function submitWalkIn() {
     await fetchRooms()
     walkInResult.value = newRes
     walkInPrintModal.value = true
-  } catch (e) { toast.error(e.response?.data?.message ?? 'Error creating reservation') } finally { walkInSaving.value = false }
+  } catch (e) {
+    const msg = e.response?.data?.message ?? e.response?.data?.error ?? 'Error creating reservation'
+    if (e.response?.status === 422 && msg.toLowerCase().includes('staff')) {
+      walkInEmailError.value = msg
+    } else {
+      toast.error(msg)
+    }
+  } finally { walkInSaving.value = false }
 }
 
 function openAddRoomModal() { editingRoom.value = null; roomForm.value = { capacity: 2 }; roomModal.value = true }

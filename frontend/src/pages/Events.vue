@@ -483,7 +483,7 @@
               <label class="block text-xs font-medium text-gray-600 mb-2">Buffet Set <span class="text-gray-400 font-normal">(optional)</span></label>
               <div class="grid grid-cols-4 gap-2">
                 <div v-for="s in buffetSets" :key="s.id"
-                  @click="form.selected_set_id = s.id; form.selected_set = s; form.selected_foods = []; if (!form.package_id) form.package_set = s.label"
+                  @click="form.selected_set_id = s.id; form.selected_set = s; form.selected_foods = []; form.package_set = s.label"
                   :class="['border rounded-xl p-2 cursor-pointer transition-all text-center', form.selected_set_id === s.id ? 'border-blue-500 bg-green-50 ring-2 ring-blue-300' : 'border-gray-200 hover:border-green-300']">
                   <p class="text-xs font-semibold text-gray-700">{{ s.label }}</p>
                   <p class="text-xs text-amber-600 font-medium mt-0.5">₱{{ s.price.toLocaleString() }}</p>
@@ -611,30 +611,15 @@
             <span class="text-xs text-gray-400 font-light">Created {{ formatDate(viewingEvent.created_at) }}</span>
           </div>
 
+          <!-- Event Info -->
           <div class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-xs text-gray-400 font-light mb-0.5">Event Type</p>
               <p class="font-medium text-gray-800">{{ viewingEvent.event_type }}</p>
             </div>
             <div>
-              <p class="text-xs text-gray-400 font-light mb-0.5">Package</p>
+              <p class="text-xs text-gray-400 font-light mb-0.5">Set / Package</p>
               <p class="font-light text-gray-700">{{ viewingEvent.package_set || 'N/A' }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 font-light mb-0.5">Client</p>
-              <p class="font-medium text-gray-800">{{ viewingEvent.client_name }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 font-light mb-0.5">Phone</p>
-              <p class="font-light text-gray-700">{{ viewingEvent.client_phone || 'N/A' }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 font-light mb-0.5">Email</p>
-              <p class="font-light text-gray-700 truncate">{{ viewingEvent.client_email || 'N/A' }}</p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 font-light mb-0.5">Venue</p>
-              <p class="font-light text-gray-700">{{ viewingEvent.venue || 'N/A' }}</p>
             </div>
             <div>
               <p class="text-xs text-gray-400 font-light mb-0.5">Date</p>
@@ -645,15 +630,51 @@
               <p class="font-light text-gray-700">{{ formatTime(viewingEvent.event_time) }}</p>
             </div>
             <div>
+              <p class="text-xs text-gray-400 font-light mb-0.5">Venue</p>
+              <p class="font-light text-gray-700">{{ viewingEvent.venue || 'N/A' }}</p>
+            </div>
+            <div>
               <p class="text-xs text-gray-400 font-light mb-0.5">Number of Guests</p>
-              <p class="font-light text-gray-700">{{ viewingEvent.number_of_guests }}</p>
+              <p class="font-light text-gray-700">{{ viewingEvent.number_of_guests }}<span v-if="viewingEvent.additional_guests > 0" class="text-gray-400"> + {{ viewingEvent.additional_guests }} extra</span></p>
             </div>
             <div>
               <p class="text-xs text-gray-400 font-light mb-0.5">Price Per Head</p>
               <p class="font-light text-gray-700">&#x20B1;{{ formatMoney(viewingEvent.price_per_head) }}</p>
             </div>
+            <div>
+              <p class="text-xs text-gray-400 font-light mb-0.5">Payment Method</p>
+              <p class="font-light text-gray-700 capitalize">{{ viewingEvent.payment_method?.replace('_', ' ') || 'N/A' }}</p>
+            </div>
           </div>
 
+          <!-- Client Info -->
+          <div class="border-t border-gray-100 pt-4">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Client Information</p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-gray-400 font-light mb-0.5">Client</p>
+                <p class="font-medium text-gray-800">{{ viewingEvent.client_name }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 font-light mb-0.5">Phone</p>
+                <p class="font-light text-gray-700">{{ viewingEvent.client_phone || 'N/A' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 font-light mb-0.5">Email</p>
+                <p class="font-light text-gray-700 truncate">{{ viewingEvent.client_email || 'N/A' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 font-light mb-0.5">Address</p>
+                <p class="font-light text-gray-700">{{ viewingEvent.client_address || 'N/A' }}</p>
+              </div>
+              <div v-if="viewingEvent.booked_by">
+                <p class="text-xs text-gray-400 font-light mb-0.5">Booked By</p>
+                <p class="font-light text-gray-700">{{ viewingEvent.booked_by }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Summary -->
           <div class="bg-gray-50 rounded-xl p-4 space-y-2">
             <div class="flex justify-between text-sm">
               <span class="font-light text-gray-500">Total Amount</span>
@@ -669,6 +690,11 @@
                 &#x20B1;{{ formatMoney(viewingEvent.remaining_balance) }}
               </span>
             </div>
+          </div>
+
+          <div v-if="viewingEvent.remarks">
+            <p class="text-xs text-gray-400 font-light mb-1">Remarks</p>
+            <p class="font-light text-gray-700 text-sm leading-relaxed">{{ viewingEvent.remarks }}</p>
           </div>
 
           <div v-if="viewingEvent.notes">
@@ -1339,7 +1365,7 @@ async function fetchSupervisors() {
   try {
     const res = await api.get('/admin/users')
     const all = res.data.data || []
-    supervisors.value = all.filter(u => ['admin','manager','front_desk'].includes(u.role))
+    supervisors.value = all.filter(u => u.role === 'manager')
   } catch (e) { console.error(e) }
 }
 
