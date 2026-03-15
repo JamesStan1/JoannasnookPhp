@@ -237,6 +237,7 @@
         <transition name="slide">
           <div v-show="sections.settings" class="sub-section">
             <router-link to="/settings" class="sub-link" :class="{ 'sub-active': isActive('/settings', true) }">General</router-link>
+            <router-link to="/settings/gallery" class="sub-link" :class="{ 'sub-active': isActive('/settings/gallery', true) }">Gallery Management</router-link>
             <router-link to="/settings/export" class="sub-link" :class="{ 'sub-active': isActive('/settings/export', true) }">Export</router-link>
           </div>
         </transition>

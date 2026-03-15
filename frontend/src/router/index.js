@@ -92,6 +92,7 @@ const routes = [
 
   // ── Settings ──
   { path: '/settings', name: 'Settings', component: () => import('../pages/Admin.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/settings/gallery', name: 'GalleryManagement', component: () => import('../pages/GalleryManagement.vue'), meta: { requiresAuth: true, requiresAdmin: true, title: 'Gallery Management' } },
   { path: '/settings/export', name: 'Export', component: () => import('../pages/Export.vue'), meta: { requiresAuth: true, requiresAdmin: true, title: 'Export Data' } },
   { path: '/admin', name: 'Admin', component: () => import('../pages/Admin.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/profile', name: 'Profile', component: () => import('../pages/Profile.vue'), meta: { requiresAuth: true, title: 'My Profile' } },

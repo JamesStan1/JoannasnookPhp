@@ -17,17 +17,17 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-black flex items-center gap-2">
-          <span class="text-xl">??</span> System Settings
+          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> System Settings
         </h1>
         <p class="text-sm text-gray-500 mt-1">Manage billing, notifications, security and logs for your system.</p>
       </div>
       <div class="flex items-center gap-4">
         <span class="text-xs text-gray-400 flex items-center gap-1">
-          <span>?</span> All changes are saved locally until you click Save.
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> All changes are saved locally until you click Save.
         </span>
         <button @click="saveSettings"
                 class="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-          <span>??</span> Save Changes
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Changes
         </button>
       </div>
     </div>
@@ -340,7 +340,7 @@
         <div v-if="isIT" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div class="flex items-center justify-between mb-1">
             <h2 class="text-lg font-bold text-gray-800">System Logs</h2>
-            <span class="text-xs text-amber-600 cursor-pointer hover:underline" @click="fetchSystemLogs">Overview</span>
+            <span class="text-xs text-amber-600 cursor-pointer hover:underline" @click="fetchSystemLogs">Refresh</span>
           </div>
           <p class="text-sm text-gray-500 mb-3">Overview of recent system activity.</p>
           <p class="text-sm font-medium text-gray-700 mb-3">
@@ -368,6 +368,53 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <div v-if="logsTotalPages > 1" class="flex items-center justify-between mt-3">
+            <p class="text-xs text-gray-500">
+              Page {{ logsPage }} of {{ logsTotalPages }}
+              <span class="ml-1 text-gray-400">({{ logsTotal }} entries)</span>
+            </p>
+            <div class="flex items-center gap-1">
+              <button
+                @click="logsPage = 1; fetchSystemLogs()"
+                :disabled="logsPage === 1"
+                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                «
+              </button>
+              <button
+                @click="logsPage--; fetchSystemLogs()"
+                :disabled="logsPage === 1"
+                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                ‹
+              </button>
+              <span
+                v-for="p in logsPaginationRange"
+                :key="p">
+                <button
+                  v-if="p !== '...'"
+                  @click="logsPage = p; fetchSystemLogs()"
+                  :class="p === logsPage ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'"
+                  class="px-2 py-1 text-xs rounded border">
+                  {{ p }}
+                </button>
+                <span v-else class="px-1 text-xs text-gray-400">…</span>
+              </span>
+              <button
+                @click="logsPage++; fetchSystemLogs()"
+                :disabled="logsPage === logsTotalPages"
+                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                ›
+              </button>
+              <button
+                @click="logsPage = logsTotalPages; fetchSystemLogs()"
+                :disabled="logsPage === logsTotalPages"
+                class="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                »
+              </button>
+            </div>
+          </div>
+          <p v-else-if="logsTotal > 0" class="text-xs text-gray-400 mt-3 text-right">{{ logsTotal }} entries</p>
         </div>
 
         <!-- Notifications Card -->
@@ -407,7 +454,7 @@
         <!-- Data Print Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span class="text-green-600">??</span> Data Print
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Data Print
           </h2>
 
           <div class="mb-3">
@@ -618,14 +665,37 @@ async function removeHoliday(id) {
 }
 
 // -- System Logs ---------------------------------------------------------------
-const systemLogs = ref([])
-const activeUsers = ref(0)
+const systemLogs     = ref([])
+const activeUsers    = ref(0)
+const logsPage       = ref(1)
+const logsLimit      = ref(10)
+const logsTotal      = ref(0)
+const logsTotalPages = ref(1)
+
+const logsPaginationRange = computed(() => {
+  const total   = logsTotalPages.value
+  const current = logsPage.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages = []
+  pages.push(1)
+  if (current > 3) pages.push('...')
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) pages.push(p)
+  if (current < total - 2) pages.push('...')
+  pages.push(total)
+  return pages
+})
 
 async function fetchSystemLogs() {
   try {
-    const res = await api.get('/admin/system-logs')
-    systemLogs.value = (res.data.data?.logs) || []
-    activeUsers.value = res.data.data?.active_users ?? 0
+    const res = await api.get('/admin/system-logs', {
+      params: { page: logsPage.value, limit: logsLimit.value }
+    })
+    const d = res.data.data ?? res.data
+    systemLogs.value  = d.logs         || []
+    activeUsers.value = d.active_users ?? 0
+    logsTotal.value      = d.total       ?? 0
+    logsTotalPages.value = d.total_pages ?? 1
+    logsPage.value       = d.page        ?? logsPage.value
   } catch {}
 }
 

@@ -16,6 +16,8 @@
           <!-- Navigation links on the right -->
           <nav class="hidden md:flex items-center gap-10">
             <a href="#home" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Home</a>
+            <a href="#about" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">About Us</a>
+            <a href="#gallery" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Gallery</a>
             <a href="#services" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Services</a>
             <a href="#contact" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase transition duration-300">Contact</a>
             <button
@@ -38,6 +40,8 @@
       <!-- Mobile nav menu -->
       <div v-if="mobileNavOpen" class="md:hidden bg-white border-t border-gray-100 px-6 py-5 flex flex-col gap-5">
         <a href="#home" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Home</a>
+        <a href="#about" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">About Us</a>
+        <a href="#gallery" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Gallery</a>
         <a href="#services" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Services</a>
         <a href="#contact" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Contact</a>
         <button @click="navigateToLogin; mobileNavOpen=false" class="text-[11px] border border-green-800 text-green-800 font-light py-3 px-6 tracking-[0.18em] uppercase text-center transition">Staff Login</button>
@@ -45,41 +49,420 @@
     </header>
 
     <!-- Hero Section -->
-    <section id="home" class="relative h-[540px] md:h-[740px] lg:h-[88vh] bg-cover bg-center flex items-center justify-center overflow-hidden" style="background-image: url('/Backimagehomepage.jpg');">
-      <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.6) 100%);"></div>
+    <section id="home" class="relative h-[540px] md:h-[740px] lg:h-[88vh] flex items-center justify-center overflow-hidden">
+      <!-- Ken Burns background -->
+      <div class="hero-bg absolute inset-0 bg-cover bg-center" style="background-image: url('/Backimagehomepage.jpg');"></div>
+      <!-- Gradient overlay -->
+      <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.62) 100%);"></div>
+
+      <!-- Shimmer line top -->
+      <div class="hero-shimmer-line"></div>
+
       <div class="relative text-center px-6 max-w-4xl mx-auto">
-        <!-- Ornamental divider -->
-        <div class="flex items-center justify-center gap-5 mb-10">
-          <div class="h-px w-20 bg-white/40"></div>
-          <span class="text-white/60 text-[12px] tracking-[0.45em] uppercase font-light">Est. Balingasag, Misamis Oriental</span>
-          <div class="h-px w-20 bg-white/40"></div>
-        </div>
-        <h1 class="text-4xl sm:text-5xl md:text-[64px] lg:text-[76px] font-extralight text-white mb-5 md:mb-7 tracking-wide leading-[1.12]">
+        <h1 class="text-4xl sm:text-5xl md:text-[64px] lg:text-[76px] font-extralight text-white mb-5 md:mb-7 tracking-wide leading-[1.12] hero-anim hero-anim--up" style="--h-delay:450ms">
           Experience<br class="hidden sm:block" /><em class="font-light not-italic"> Comfort &amp; Luxury</em>
         </h1>
-        <p class="text-xs md:text-sm text-white/75 mb-12 font-light leading-loose tracking-[0.2em] max-w-lg mx-auto uppercase">
+        <!-- Animated decorative accent line under heading -->
+        <div class="hero-accent-line mx-auto mb-8" style="--h-delay:750ms"></div>
+        <p class="text-xs md:text-sm text-white/75 mb-12 font-light leading-loose tracking-[0.2em] max-w-lg mx-auto uppercase hero-anim hero-anim--up" style="--h-delay:850ms">
           Your sanctuary of relaxation — premium accommodations &amp; world-class hospitality
         </p>
         <button
           @click="scrollToSection('services')"
-          class="inline-block border border-white/75 text-white hover:bg-white hover:text-green-900 font-light py-4 px-14 transition duration-500 text-[11px] tracking-[0.3em] uppercase"
+          class="hero-anim hero-anim--up inline-block border border-white/75 text-white hover:bg-white hover:text-green-900 font-light py-4 px-14 transition duration-500 text-[11px] tracking-[0.3em] uppercase"
+          style="--h-delay:1050ms"
         >
           Explore Our Services
         </button>
       </div>
+
       <!-- Scroll indicator -->
-      <div class="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-60">
-        <div class="w-px h-8 bg-white"></div>
-        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/></svg>
+      <div class="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 hero-scroll-indicator">
+        <span class="text-white/40 text-[9px] tracking-[0.35em] uppercase mb-1">Scroll</span>
+        <div class="hero-scroll-line"></div>
+        <svg class="w-3 h-3 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+    </section>
+
+    <!-- ── About Us Section ──────────────────────────────────────────────── -->
+    <section id="about" class="py-28 bg-white border-t border-gray-100 overflow-hidden">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Section Title -->
+        <div class="text-center mb-20 about-reveal about-reveal--up" style="--delay:0ms">
+          <p class="text-[11px] tracking-[0.45em] text-gray-400 uppercase mb-4">Our Story</p>
+          <h2 class="text-5xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">About Us</h2>
+          <div class="flex items-center justify-center gap-4">
+            <div class="h-px w-16 bg-gray-200"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-green-700"></div>
+            <div class="h-px w-16 bg-gray-200"></div>
+          </div>
+        </div>
+
+        <!-- Two-column layout: Text + Image -->
+        <div class="flex flex-col lg:flex-row items-center gap-16 mb-24">
+
+          <!-- Text -->
+          <div class="flex-1">
+            <p class="text-xs tracking-[0.35em] text-amber-600 uppercase mb-4 about-reveal about-reveal--left" style="--delay:100ms">Welcome to Joanna's Nook</p>
+            <h3 class="text-3xl font-extralight text-green-800 tracking-wide mb-7 leading-snug about-reveal about-reveal--left" style="--delay:200ms">
+              A Home Away<br />From Home
+            </h3>
+            <div class="h-px w-12 bg-gray-200 mb-7 about-reveal about-reveal--left" style="--delay:260ms"></div>
+            <p class="text-base text-gray-500 font-light leading-loose mb-5 about-reveal about-reveal--left" style="--delay:320ms">
+              Nestled in the heart of Balingasag, Misamis Oriental, Joanna's Nook Bed &amp; Breakfast is a cozy and welcoming retreat that blends warm Filipino hospitality with modern comforts. We take pride in providing our guests with a relaxing and memorable stay.
+            </p>
+            <p class="text-base text-gray-500 font-light leading-loose mb-5 about-reveal about-reveal--left" style="--delay:420ms">
+              Whether you're visiting for leisure, business, or celebrating a special occasion, our dedicated team is committed to making every moment of your stay exceptional. From our thoughtfully furnished rooms to our event facilities, everything at Joanna's Nook is designed with your comfort in mind.
+            </p>
+            <p class="text-base text-gray-500 font-light leading-loose about-reveal about-reveal--left" style="--delay:520ms">
+              We believe that great hospitality starts with genuine care — and that's exactly what we offer every single guest, every single day.
+            </p>
+            <div class="mt-10 flex flex-wrap gap-4 about-reveal about-reveal--up" style="--delay:620ms">
+              <button @click="scrollToSection('services')"
+                class="border border-green-700 text-green-800 hover:bg-green-700 hover:text-white text-[11px] font-light py-3.5 px-10 tracking-[0.25em] uppercase transition duration-300">
+                Explore Our Services
+              </button>
+              <button @click="scrollToSection('contact')"
+                class="border border-gray-300 text-gray-600 hover:border-green-700 hover:text-green-700 text-[11px] font-light py-3.5 px-10 tracking-[0.25em] uppercase transition duration-300">
+                Find Us
+              </button>
+            </div>
+          </div>
+
+          <!-- Image -->
+          <div class="w-full lg:w-[420px] flex-shrink-0 about-reveal about-reveal--right" style="--delay:200ms">
+            <div class="relative about-img-wrapper">
+              <!-- Pulsing decorative ring -->
+              <div class="about-pulse-ring"></div>
+              <img src="/Backimagehomepage.jpg" alt="Joanna's Nook"
+                class="relative z-10 w-full h-[380px] object-cover shadow-xl about-img transition-transform duration-700 ease-out" />
+              <!-- Decorative border offset -->
+              <div class="absolute -bottom-4 -right-4 w-full h-full border border-green-200 -z-10"></div>
+              <!-- Floating badge -->
+              <div class="absolute -bottom-6 -left-6 z-20 bg-white shadow-xl border border-gray-100 px-5 py-4 about-float-badge">
+                <p class="text-[9px] tracking-[0.3em] text-gray-400 uppercase mb-1">Est. in Balingasag</p>
+                <p class="text-sm font-light text-green-800 tracking-wider">Misamis Oriental</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Narrative Timeline ── -->
+        <div class="mb-24 about-reveal about-reveal--up" style="--delay:80ms">
+          <div class="text-center mb-12">
+            <p class="text-[11px] tracking-[0.45em] text-gray-400 uppercase mb-3">How It All Started</p>
+            <h3 class="text-3xl font-extralight text-gray-700 tracking-wider">Our Journey</h3>
+          </div>
+          <div class="relative flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-0">
+            <!-- Horizontal connector line (desktop) -->
+            <div class="hidden md:block absolute top-8 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)] h-px bg-gray-200 z-0"></div>
+
+            <!-- Step 1 -->
+            <div class="flex-1 flex flex-col items-center text-center px-6 about-timeline-step" style="--step-delay:150ms">
+              <div class="relative z-10 w-16 h-16 rounded-full bg-green-700 flex items-center justify-center shadow-lg mb-5 about-timeline-icon">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+              </div>
+              <p class="text-[10px] tracking-[0.35em] text-amber-500 uppercase mb-2">The Beginning</p>
+              <h4 class="text-base font-light text-gray-800 tracking-wider mb-3">A Family Dream</h4>
+              <p class="text-sm text-gray-400 font-light leading-loose">Born from a passion for warm hospitality, Joanna's Nook started as a family dream to create a truly welcoming retreat in Balingasag.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex-1 flex flex-col items-center text-center px-6 about-timeline-step" style="--step-delay:300ms">
+              <div class="relative z-10 w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center shadow-lg mb-5 about-timeline-icon">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <p class="text-[10px] tracking-[0.35em] text-amber-500 uppercase mb-2">Growing Together</p>
+              <h4 class="text-base font-light text-gray-800 tracking-wider mb-3">Building Community</h4>
+              <p class="text-sm text-gray-400 font-light leading-loose">We expanded our rooms and event packages, welcoming guests from across the region to celebrate life's biggest moments with us.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex-1 flex flex-col items-center text-center px-6 about-timeline-step" style="--step-delay:450ms">
+              <div class="relative z-10 w-16 h-16 rounded-full bg-green-700 flex items-center justify-center shadow-lg mb-5 about-timeline-icon">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+              </div>
+              <p class="text-[10px] tracking-[0.35em] text-amber-500 uppercase mb-2">Today &amp; Beyond</p>
+              <h4 class="text-base font-light text-gray-800 tracking-wider mb-3">Continuing Excellence</h4>
+              <p class="text-sm text-gray-400 font-light leading-loose">With modern comforts and a heart full of care, we remain dedicated to giving every guest an experience that feels like home.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats / Highlights row -->
+        <div class="about-stats-grid grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100 border border-gray-100">
+          <div class="bg-white px-8 py-10 text-center about-reveal about-reveal--up" style="--delay:0ms">
+            <p class="text-4xl font-extralight text-green-700 mb-2">{{ statRooms }}<span class="text-2xl">+</span></p>
+            <p class="text-[11px] tracking-[0.3em] text-gray-400 uppercase">Rooms Available</p>
+          </div>
+          <div class="bg-white px-8 py-10 text-center about-reveal about-reveal--up" style="--delay:120ms">
+            <p class="text-4xl font-extralight text-amber-600 mb-2">{{ statPackages }}<span class="text-2xl">+</span></p>
+            <p class="text-[11px] tracking-[0.3em] text-gray-400 uppercase">Event Packages</p>
+          </div>
+          <div class="bg-white px-8 py-10 text-center about-reveal about-reveal--up" style="--delay:240ms">
+            <p class="text-4xl font-extralight text-green-700 mb-2">24<span class="text-2xl">/7</span></p>
+            <p class="text-[11px] tracking-[0.3em] text-gray-400 uppercase">Guest Support</p>
+          </div>
+          <div class="bg-white px-8 py-10 text-center about-reveal about-reveal--up" style="--delay:360ms">
+            <p class="text-4xl font-extralight text-amber-600 mb-2">{{ statSatisfaction }}<span class="text-2xl">%</span></p>
+            <p class="text-[11px] tracking-[0.3em] text-gray-400 uppercase">Satisfaction Goal</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Gallery Section ─────────────────────────────────────────────── -->
+    <section id="gallery" class="py-28 bg-gray-50 border-t border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Heading -->
+        <div class="text-center mb-20">
+          <p class="text-[11px] tracking-[0.45em] text-gray-400 uppercase mb-4">A Glimpse of Our Space</p>
+          <h2 class="text-5xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">Gallery</h2>
+          <div class="flex items-center justify-center gap-4">
+            <div class="h-px w-16 bg-gray-200"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-green-700"></div>
+            <div class="h-px w-16 bg-gray-200"></div>
+          </div>
+        </div>
+
+        <!-- No Albums -->
+        <div v-if="galleryAlbums.length === 0" class="text-center py-16 text-gray-400 font-light tracking-wider">
+          No gallery photos available yet.
+        </div>
+
+        <!-- Album Stat Cards -->
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="album in galleryAlbums"
+            :key="album.id"
+            @click="galleryOpenAlbum = album"
+            class="gallery-album-card group relative rounded-2xl overflow-hidden cursor-pointer shadow-md border border-gray-100 bg-white"
+          >
+            <!-- Cover image -->
+            <div class="relative h-56 overflow-hidden bg-gray-200">
+              <img
+                v-if="album.photos && album.photos.length"
+                :src="publicPhotoUrl(album.photos[0].filename)"
+                :alt="album.name"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                @error="$event.target.src='/placeholder-image.jpg'"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center bg-gray-100">
+                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <!-- Dark gradient overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 group-hover:from-black/80"></div>
+              <!-- Photo count badge -->
+              <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-700 text-[11px] font-medium tracking-wider px-2.5 py-1 rounded-full shadow-sm">
+                {{ album.photos?.length ?? 0 }} photo{{ (album.photos?.length ?? 0) === 1 ? '' : 's' }}
+              </div>
+              <!-- View Album CTA -->
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span class="border border-white/80 text-white text-[11px] tracking-[0.25em] uppercase px-5 py-2 font-light backdrop-blur-sm bg-white/10 rounded">
+                  View Album
+                </span>
+              </div>
+            </div>
+            <!-- Card footer -->
+            <div class="px-5 py-4 transition-colors duration-300 group-hover:bg-green-50">
+              <p class="text-sm font-semibold text-gray-800 tracking-wide truncate group-hover:text-green-800 transition-colors duration-300">{{ album.name }}</p>
+              <p v-if="album.description" class="text-xs text-gray-400 mt-0.5 truncate">{{ album.description }}</p>
+              <p v-else class="text-xs text-gray-400 mt-0.5 italic">Click to explore</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Album Photos Modal -->
+    <Teleport to="body">
+      <Transition name="gallery-modal">
+        <div
+          v-if="galleryOpenAlbum"
+          class="fixed inset-0 z-[55] flex flex-col bg-white"
+        >
+          <!-- Modal header -->
+          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shadow-sm flex-shrink-0">
+            <div class="flex items-center gap-3">
+              <button
+                @click="galleryOpenAlbum = null"
+                class="p-2 rounded-full text-gray-500 hover:text-green-700 hover:bg-green-50 transition"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+              </button>
+              <div>
+                <p class="text-[10px] tracking-[0.35em] text-gray-400 uppercase">Gallery</p>
+                <h3 class="text-lg font-light text-gray-800 tracking-widest uppercase">{{ galleryOpenAlbum.name }}</h3>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-gray-400 font-light">{{ galleryOpenAlbum.photos?.length ?? 0 }} photo{{ (galleryOpenAlbum.photos?.length ?? 0) === 1 ? '' : 's' }}</span>
+              <button
+                @click="galleryOpenAlbum = null"
+                class="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <!-- Photos grid -->
+          <div class="flex-1 overflow-y-auto p-6">
+            <div v-if="!galleryOpenAlbum.photos || galleryOpenAlbum.photos.length === 0"
+              class="flex flex-col items-center justify-center h-64 text-gray-400 font-light gap-3">
+              <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <p class="text-sm italic">No photos in this album.</p>
+            </div>
+            <div v-else class="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
+              <div
+                v-for="photo in galleryOpenAlbum.photos"
+                :key="photo.id"
+                class="break-inside-avoid overflow-hidden rounded-lg cursor-pointer group"
+                @click="galleryLightboxPhoto = photo"
+              >
+                <img
+                  :src="publicPhotoUrl(photo.filename)"
+                  :alt="photo.caption || galleryOpenAlbum.name"
+                  class="w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  style="display:block"
+                  @error="$event.target.src='/placeholder-image.jpg'"
+                />
+                <div v-if="photo.caption" class="bg-white/90 text-xs text-gray-600 font-light tracking-wider px-2 py-1.5 truncate">
+                  {{ photo.caption }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Gallery Lightbox -->
+    <div v-if="galleryLightboxPhoto"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/85"
+      @click.self="galleryLightboxPhoto = null">
+      <button class="absolute top-5 right-5 text-white/70 hover:text-white transition"
+        @click="galleryLightboxPhoto = null">
+        <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="max-w-4xl w-full mx-4">
+        <img :src="publicPhotoUrl(galleryLightboxPhoto.filename)"
+          class="max-h-[82vh] w-full object-contain rounded-lg shadow-2xl" />
+        <p v-if="galleryLightboxPhoto.caption" class="text-center text-white/70 text-sm font-light tracking-wider mt-4">
+          {{ galleryLightboxPhoto.caption }}
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Terms & Conditions Section ──────────────────────────────────── -->
+    <section id="terms" class="py-24 bg-white border-t border-gray-100">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Heading -->
+        <div class="text-center mb-16">
+          <p class="text-[11px] tracking-[0.45em] text-gray-400 uppercase mb-4">Legal &amp; Policy</p>
+          <h2 class="text-4xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">Terms &amp; Conditions</h2>
+          <div class="flex items-center justify-center gap-4">
+            <div class="h-px w-16 bg-gray-200"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+            <div class="h-px w-16 bg-gray-200"></div>
+          </div>
+        </div>
+
+        <div class="space-y-10 text-gray-600 font-light leading-loose">
+
+          <div>
+            <h3 class="text-base font-semibold text-gray-800 tracking-widest uppercase mb-3 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-green-700 text-white text-xs flex items-center justify-center font-medium flex-shrink-0">1</span>
+              Reservations &amp; Booking
+            </h3>
+            <ul class="pl-9 space-y-2 text-sm">
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>All reservations are subject to availability and confirmed only upon receipt of the required down payment.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>A valid government-issued ID must be presented upon check-in. The name on the ID must match the reservation.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Management reserves the right to cancel a booking if verification requirements are not met.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-base font-semibold text-gray-800 tracking-widest uppercase mb-3 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-green-700 text-white text-xs flex items-center justify-center font-medium flex-shrink-0">2</span>
+              Check-in &amp; Check-out
+            </h3>
+            <ul class="pl-9 space-y-2 text-sm">
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Standard check-in time is <strong>2:00 PM</strong>. Standard check-out time is <strong>12:00 Noon</strong>.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Early check-in and late check-out are subject to availability and may incur additional fees.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Guests are expected to vacate the premises promptly at the agreed check-out time.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-base font-semibold text-gray-800 tracking-widest uppercase mb-3 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-green-700 text-white text-xs flex items-center justify-center font-medium flex-shrink-0">3</span>
+              Cancellation &amp; Refund Policy
+            </h3>
+            <ul class="pl-9 space-y-2 text-sm">
+              <li class="flex gap-2"><span class="text-amber-500 mt-1 flex-shrink-0">&#8212;</span>Cancellations made <strong>48 hours or more</strong> before the check-in date are eligible for a full refund of the down payment.</li>
+              <li class="flex gap-2"><span class="text-amber-500 mt-1 flex-shrink-0">&#8212;</span>Cancellations made <strong>within 24 hours</strong> of check-in are non-refundable.</li>
+              <li class="flex gap-2"><span class="text-amber-500 mt-1 flex-shrink-0">&#8212;</span>No-shows will be charged the full amount of the first night's stay.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-base font-semibold text-gray-800 tracking-widest uppercase mb-3 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-green-700 text-white text-xs flex items-center justify-center font-medium flex-shrink-0">4</span>
+              House Rules
+            </h3>
+            <ul class="pl-9 space-y-2 text-sm">
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Quiet hours are observed from <strong>10:00 PM to 7:00 AM</strong>. Noise disturbances will not be tolerated.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Smoking is strictly prohibited inside all rooms and common areas.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Pets are not allowed on the premises.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Any damage to property caused by guests will be billed accordingly.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-base font-semibold text-gray-800 tracking-widest uppercase mb-3 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-green-700 text-white text-xs flex items-center justify-center font-medium flex-shrink-0">5</span>
+              Data Privacy
+            </h3>
+            <ul class="pl-9 space-y-2 text-sm">
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>All personal information collected during the reservation process is used solely for booking confirmation and ID verification.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>We comply with the Philippines Data Privacy Act of 2012 (R.A. 10173). Your data will not be shared with third parties without your consent.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-base font-semibold text-gray-800 tracking-widest uppercase mb-3 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-green-700 text-white text-xs flex items-center justify-center font-medium flex-shrink-0">6</span>
+              Events &amp; Functions
+            </h3>
+            <ul class="pl-9 space-y-2 text-sm">
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Event bookings require a down payment to confirm the date. The balance is due on or before the event date.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>Cancellations for events must be made at least <strong>72 hours</strong> in advance.</li>
+              <li class="flex gap-2"><span class="text-green-600 mt-1 flex-shrink-0">&#8212;</span>The management is not liable for damages or losses resulting from force majeure or events beyond our control.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="mt-14 p-6 bg-green-50 border border-green-100 rounded-xl text-sm text-gray-600 font-light leading-loose">
+          <p>By making a reservation or using the facilities of <strong class="text-green-800">Joanna's Nook Bed &amp; Breakfast</strong>, you acknowledge that you have read, understood, and agreed to these Terms &amp; Conditions. For inquiries, please contact us at <span class="text-green-700">{{ contactInfo.hotel_email || 'joannasnookb@gmail.com' }}</span> or call <span class="text-green-700">{{ contactInfo.hotel_phone || '' }}</span>.</p>
+        </div>
       </div>
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-28 bg-white">
+    <section id="services" class="py-28 bg-white overflow-hidden">
       <div class="max-w-5xl mx-auto px-4">
 
         <!-- Section Title -->
-        <div class="text-center mb-24">
+        <div class="text-center mb-24 svc-reveal svc-reveal--up" style="--svc-delay:0ms">
           <p class="text-lg tracking-[0.45em] text-gray-400 uppercase mb-5">What We Offer</p>
           <h2 class="text-5xl font-extralight text-gray-800 tracking-[0.15em] uppercase mb-6">Our Services</h2>
           <div class="flex items-center justify-center gap-4">
@@ -91,7 +474,7 @@
 
         <!-- ── Room Reservations ── -->
         <div class="mb-24">
-          <div class="text-center mb-12">
+          <div class="text-center mb-12 svc-reveal svc-reveal--up" style="--svc-delay:0ms">
             <p class="text-base tracking-[0.4em] text-gray-400 uppercase mb-3">Accommodations</p>
             <h2 class="text-4xl font-extralight text-green-800 tracking-wider">Room Reservations</h2>
             <p class="text-lg text-gray-400 font-light mt-3 tracking-wider">Book comfortable accommodations for your stay with modern amenities</p>
@@ -106,24 +489,12 @@
           <div v-if="roomGroups.length">
             <!-- Single Room Card -->
             <div class="bg-white border border-gray-100 shadow-xl overflow-hidden flex flex-col sm:flex-row">
-              <!-- Image Carousel -->
-              <div class="relative w-full sm:w-80 flex-shrink-0 bg-gray-100 overflow-hidden">
-                <img :src="roomGroups[serviceRoomIndex].images[roomGroups[serviceRoomIndex].activeImage]"
+              <!-- Service Image -->
+              <div class="relative w-full sm:w-80 flex-shrink-0 bg-gray-100 overflow-hidden svc-reveal svc-reveal--left svc-card-img-wrap" style="--svc-delay:120ms">
+                <img :src="roomGroups[serviceRoomIndex].images[0]"
                   :alt="roomGroups[serviceRoomIndex].name"
                   class="w-full h-full object-cover" style="min-height:300px"
                   @error="$event.target.src = ROOM_PLACEHOLDER"/>
-                <button v-if="roomGroups[serviceRoomIndex].images.length > 1" @click="prevImage(roomGroups[serviceRoomIndex])"
-                  class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 z-10">
-                  <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <button v-if="roomGroups[serviceRoomIndex].images.length > 1" @click="nextImage(roomGroups[serviceRoomIndex])"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 z-10">
-                  <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-                <div v-if="roomGroups[serviceRoomIndex].images.length > 1" class="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                  <span v-for="(img, i) in roomGroups[serviceRoomIndex].images" :key="i"
-                    :class="['w-1.5 h-1.5 rounded-full transition-colors', i === roomGroups[serviceRoomIndex].activeImage ? 'bg-white' : 'bg-white/50']"/>
-                </div>
                 <div class="absolute top-0 left-0 bg-black/60 text-white text-[9px] font-light px-3 py-1.5 uppercase tracking-[0.25em]">
                   {{ roomGroups[serviceRoomIndex].label }}
                 </div>
@@ -136,7 +507,7 @@
                 </div>
               </div>
               <!-- Info -->
-              <div class="flex-1 p-11 flex flex-col justify-between">
+              <div class="flex-1 p-11 flex flex-col justify-between svc-reveal svc-reveal--right" style="--svc-delay:240ms">
                 <div>
                   <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-light tracking-[0.18em] text-amber-700 uppercase">{{ roomGroups[serviceRoomIndex].name }}</h3>
@@ -168,7 +539,7 @@
             </div>
 
             <!-- Bottom Nav: Prev · Dots · Next -->
-            <div class="flex items-center justify-center gap-4 mt-6">
+            <div class="flex items-center justify-center gap-4 mt-6 svc-reveal svc-reveal--up" style="--svc-delay:360ms">
               <button @click="serviceRoomIndex = (serviceRoomIndex - 1 + roomGroups.length) % roomGroups.length"
                 class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-green-700 hover:text-green-700 transition">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
@@ -189,7 +560,7 @@
 
         <!-- ── Event Reservations ── -->
         <div class="mb-24">
-          <div class="text-center mb-12">
+          <div class="text-center mb-12 svc-reveal svc-reveal--up" style="--svc-delay:0ms">
             <p class="text-base tracking-[0.4em] text-gray-400 uppercase mb-3">Celebrations &amp; Gatherings</p>
             <h2 class="text-4xl font-extralight text-green-800 tracking-wider">Event Reservations</h2>
             <p class="text-lg text-gray-400 font-light mt-3 tracking-wider">Host your special events with our comprehensive event packages</p>
@@ -204,27 +575,15 @@
           <div v-if="eventPackages.length">
             <!-- Single Package Card -->
             <div class="bg-white border border-gray-100 shadow-xl overflow-hidden flex flex-col sm:flex-row">
-              <!-- Image Carousel -->
-              <div class="relative w-full sm:w-80 flex-shrink-0 bg-gray-100 overflow-hidden">
-                <img :src="eventPackages[serviceEventIndex].images[eventPackages[serviceEventIndex].activeImage]"
+              <!-- Service Image -->
+              <div class="relative w-full sm:w-80 flex-shrink-0 bg-gray-100 overflow-hidden svc-reveal svc-reveal--left svc-card-img-wrap" style="--svc-delay:120ms">
+                <img :src="eventPackages[serviceEventIndex].images[0]"
                   :alt="eventPackages[serviceEventIndex].name"
                   class="w-full h-full object-cover" style="min-height:300px"
                   @error="$event.target.src = '/Event%20Packages/Basic%20Package.jpg'"/>
-                <button v-if="eventPackages[serviceEventIndex].images.length > 1" @click="prevImage(eventPackages[serviceEventIndex])"
-                  class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 z-10">
-                  <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <button v-if="eventPackages[serviceEventIndex].images.length > 1" @click="nextImage(eventPackages[serviceEventIndex])"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 z-10">
-                  <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-                <div v-if="eventPackages[serviceEventIndex].images.length > 1" class="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                  <span v-for="(img, i) in eventPackages[serviceEventIndex].images" :key="i"
-                    :class="['w-1.5 h-1.5 rounded-full transition-colors', i === eventPackages[serviceEventIndex].activeImage ? 'bg-white' : 'bg-white/50']"/>
-                </div>
               </div>
               <!-- Info -->
-              <div class="flex-1 p-11 flex flex-col justify-between">
+              <div class="flex-1 p-11 flex flex-col justify-between svc-reveal svc-reveal--right" style="--svc-delay:240ms">
                 <div>
                   <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-light tracking-[0.18em] text-amber-700 uppercase">{{ eventPackages[serviceEventIndex].name }}</h3>
@@ -255,7 +614,7 @@
             </div>
 
             <!-- Bottom Nav: Prev · Dots · Next -->
-            <div class="flex items-center justify-center gap-4 mt-6">
+            <div class="flex items-center justify-center gap-4 mt-6 svc-reveal svc-reveal--up" style="--svc-delay:360ms">
               <button @click="serviceEventIndex = (serviceEventIndex - 1 + eventPackages.length) % eventPackages.length"
                 class="w-9 h-9 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-purple-600 hover:text-purple-600 transition">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/></svg>
@@ -276,27 +635,27 @@
 
         <!-- ── Why Choose Joanna's Nook ── -->
         <div class="mb-4 py-20 border-t border-gray-100">
-          <div class="text-center mb-16">
+          <div class="text-center mb-16 svc-reveal svc-reveal--up" style="--svc-delay:0ms">
             <p class="text-xs tracking-[0.4em] text-gray-400 uppercase mb-4">Our Promise</p>
             <h2 class="text-4xl font-extralight text-gray-800 tracking-wider">Why Choose Joanna's Nook?</h2>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-12">
-            <div class="text-center">
-              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center">
+            <div class="text-center svc-feature-card" style="--svc-delay:0ms">
+              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center svc-feature-icon">
                 <svg class="w-9 h-9 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
               </div>
               <p class="text-xs tracking-[0.3em] text-amber-600 uppercase mb-3">Quality Accommodations</p>
               <p class="text-base text-gray-400 font-light leading-loose">Clean, comfortable rooms with modern amenities to ensure a pleasant stay.</p>
             </div>
-            <div class="text-center">
-              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center">
+            <div class="text-center svc-feature-card" style="--svc-delay:150ms">
+              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center svc-feature-icon">
                 <svg class="w-9 h-9 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
               <p class="text-xs tracking-[0.3em] text-amber-600 uppercase mb-3">Affordable Rates</p>
               <p class="text-base text-gray-400 font-light leading-loose">Competitive pricing with flexible payment options to suit your budget.</p>
             </div>
-            <div class="text-center">
-              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center">
+            <div class="text-center svc-feature-card" style="--svc-delay:300ms">
+              <div class="w-20 h-20 mx-auto mb-6 border border-green-100 flex items-center justify-center svc-feature-icon">
                 <svg class="w-9 h-9 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
               </div>
               <p class="text-xs tracking-[0.3em] text-amber-600 uppercase mb-3">Excellent Service</p>
@@ -798,8 +1157,6 @@
 
     <!-- User Manual is in the floating side drawer below -->
 
-
-
     <!-- Find Us / Contact Section -->
     <section id="contact" class="py-24 bg-white border-t border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -940,46 +1297,105 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-950 text-gray-500 py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Footer logo/motto row -->
-        <div class="text-center mb-16 pb-16 border-b border-gray-800">
-          <p class="text-[11px] tracking-[0.5em] text-gray-600 uppercase mb-4">Balingasag, Misamis Oriental</p>
-          <h3 class="text-xl font-extralight text-white tracking-[0.3em] uppercase mb-3">Joanna's Nook</h3>
-          <p class="text-xs tracking-[0.3em] text-gray-500 uppercase">Bed &amp; Breakfast</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
+    <footer class="relative bg-gray-950 text-gray-400 overflow-hidden">
+      <!-- Decorative top accent line -->
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-60"></div>
+
+      <!-- Main grid -->
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+
+          <!-- About -->
           <div>
-            <p class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">About</p>
-            <p class="text-sm font-light leading-loose text-gray-500">Your premier destination for hospitality and unforgettable experiences in Balingasag.</p>
+            <div class="flex items-center gap-2 mb-6">
+              <span class="block w-5 h-px bg-green-500"></span>
+              <p class="text-[10px] tracking-[0.4em] text-green-500/80 uppercase font-semibold">About</p>
+            </div>
+            <p class="text-sm font-light leading-relaxed text-gray-500">
+              Your premier destination for warm hospitality and unforgettable experiences nestled in the heart of Balingasag.
+            </p>
+            <div class="mt-8">
+              <div class="flex items-center gap-2 mb-6">
+                <span class="block w-5 h-px bg-green-500"></span>
+                <p class="text-[10px] tracking-[0.4em] text-green-500/80 uppercase font-semibold">Contact</p>
+              </div>
+              <ul class="space-y-3 text-sm font-light text-gray-500">
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 mt-0.5 text-green-600/60 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
+                  <span>{{ contactInfo.hotel_phone || 'N/A' }}</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 mt-0.5 text-green-600/60 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                  <span>{{ contactInfo.hotel_email || 'N/A' }}</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 mt-0.5 text-green-600/60 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                  <span>{{ contactInfo.hotel_address || '' }}</span>
+                </li>
+              </ul>
+            </div>
           </div>
+
+          <!-- Navigation -->
           <div>
-            <p class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">Navigation</p>
-            <ul class="space-y-3 font-light">
-              <li><a href="#home" class="text-sm tracking-wider hover:text-green-500 transition">Home</a></li>
-              <li><a href="#services" class="text-sm tracking-wider hover:text-green-500 transition">Services</a></li>
-              <li><a href="#contact" class="text-sm tracking-wider hover:text-green-500 transition">Contact</a></li>
+            <div class="flex items-center gap-2 mb-6">
+              <span class="block w-5 h-px bg-green-500"></span>
+              <p class="text-[10px] tracking-[0.4em] text-green-500/80 uppercase font-semibold">Navigation</p>
+            </div>
+            <ul class="space-y-4">
+              <li v-for="link in [
+                { href: '#home', label: 'Home' },
+                { href: '#about', label: 'About Us' },
+                { href: '#gallery', label: 'Gallery' },
+                { href: '#terms', label: 'Terms & Conditions' },
+                { href: '#services', label: 'Services' },
+                { href: '#contact', label: 'Contact Us' }
+              ]" :key="link.href">
+                <a :href="link.href"
+                   class="group flex items-center gap-3 text-sm font-light text-gray-500 hover:text-white transition-colors duration-200">
+                  <span class="block w-0 group-hover:w-4 h-px bg-green-500 transition-all duration-300"></span>
+                  {{ link.label }}
+                </a>
+              </li>
             </ul>
           </div>
-          <div>
-            <p class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">Contact</p>
-            <p class="text-sm font-light tracking-wider text-gray-500 mb-2">{{ contactInfo.hotel_phone || 'N/A' }}</p>
-            <p class="text-sm font-light tracking-wider text-gray-500 mb-2">{{ contactInfo.hotel_email || 'N/A' }}</p>
-            <p class="text-sm font-light tracking-wider text-gray-500">{{ contactInfo.hotel_address || '' }}</p>
+
+          <!-- Developer credit -->
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2 mb-6">
+              <span class="block w-5 h-px bg-green-500"></span>
+              <p class="text-[10px] tracking-[0.4em] text-green-500/80 uppercase font-semibold">Developer</p>
+            </div>
+            <div class="flex-1 flex flex-col items-start gap-4">
+              <img
+                src="/JSM Digital Logo.png"
+                alt="JSM Digital"
+                class="w-14 h-14 object-cover rounded-full border border-gray-700 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                title="JSM Digital"
+              />
+              <div>
+                <p class="text-white text-sm font-light tracking-widest mb-0.5">James Stanley Macarulay</p>
+                <p class="text-[11px] text-gray-500 tracking-[0.25em]">from JSM Digital</p>
+              </div>
+              <p class="text-xs text-gray-600 font-light leading-relaxed mt-1">
+                Crafted with care &mdash; delivering modern digital solutions for hospitality businesses.
+              </p>
+            </div>
           </div>
-          <div class="flex flex-col items-center justify-center text-center">
-            <span class="text-[11px] tracking-[0.35em] text-gray-600 uppercase mb-4">Developed by</span>
-            <img
-              src="/JSM Digital Logo.png"
-              alt="JSM Digital"
-              class="w-16 h-16 object-cover mb-3 opacity-80"
-              title="JSM Digital"
-            />
-            <span class="text-sm text-gray-500 font-light tracking-widest">JSM Digital</span>
-          </div>
+
         </div>
-        <div class="border-t border-gray-800 pt-8 text-center">
-          <p class="text-xs font-light tracking-widest text-gray-600 uppercase">© 2026 Joanna's Nook Bed &amp; Breakfast &mdash; All Rights Reserved</p>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="border-t border-gray-800/60 py-6 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p class="text-[11px] font-light tracking-widest text-gray-600 uppercase">
+            © 2026 Joanna's Nook Bed &amp; Breakfast &mdash; All Rights Reserved
+          </p>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+            <span class="text-[10px] tracking-widest text-gray-600 uppercase">Open for Reservations</span>
+          </div>
         </div>
       </div>
     </footer>
@@ -1267,6 +1683,22 @@ const rooms = ref([])
 const eventPackages = ref([])
 const selectedRoom = ref(null)
 
+// Gallery
+const galleryAlbums        = ref([])
+const galleryOpenAlbum     = ref(null)
+const galleryLightboxPhoto = ref(null)
+
+function publicPhotoUrl(filename) {
+  return `http://localhost:8000/uploads/gallery/${filename}`
+}
+
+async function fetchPublicGallery() {
+  try {
+    const res = await api.get('/public/gallery')
+    galleryAlbums.value = (res.data.data ?? res.data ?? []).filter(a => a.photos?.length)
+  } catch {}
+}
+
 const contactInfo = ref({
   hotel_name:    "Joanna's Nook Bed & Breakfast",
   hotel_phone:   '',
@@ -1278,6 +1710,11 @@ const selectedEvent = ref(null)
 const pkgCarouselIndex = ref(0)
 const serviceRoomIndex = ref(0)
 const serviceEventIndex = ref(0)
+
+// About Us count-up stats
+const statRooms = ref(0)
+const statPackages = ref(0)
+const statSatisfaction = ref(0)
 
 const roomGroups = computed(() => {
   const map = {}
@@ -1581,8 +2018,95 @@ onMounted(async () => {
   } catch (e) {
     console.error('Failed to load homepage data:', e)
   }
+  // Gallery fetch is non-critical — don't block page load
+  fetchPublicGallery()
   await nextTick()
   initContactMap()
+
+  // About Us scroll-reveal
+  const revealEls = document.querySelectorAll('.about-reveal')
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('about-reveal--visible')
+        revealObserver.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.15 })
+  revealEls.forEach(el => revealObserver.observe(el))
+
+  // About Us timeline steps staggered reveal
+  const timelineSteps = document.querySelectorAll('.about-timeline-step')
+  const timelineObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = entry.target.style.getPropertyValue('--step-delay') || '0ms'
+        setTimeout(() => {
+          entry.target.classList.add('about-timeline-step--visible')
+        }, parseInt(delay))
+        timelineObserver.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.2 })
+  timelineSteps.forEach(el => timelineObserver.observe(el))
+
+  // About Us stats count-up
+  function animateCount(refVal, target, duration) {
+    const steps = 50
+    const stepTime = duration / steps
+    const increment = target / steps
+    let current = 0
+    const timer = setInterval(() => {
+      current += increment
+      if (current >= target) {
+        refVal.value = target
+        clearInterval(timer)
+      } else {
+        refVal.value = Math.floor(current)
+      }
+    }, stepTime)
+  }
+  const statsGrid = document.querySelector('.about-stats-grid')
+  let statsTriggered = false
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !statsTriggered) {
+        statsTriggered = true
+        animateCount(statRooms, 10, 1200)
+        animateCount(statPackages, 5, 1000)
+        animateCount(statSatisfaction, 100, 1400)
+        statsObserver.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.3 })
+  if (statsGrid) statsObserver.observe(statsGrid)
+
+  // Services scroll-reveal
+  const svcRevealEls = document.querySelectorAll('.svc-reveal')
+  const svcRevealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('svc-reveal--visible')
+        svcRevealObserver.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.12 })
+  svcRevealEls.forEach(el => svcRevealObserver.observe(el))
+
+  // Services feature cards staggered reveal
+  const svcFeatureCards = document.querySelectorAll('.svc-feature-card')
+  const svcFeatureObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = parseInt(entry.target.style.getPropertyValue('--svc-delay') || '0')
+        setTimeout(() => {
+          entry.target.classList.add('svc-feature-card--visible')
+        }, delay)
+        svcFeatureObserver.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.2 })
+  svcFeatureCards.forEach(el => svcFeatureObserver.observe(el))
 })
 
 // ── Modals ────────────────────────────────────────────────────────────────────
@@ -1695,4 +2219,210 @@ const prevImage = (item) => {
 /* Guest Manual modal transitions */
 .gm-modal-enter-active, .gm-modal-leave-active { transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.4,0,0.2,1); }
 .gm-modal-enter-from,  .gm-modal-leave-to      { opacity: 0; transform: scale(0.95); }
+
+/* ── Hero Section animations ─────────────────────────────────────────────── */
+
+/* Ken Burns slow zoom */
+.hero-bg {
+  animation: heroBgZoom 18s ease-in-out infinite alternate;
+  transform-origin: center center;
+}
+@keyframes heroBgZoom {
+  0%   { transform: scale(1);    }
+  100% { transform: scale(1.08); }
+}
+
+/* Top shimmer line */
+.hero-shimmer-line {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  z-index: 10;
+  animation: heroShimmer 4s ease-in-out 0.5s forwards;
+}
+@keyframes heroShimmer {
+  0%   { left: -60%; opacity: 0; }
+  20%  { opacity: 1; }
+  100% { left: 140%; opacity: 0; }
+}
+
+/* Generic entrance animations */
+.hero-anim {
+  opacity: 0;
+  animation-fill-mode: forwards;
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-delay: var(--h-delay, 0ms);
+}
+.hero-anim--fade {
+  animation-name: heroFadeIn;
+}
+.hero-anim--up {
+  transform: translateY(28px);
+  animation-name: heroSlideUp;
+}
+@keyframes heroFadeIn {
+  to { opacity: 1; }
+}
+@keyframes heroSlideUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animated accent line under heading */
+.hero-accent-line {
+  height: 1px;
+  width: 0;
+  background: rgba(255,255,255,0.5);
+  animation: heroAccentExpand 0.9s cubic-bezier(0.4, 0, 0.2, 1) var(--h-delay, 750ms) forwards;
+}
+@keyframes heroAccentExpand {
+  to { width: 80px; }
+}
+
+/* Scroll indicator */
+.hero-scroll-indicator {
+  animation: heroScrollFadeIn 1s ease 1.6s forwards;
+  opacity: 0;
+}
+@keyframes heroScrollFadeIn {
+  to { opacity: 1; }
+}
+.hero-scroll-line {
+  width: 1px;
+  height: 0;
+  background: white;
+  animation: heroScrollGrow 1s ease 1.8s forwards;
+}
+@keyframes heroScrollGrow {
+  to { height: 32px; }
+}
+
+/* ── About Us scroll-reveal animations ────────────────────────────────────── */
+.about-reveal {
+  opacity: 0;
+  transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: var(--delay, 0ms);
+}
+.about-reveal--up    { transform: translateY(40px); }
+.about-reveal--left  { transform: translateX(-50px); }
+.about-reveal--right { transform: translateX(50px); }
+
+.about-reveal--visible {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* ── About Us image hover parallax ── */
+.about-img-wrapper:hover .about-img {
+  transform: scale(1.03) translateY(-4px);
+}
+
+/* ── Floating badge animation ── */
+.about-float-badge {
+  animation: aboutFloatBadge 3.5s ease-in-out infinite;
+}
+@keyframes aboutFloatBadge {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* ── Pulsing decorative ring behind image ── */
+.about-pulse-ring {
+  position: absolute;
+  inset: -12px;
+  border: 1.5px solid rgba(21, 128, 61, 0.25);
+  z-index: 0;
+  animation: aboutPulseRing 3s ease-in-out infinite;
+}
+@keyframes aboutPulseRing {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.015); }
+}
+
+/* ── Timeline step reveal ── */
+.about-timeline-step {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.about-timeline-step--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Timeline icon bounce-in ── */
+.about-timeline-step--visible .about-timeline-icon {
+  animation: aboutIconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes aboutIconPop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+/* ── Services Section animations ─────────────────────────────────────────── */
+.svc-reveal {
+  opacity: 0;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: var(--svc-delay, 0ms);
+}
+.svc-reveal--up    { transform: translateY(36px); }
+.svc-reveal--left  { transform: translateX(-44px); }
+.svc-reveal--right { transform: translateX(44px); }
+.svc-reveal--visible {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* Card image hover zoom */
+.svc-card-img-wrap img {
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.svc-card-img-wrap:hover img {
+  transform: scale(1.07);
+}
+
+/* Feature card staggered reveal */
+.svc-feature-card {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.svc-feature-card--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Feature icon pop when card becomes visible */
+.svc-feature-card--visible .svc-feature-icon {
+  animation: svcIconPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes svcIconPop {
+  0%   { transform: scale(0.55) rotate(-12deg); opacity: 0; }
+  100% { transform: scale(1)    rotate(0deg);   opacity: 1; }
+}
+
+/* Gallery album card hover elevation */
+.gallery-album-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+.gallery-album-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Gallery album modal slide-up transition */
+.gallery-modal-enter-active {
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-modal-leave-active {
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-modal-enter-from,
+.gallery-modal-leave-to {
+  opacity: 0;
+  transform: translateY(40px);
+}
 </style>

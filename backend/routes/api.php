@@ -79,6 +79,7 @@ $router = new Router();
 $router->get('/api/public/rooms', 'RoomController', 'getAll');
 $router->get('/api/public/event-packages', 'EventPackageController', 'getPublic');
 $router->get('/api/public/settings', 'AdminController', 'getPublicSettings');
+$router->get('/api/public/gallery', 'AdminController', 'getPublicGallery');
 
 // Auth routes
 $router->post('/api/auth/login', 'AuthController', 'login');
@@ -229,6 +230,13 @@ $router->get('/api/admin/discounts', 'AdminController', 'getDiscounts');
 $router->post('/api/admin/discounts', 'AdminController', 'addDiscount');
 $router->delete('/api/admin/discounts/{id}', 'AdminController', 'deleteDiscount');
 $router->put('/api/admin/discounts/{id}/default', 'AdminController', 'setDefaultDiscount');
+
+// Gallery routes
+$router->get('/api/admin/gallery/albums', 'AdminController', 'getGalleryAlbums');
+$router->post('/api/admin/gallery/albums', 'AdminController', 'createGalleryAlbum');
+$router->delete('/api/admin/gallery/albums/{id}', 'AdminController', 'deleteGalleryAlbum');
+$router->post('/api/admin/gallery/albums/{id}/photos', 'AdminController', 'uploadGalleryPhoto');
+$router->delete('/api/admin/gallery/photos/{id}', 'AdminController', 'deleteGalleryPhoto');
 
 // Pending Reservation routes (public create + admin management)
 $router->post('/api/pending-reservations', 'PendingReservationController', 'create');

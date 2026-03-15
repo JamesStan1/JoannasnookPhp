@@ -1360,4 +1360,165 @@ class AdminController {
 
         return response([], 200, 'Report status updated');
     }
+
+    // ── Gallery ──────────────────────────────────────────────────────────────
+
+    /** Public: all albums with their photos (for homepage gallery). */
+    public function getPublicGallery() {
+        $db = \Database::connect();
+        $albums = $db->query("SELECT * FROM gallery_albums ORDER BY created_at DESC")->fetchAll();
+        foreach ($albums as &$album) {
+            $stmt = $db->prepare("SELECT * FROM gallery_photos WHERE album_id = :id ORDER BY created_at ASC");
+            $stmt->execute([':id' => $album['id']]);
+            $album['photos'] = $stmt->fetchAll();
+        }
+        return response($albums, 200);
+    }
+
+    /** Admin: list albums with photo counts. */
+    public function getGalleryAlbums() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $db = \Database::connect();
+        $albums = $db->query("
+            SELECT a.*, COUNT(p.id) AS photo_count
+            FROM gallery_albums a
+            LEFT JOIN gallery_photos p ON p.album_id = a.id
+            GROUP BY a.id
+            ORDER BY a.created_at DESC
+        ")->fetchAll();
+        foreach ($albums as &$album) {
+            $stmt = $db->prepare("SELECT * FROM gallery_photos WHERE album_id = :id ORDER BY created_at ASC");
+            $stmt->execute([':id' => $album['id']]);
+            $album['photos'] = $stmt->fetchAll();
+        }
+        return response($albums, 200);
+    }
+
+    /** Admin: create a new album. */
+    public function createGalleryAlbum() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $name = trim($data['name'] ?? '');
+        if ($name === '') return error('Album name is required', 400);
+
+        $db = \Database::connect();
+        $stmt = $db->prepare("INSERT INTO gallery_albums (name, description) VALUES (:name, :desc)");
+        $stmt->execute([':name' => $name, ':desc' => trim($data['description'] ?? '')]);
+        $id = (int)$db->lastInsertId();
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'create', 'gallery', "Album created: $name");
+
+        return response(['id' => $id, 'name' => $name, 'description' => $data['description'] ?? '', 'photos' => [], 'photo_count' => 0], 201, 'Album created');
+    }
+
+    /** Admin: delete an album (and its photos via FK CASCADE). */
+    public function deleteGalleryAlbum($albumId) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $db = \Database::connect();
+
+        // Remove physical files first
+        $stmt = $db->prepare("SELECT filename FROM gallery_photos WHERE album_id = :id");
+        $stmt->execute([':id' => (int)$albumId]);
+        foreach ($stmt->fetchAll() as $row) {
+            $path = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/' . $row['filename'];
+            if (file_exists($path)) @unlink($path);
+        }
+
+        // Also delete cover if stored separately
+        $album = $db->prepare("SELECT cover_photo FROM gallery_albums WHERE id = :id");
+        $album->execute([':id' => (int)$albumId]);
+        $row = $album->fetch();
+        if ($row && $row['cover_photo']) {
+            $cover = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/' . $row['cover_photo'];
+            if (file_exists($cover)) @unlink($cover);
+        }
+
+        $db->prepare("DELETE FROM gallery_albums WHERE id = :id")->execute([':id' => (int)$albumId]);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'delete', 'gallery', "Album deleted: $albumId");
+
+        return response([], 200, 'Album deleted');
+    }
+
+    /** Admin: upload a photo to an album. */
+    public function uploadGalleryPhoto($albumId) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $db = \Database::connect();
+        $stmt = $db->prepare("SELECT id FROM gallery_albums WHERE id = :id");
+        $stmt->execute([':id' => (int)$albumId]);
+        if (!$stmt->fetch()) return error('Album not found', 404);
+
+        if (empty($_FILES['photo']['tmp_name'])) return error('No photo uploaded', 400);
+
+        $file    = $_FILES['photo'];
+        $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($file['type'], $allowed)) return error('Invalid image type', 422);
+        if ($file['size'] > 10 * 1024 * 1024) return error('Image too large (max 10 MB)', 422);
+
+        $ext  = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $name = uniqid('gallery_', true) . '.' . $ext;
+        $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        if (!move_uploaded_file($file['tmp_name'], $dir . $name)) return error('Failed to save image', 500);
+
+        $caption = trim($_POST['caption'] ?? '');
+        $ins = $db->prepare("INSERT INTO gallery_photos (album_id, filename, caption) VALUES (:album, :file, :cap)");
+        $ins->execute([':album' => (int)$albumId, ':file' => $name, ':cap' => $caption]);
+        $photoId = (int)$db->lastInsertId();
+
+        // Set as cover if album has no cover yet
+        $cov = $db->prepare("UPDATE gallery_albums SET cover_photo = :f WHERE id = :id AND cover_photo IS NULL");
+        $cov->execute([':f' => $name, ':id' => (int)$albumId]);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'create', 'gallery', "Photo uploaded to album $albumId");
+
+        return response(['id' => $photoId, 'album_id' => (int)$albumId, 'filename' => $name, 'caption' => $caption], 201, 'Photo uploaded');
+    }
+
+    /** Admin: delete a single photo. */
+    public function deleteGalleryPhoto($photoId) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $db = \Database::connect();
+        $stmt = $db->prepare("SELECT * FROM gallery_photos WHERE id = :id");
+        $stmt->execute([':id' => (int)$photoId]);
+        $photo = $stmt->fetch();
+        if (!$photo) return error('Photo not found', 404);
+
+        // Remove file
+        $path = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/' . $photo['filename'];
+        if (file_exists($path)) @unlink($path);
+
+        $db->prepare("DELETE FROM gallery_photos WHERE id = :id")->execute([':id' => (int)$photoId]);
+
+        // Clear album cover if it was this photo
+        $db->prepare("UPDATE gallery_albums SET cover_photo = NULL WHERE id = :aid AND cover_photo = :f")
+           ->execute([':aid' => $photo['album_id'], ':f' => $photo['filename']]);
+
+        // Re-assign cover to the next photo in the album
+        $next = $db->prepare("SELECT filename FROM gallery_photos WHERE album_id = :aid ORDER BY created_at ASC LIMIT 1");
+        $next->execute([':aid' => $photo['album_id']]);
+        $nextRow = $next->fetch();
+        if ($nextRow) {
+            $db->prepare("UPDATE gallery_albums SET cover_photo = :f WHERE id = :aid")
+               ->execute([':f' => $nextRow['filename'], ':aid' => $photo['album_id']]);
+        }
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'delete', 'gallery', "Photo $photoId deleted from album {$photo['album_id']}");
+
+        return response([], 200, 'Photo deleted');
+    }
 }
