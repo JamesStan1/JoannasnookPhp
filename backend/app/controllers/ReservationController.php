@@ -153,10 +153,14 @@ class ReservationController {
         }
 
         if ($balance > 0.01) {
-            return error(
-                'Cannot check out: there is an unpaid balance of ₱' . number_format($balance, 2) . '. Please settle the full amount before checking out.',
-                422
-            );
+            http_response_code(422);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Cannot check out: there is an unpaid balance of ₱' . number_format($balance, 2) . '. Please settle the full amount before checking out.',
+                'balance' => round($balance, 2),
+            ]);
+            exit;
         }
         // ─────────────────────────────────────────────────────────────────────
 
@@ -213,6 +217,98 @@ class ReservationController {
         $auditLog->log($user['user_id'], 'update', 'reservations', "Guest checked out: $id");
 
         return response([], 200, 'Guest checked out successfully');
+    }
+
+    public function payBalance($id) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager', 'front_desk', 'accountant']);
+
+        $data   = json_decode(file_get_contents('php://input'), true);
+        $method = $data['method'] ?? null;
+
+        if (empty($method)) {
+            return error('Payment method is required', 400);
+        }
+
+        $reservationModel = new Reservation();
+        $reservation      = $reservationModel->getReservationDetails($id);
+
+        if (!$reservation) {
+            return error('Reservation not found', 404);
+        }
+
+        $db  = $reservationModel->getDb();
+        $now = date('Y-m-d H:i:s');
+
+        // Try to find the most recent room bill for this reservation
+        $billStmt = $db->prepare(
+            "SELECT id, total_amount, COALESCE(paid_amount, 0) AS paid_amount
+             FROM bills WHERE reservation_id = ? AND bill_type = 'room'
+             ORDER BY created_at DESC LIMIT 1"
+        );
+        $billStmt->execute([$id]);
+        $bill = $billStmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($bill) {
+            $balance = (float)$bill['total_amount'] - (float)$bill['paid_amount'];
+            if ($balance > 0.01) {
+                $newPaid = (float)$bill['paid_amount'] + $balance;
+                $db->prepare(
+                    "UPDATE bills
+                     SET paid_amount = ?, payment_status = 'paid',
+                         payment_method = ?, payment_date = ?,
+                         processed_by = ?, updated_at = ?
+                     WHERE id = ?"
+                )->execute([$newPaid, $method, $now, $user['user_id'], $now, $bill['id']]);
+            }
+        } else {
+            // No bill yet — calculate from room price × nights minus down payment
+            $rStmt = $db->prepare("SELECT price FROM rooms WHERE id = ? LIMIT 1");
+            $rStmt->execute([$reservation['room_id']]);
+            $roomRow       = $rStmt->fetch(\PDO::FETCH_ASSOC);
+            $pricePerNight = (float)($roomRow['price'] ?? 0);
+
+            $checkIn     = new \DateTime($reservation['check_in_date']);
+            $checkOut    = new \DateTime($reservation['check_out_date']);
+            $nights      = max(1, (int)$checkIn->diff($checkOut)->days);
+            $totalAmount = $pricePerNight * $nights;
+            $downPayment = (float)($reservation['down_payment'] ?? 0);
+            $balance     = $totalAmount - $downPayment;
+
+            if ($balance > 0.01) {
+                $billNumber = 'ROOM-' . $id . '-' . date('Ymd');
+                $db->prepare(
+                    "INSERT INTO bills
+                       (guest_id, reservation_id, bill_type, bill_number,
+                        subtotal, discount, tax, total_amount,
+                        payment_status, paid_amount, payment_method, payment_date,
+                        processed_by, created_at, updated_at)
+                     VALUES (?,?,'room',?,?,0,0,?,'paid',?,?,?,?,?,?)"
+                )->execute([
+                    $reservation['guest_id'], $id, $billNumber,
+                    $totalAmount, $totalAmount,
+                    $totalAmount, $method, $now,
+                    $user['user_id'], $now, $now,
+                ]);
+
+                $billId = $db->lastInsertId();
+                $roomNum  = $reservation['room_number'] ?? '';
+                $roomType = $reservation['room_type']   ?? '';
+                $db->prepare(
+                    "INSERT INTO bill_items (bill_id, description, quantity, unit_price, amount, created_at)
+                     VALUES (?,?,?,?,?,?)"
+                )->execute([
+                    $billId,
+                    "Room {$roomNum} ({$roomType}) — {$nights} night(s) @ ₱" . number_format($pricePerNight, 2),
+                    $nights, $pricePerNight, $totalAmount, $now,
+                ]);
+            }
+        }
+
+        $auditLog = new \App\Models\AuditLog();
+        $auditLog->log($user['user_id'], 'update', 'billing', "Balance paid for reservation: $id via $method");
+
+        return response([], 200, 'Balance paid successfully');
     }
 
     public function cancel($id) {
@@ -319,7 +415,11 @@ class ReservationController {
         }
 
         // Update guest profile with extra fields that exist on the users table
-        $profileUpdate = array_filter(['phone' => $data['contact_number'] ?? null]);
+        $profileUpdate = array_filter([
+            'phone'       => $data['contact_number'] ?? null,
+            'address'     => $data['address']        ?? null,
+            'nationality' => $data['nationality']    ?? null,
+        ]);
         if (!empty($profileUpdate)) {
             $userModel->update($guestId, $profileUpdate);
         }
@@ -362,9 +462,66 @@ class ReservationController {
 
         $db = \Database::connect();
         $like = '%' . $q . '%';
-        $stmt = $db->prepare("SELECT id, name, email, phone AS contact_number FROM users WHERE role = 'guest' AND active = 1 AND (name LIKE :n OR email LIKE :e OR phone LIKE :p) LIMIT 10");
+
+        // Search registered guest users; pull address/nationality from most recent pending_reservation
+        $stmt = $db->prepare("
+            SELECT u.id, u.name, u.email,
+                   u.phone AS contact_number,
+                   (SELECT pr.guest_address FROM pending_reservations pr
+                    WHERE pr.guest_email = u.email AND pr.guest_address IS NOT NULL
+                    ORDER BY pr.created_at DESC LIMIT 1
+                   ) AS address,
+                   (SELECT pr.guest_country FROM pending_reservations pr
+                    WHERE pr.guest_email = u.email AND pr.guest_country IS NOT NULL
+                    ORDER BY pr.created_at DESC LIMIT 1
+                   ) AS nationality,
+                   (SELECT COUNT(*) FROM pending_reservations pr2
+                    WHERE pr2.guest_email = u.email
+                      AND pr2.status IN ('approved','completed')
+                   ) AS reservation_count
+            FROM users u
+            WHERE u.role = 'guest' AND u.active = 1
+              AND (u.name LIKE :n OR u.email LIKE :e OR u.phone LIKE :p)
+            ORDER BY u.name
+            LIMIT 8
+        ");
         $stmt->execute([':n' => $like, ':e' => $like, ':p' => $like]);
-        return response($stmt->fetchAll(), 200);
+        $userResults = $stmt->fetchAll();
+
+        // Also search pending_reservations for walk-in/online guests not yet in users table
+        $foundEmails = array_values(array_filter(array_column($userResults, 'email')));
+        $excludeClause = '';
+        $params2 = [':n2' => $like, ':e2' => $like, ':c2' => $like];
+        if (!empty($foundEmails)) {
+            $placeholders = [];
+            foreach ($foundEmails as $i => $email) {
+                $key = ':ex' . $i;
+                $placeholders[] = $key;
+                $params2[$key] = $email;
+            }
+            $excludeClause = 'AND (pr.guest_email IS NULL OR pr.guest_email NOT IN (' . implode(',', $placeholders) . '))';
+        }
+
+        $remainingLimit = max(1, 10 - count($userResults));
+        $stmt2 = $db->prepare("
+            SELECT NULL AS id,
+                   pr.guest_name AS name,
+                   MAX(pr.guest_email) AS email,
+                   MAX(pr.guest_contact) AS contact_number,
+                   MAX(pr.guest_address) AS address,
+                   MAX(pr.guest_country) AS nationality,
+                   SUM(CASE WHEN pr.status IN ('approved','completed') THEN 1 ELSE 0 END) AS reservation_count
+            FROM pending_reservations pr
+            WHERE (pr.guest_name LIKE :n2 OR pr.guest_email LIKE :e2 OR pr.guest_contact LIKE :c2)
+              $excludeClause
+            GROUP BY pr.guest_name, COALESCE(pr.guest_email, pr.guest_contact, CAST(pr.id AS CHAR))
+            ORDER BY MAX(pr.created_at) DESC
+            LIMIT $remainingLimit
+        ");
+        $stmt2->execute($params2);
+        $prResults = $stmt2->fetchAll();
+
+        return response(array_merge($userResults, $prResults), 200);
     }
 
     public function update($id) {

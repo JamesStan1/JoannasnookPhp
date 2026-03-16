@@ -477,24 +477,89 @@
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="text-xs font-medium text-gray-600">Returning Customer?</label>
-              <button type="button" @click="walkInManual = !walkInManual"
-                class="text-xs text-green-600 hover:underline">Enter manually</button>
+              <button v-if="selectedGuest" type="button" @click="clearGuest"
+                class="text-xs text-red-500 hover:underline flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                Clear selection
+              </button>
             </div>
+
+            <!-- Selected guest badge -->
+            <div v-if="selectedGuest" class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-2">
+              <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-green-800 truncate">{{ selectedGuest.name }}</p>
+                <p class="text-xs text-gray-500 truncate">{{ selectedGuest.email }}</p>
+              </div>
+              <span class="text-xs bg-green-700 text-white px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">Returning</span>
+            </div>
+
             <div class="flex gap-2">
               <input v-model="walkInGuestSearch" type="text"
-                placeholder="Search by email or phone number"
+                placeholder="Search by name, email, or phone"
+                @keyup.enter="searchGuest"
+                @input="onGuestSearchInput"
                 class="flex-1 border border-green-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400" />
-              <button type="button" @click="searchGuest"
-                class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg transition">Search</button>
+              <button type="button" @click="searchGuest" :disabled="guestSearchLoading"
+                class="bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                <svg v-if="guestSearchLoading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                <span>{{ guestSearchLoading ? 'Searching…' : 'Search' }}</span>
+              </button>
             </div>
-            <!-- Guest search results -->
-            <div v-if="guestResults.length > 0" class="mt-1 border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-              <div v-for="g in guestResults" :key="g.id"
+
+            <!-- No results note -->
+            <p v-if="guestSearched && guestResults.length === 0" class="text-xs text-gray-400 mt-1 pl-1">
+              No previous guest found. Please enter details manually below.
+            </p>
+
+            <!-- Guest search results dropdown -->
+            <div v-if="guestResults.length > 0" class="mt-1 border border-gray-200 rounded-xl overflow-hidden shadow-md">
+              <div v-for="g in guestResults" :key="g.id ?? g.email ?? g.name"
                 @click="fillGuest(g)"
-                class="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-0">
-                <span class="font-medium text-gray-800">{{ g.name }}</span>
-                <span class="text-gray-400 ml-2 text-xs">{{ g.email }}</span>
+                class="px-3 py-2.5 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-0 transition">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-semibold text-gray-800 truncate">{{ g.name }}</p>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <span v-if="Number(g.reservation_count) > 0" class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+                      {{ g.reservation_count }}× returning
+                    </span>
+                    <span v-if="g.id" class="text-xs text-green-600">Registered</span>
+                    <span v-else class="text-xs text-amber-600">Past guest</span>
+                  </div>
+                </div>
+                <div class="flex gap-3 mt-0.5">
+                  <p v-if="g.email" class="text-xs text-gray-400 truncate">{{ g.email }}</p>
+                  <p v-if="g.contact_number" class="text-xs text-gray-400 shrink-0">{{ g.contact_number }}</p>
+                </div>
+                <p v-if="g.address" class="text-xs text-gray-400 truncate mt-0.5">{{ g.address }}{{ g.nationality ? ', ' + g.nationality : '' }}</p>
               </div>
+            </div>
+
+            <!-- Returning customer history table -->
+            <div v-if="selectedGuest && Number(selectedGuest.reservation_count) > 0"
+              class="mt-3 border border-blue-200 rounded-xl overflow-hidden bg-blue-50">
+              <div class="flex items-center gap-2 px-3 py-2 bg-blue-100 border-b border-blue-200">
+                <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-xs font-semibold text-blue-800">Returning Customer — {{ selectedGuest.reservation_count }} past approved booking{{ Number(selectedGuest.reservation_count) > 1 ? 's' : '' }}</span>
+              </div>
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="text-left text-blue-700 bg-blue-100/60">
+                    <th class="px-3 py-1.5 font-medium">Name</th>
+                    <th class="px-3 py-1.5 font-medium">Email</th>
+                    <th class="px-3 py-1.5 font-medium">Contact</th>
+                    <th class="px-3 py-1.5 font-medium">Address / Country</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-blue-100">
+                    <td class="px-3 py-2 text-gray-700">{{ selectedGuest.name }}</td>
+                    <td class="px-3 py-2 text-gray-500">{{ selectedGuest.email || '—' }}</td>
+                    <td class="px-3 py-2 text-gray-500">{{ selectedGuest.contact_number || '—' }}</td>
+                    <td class="px-3 py-2 text-gray-500">{{ [selectedGuest.address, selectedGuest.nationality].filter(Boolean).join(', ') || '—' }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -809,20 +874,47 @@
 
     <!-- ====== CHECKOUT BLOCKED (unpaid balance) ====== -->
     <div v-if="checkoutBlockedRes" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-gray-800 mb-1">Outstanding Balance</p>
+          <p class="text-xs text-gray-500">
+            <strong>{{ checkoutBlockedRes.guestName }}</strong> (Room {{ checkoutBlockedRes.roomNumber }}) has an unpaid balance.
+          </p>
         </div>
-        <p class="text-sm font-semibold text-gray-800 mb-1">Cannot Check Out</p>
-        <p class="text-xs text-gray-500 mb-3">
-          <strong>{{ checkoutBlockedRes.guestName }}</strong> (Room {{ checkoutBlockedRes.roomNumber }}) still has an unpaid balance.
-        </p>
-        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5">
-          <p class="text-xs text-orange-600 font-medium">Outstanding Balance</p>
-          <p class="text-xl font-bold text-orange-700">₱{{ formatMoney(checkoutBlockedRes.balance) }}</p>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5 text-center">
+          <p class="text-xs text-orange-600 font-medium mb-0.5">Amount Due</p>
+          <p class="text-2xl font-bold text-orange-700">₱{{ formatMoney(checkoutBlockedRes.balance) }}</p>
         </div>
-        <p class="text-xs text-gray-400 mb-5">Please settle the full remaining balance before completing the checkout.</p>
-        <button @click="checkoutBlockedRes = null" class="w-full py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition">Understood</button>
+
+        <!-- Pay Balance Form -->
+        <div v-if="showPayForm" class="mb-4">
+          <p class="text-xs font-medium text-gray-600 mb-2">Select Payment Method</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button v-for="opt in [{ value:'cash', label:'Cash' }, { value:'credit_card', label:'Credit Card' }, { value:'debit_card', label:'Debit Card' }, { value:'gcash', label:'GCash' }]"
+              :key="opt.value"
+              @click="payBalanceMethod = opt.value"
+              :class="payBalanceMethod === opt.value ? 'border-green-600 bg-green-50 text-green-800 font-semibold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
+              class="py-2 px-3 text-xs border rounded-xl transition text-center">
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+
+        <div v-if="!showPayForm" class="flex gap-2">
+          <button @click="checkoutBlockedRes = null" class="flex-1 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">Close</button>
+          <button @click="showPayForm = true" class="flex-1 py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition font-medium">Pay Balance</button>
+        </div>
+        <div v-else class="flex gap-2">
+          <button @click="showPayForm = false" :disabled="payBalanceSaving" class="flex-1 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition disabled:opacity-50">Back</button>
+          <button @click="submitPayBalance" :disabled="payBalanceSaving"
+            class="flex-1 py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition font-medium flex items-center justify-center gap-1.5 disabled:opacity-60">
+            <svg v-if="payBalanceSaving" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+            {{ payBalanceSaving ? 'Processing...' : 'Confirm Payment & Check Out' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -908,6 +1000,10 @@ const walkInModal = ref(false)
 const walkInManual = ref(false)
 const walkInGuestSearch = ref('')
 const guestResults = ref([])
+const guestSearchLoading = ref(false)
+const guestSearched = ref(false)
+const selectedGuest = ref(null)
+let guestSearchDebounceTimer = null
 const idFileInput = ref(null)
 const walkInIdFile = ref(null)
 const capturedIdPreview = ref(null)
@@ -923,6 +1019,9 @@ const walkInAgreedTerms = ref(false)
 const roomModal = ref(false)
 const cancelConfirmRes = ref(null)
 const checkoutBlockedRes = ref(null)
+const payBalanceMethod = ref('cash')
+const payBalanceSaving = ref(false)
+const showPayForm = ref(false)
 const selectedRes = ref(null)
 const editSaving = ref(false)
 const walkInSaving    = ref(false)
@@ -992,10 +1091,28 @@ async function fetchHkTasks() {
 function handleCheckOut(res) {
   const balance = Number(res.remaining_balance || 0) + Number(res.cafe_payment || 0)
   if (balance > 0.01) {
-    checkoutBlockedRes.value = { guestName: res.guest_name, roomNumber: res.room_number, balance }
+    checkoutBlockedRes.value = { id: res.id, guestName: res.guest_name, roomNumber: res.room_number, balance, _res: res }
+    payBalanceMethod.value = 'cash'
+    showPayForm.value = false
     return
   }
   updateStatus(res.id, 'check-out')
+}
+
+async function submitPayBalance() {
+  if (!checkoutBlockedRes.value) return
+  payBalanceSaving.value = true
+  try {
+    await api.post(`/reservations/${checkoutBlockedRes.value.id}/pay-balance`, { method: payBalanceMethod.value })
+    const resObj = checkoutBlockedRes.value._res
+    checkoutBlockedRes.value = null
+    showPayForm.value = false
+    await updateStatus(resObj.id, 'check-out')
+  } catch (e) {
+    toast.error(e.response?.data?.message ?? 'Payment failed')
+  } finally {
+    payBalanceSaving.value = false
+  }
 }
 
 async function updateStatus(id, action) {
@@ -1005,7 +1122,25 @@ async function updateStatus(id, action) {
     await fetchStats()
     await fetchBookedDates()
     await fetchRooms()
-  } catch (e) { toast.error(e.response?.data?.message ?? 'Error updating status') }
+  } catch (e) {
+    if (action === 'check-out' && e.response?.status === 422) {
+      const balance = e.response?.data?.balance ?? 0
+      if (balance > 0.01) {
+        const res = reservations.value.find(r => r.id == id)
+        checkoutBlockedRes.value = {
+          id,
+          guestName: res?.guest_name ?? '',
+          roomNumber: res?.room_number ?? '',
+          balance,
+          _res: res,
+        }
+        payBalanceMethod.value = 'cash'
+        showPayForm.value = false
+        return
+      }
+    }
+    toast.error(e.response?.data?.message ?? 'Error updating status')
+  }
 }
 
 function confirmCancel(res) { cancelConfirmRes.value = res }
@@ -1050,6 +1185,8 @@ function openWalkInModal() {
   }
   walkInGuestSearch.value = ''
   guestResults.value = []
+  guestSearched.value = false
+  selectedGuest.value = null
   walkInIdFile.value = null
   capturedIdPreview.value = null
   walkInEmailError.value = ''
@@ -1067,21 +1204,57 @@ function handleWalkInTermsScroll(e) {
 
 async function searchGuest() {
   if (!walkInGuestSearch.value.trim()) return
+  guestSearchLoading.value = true
+  guestSearched.value = false
   try {
     const res = await api.get('/admin/reservations/search-guests', { params: { q: walkInGuestSearch.value } })
     guestResults.value = res.data.data || []
   } catch { guestResults.value = [] }
+  finally {
+    guestSearchLoading.value = false
+    guestSearched.value = true
+  }
+}
+
+function onGuestSearchInput() {
+  // Clear selection if user changes the search text after having selected a guest
+  if (selectedGuest.value && walkInGuestSearch.value !== selectedGuest.value.name) {
+    selectedGuest.value = null
+  }
+  // Debounced auto-search after 600 ms of inactivity
+  clearTimeout(guestSearchDebounceTimer)
+  if (walkInGuestSearch.value.trim().length >= 2) {
+    guestSearchDebounceTimer = setTimeout(searchGuest, 600)
+  } else {
+    guestResults.value = []
+    guestSearched.value = false
+  }
 }
 
 function fillGuest(g) {
-  walkInForm.value.guest_name = g.name
-  walkInForm.value.guest_email = g.email
+  walkInForm.value.guest_name     = g.name
+  walkInForm.value.guest_email    = g.email     || ''
   walkInForm.value.contact_number = g.contact_number || ''
-  walkInForm.value.address = g.address || ''
-  walkInForm.value.nationality = g.nationality || ''
-  walkInForm.value.guest_id = g.id
+  walkInForm.value.address        = g.address   || ''
+  walkInForm.value.nationality    = g.nationality || ''
+  walkInForm.value.guest_id       = g.id || null
   guestResults.value = []
+  guestSearched.value = false
   walkInGuestSearch.value = g.name
+  selectedGuest.value = g
+}
+
+function clearGuest() {
+  selectedGuest.value = null
+  walkInGuestSearch.value = ''
+  guestResults.value = []
+  guestSearched.value = false
+  walkInForm.value.guest_name     = ''
+  walkInForm.value.guest_email    = ''
+  walkInForm.value.contact_number = ''
+  walkInForm.value.address        = ''
+  walkInForm.value.nationality    = ''
+  walkInForm.value.guest_id       = null
 }
 
 function handleIdFile(e) {

@@ -584,7 +584,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
-              <tr v-for="staff in staffList" :key="staff.id"
+              <tr v-for="staff in pagedStaffList" :key="staff.id"
                 :class="[
                   'transition-all',
                   editingStaffId === staff.id 
@@ -649,6 +649,33 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="staffTotalPages > 1" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-wrap gap-3">
+          <p class="text-sm text-gray-600">
+            Showing <span class="font-semibold text-gray-900">{{ (staffPage - 1) * 10 + 1 }}–{{ Math.min(staffPage * 10, staffList.length) }}</span>
+            of <span class="font-semibold text-gray-900">{{ staffList.length }}</span> staff
+          </p>
+          <div class="flex items-center gap-2">
+            <button @click="staffPage--" :disabled="staffPage <= 1"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-amber-200 text-amber-700 hover:bg-amber-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Prev
+            </button>
+            <span class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg">
+              {{ staffPage }} / {{ staffTotalPages }}
+            </span>
+            <button @click="staffPage++" :disabled="staffPage >= staffTotalPages"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-amber-200 text-amber-700 hover:bg-amber-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              Next
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Empty State -->
@@ -717,7 +744,7 @@
 
         <!-- Requests List -->
         <div class="divide-y divide-gray-200 bg-gray-50">
-          <div v-for="req in filteredRequests" :key="req.id"
+          <div v-for="req in pagedFilteredRequests" :key="req.id"
             :class="[
               'px-6 py-5 transition-all',
               req.status === 'pending' 
@@ -772,6 +799,33 @@
                 ✗ Dismiss
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="fpwTotalPages > 1" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-wrap gap-3">
+          <p class="text-sm text-gray-600">
+            Showing <span class="font-semibold text-gray-900">{{ (fpwPage - 1) * 10 + 1 }}–{{ Math.min(fpwPage * 10, filteredRequests.length) }}</span>
+            of <span class="font-semibold text-gray-900">{{ filteredRequests.length }}</span> requests
+          </p>
+          <div class="flex items-center gap-2">
+            <button @click="fpwPage--" :disabled="fpwPage <= 1"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Prev
+            </button>
+            <span class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg">
+              {{ fpwPage }} / {{ fpwTotalPages }}
+            </span>
+            <button @click="fpwPage++" :disabled="fpwPage >= fpwTotalPages"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              Next
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -985,7 +1039,7 @@
 
         <!-- Reports List -->
         <div class="divide-y divide-gray-100">
-          <div v-for="report in filteredReports" :key="report.id"
+          <div v-for="report in pagedFilteredReports" :key="report.id"
             :class="[
               'px-6 py-5 hover:bg-emerald-50/30 transition-all',
               report.status === 'pending' ? 'border-l-4 border-blue-400' :
@@ -1067,6 +1121,33 @@
           </div>
         </div>
 
+        <!-- Pagination -->
+        <div v-if="reportsTotalPages > 1" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-wrap gap-3">
+          <p class="text-sm text-gray-600">
+            Showing <span class="font-semibold text-gray-900">{{ (reportsPage - 1) * 10 + 1 }}–{{ Math.min(reportsPage * 10, filteredReports.length) }}</span>
+            of <span class="font-semibold text-gray-900">{{ filteredReports.length }}</span> reports
+          </p>
+          <div class="flex items-center gap-2">
+            <button @click="reportsPage--" :disabled="reportsPage <= 1"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Prev
+            </button>
+            <span class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg">
+              {{ reportsPage }} / {{ reportsTotalPages }}
+            </span>
+            <button @click="reportsPage++" :disabled="reportsPage >= reportsTotalPages"
+              class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+              Next
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <!-- Empty State -->
         <div v-if="filteredReports.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400 bg-gray-50">
           <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1093,7 +1174,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
@@ -1158,6 +1239,33 @@ const pagedSalesAuditLogs = computed(() => {
 })
 const salesAuditFrom = computed(() => salesAuditLogs.value.length === 0 ? 0 : (salesAuditPage.value - 1) * SALES_AUDIT_PER_PAGE + 1)
 const salesAuditTo = computed(() => Math.min(salesAuditPage.value * SALES_AUDIT_PER_PAGE, salesAuditLogs.value.length))
+
+// Staff Hourly Rates pagination
+const staffPage = ref(1)
+const STAFF_PER_PAGE = 10
+const staffTotalPages = computed(() => Math.max(1, Math.ceil(staffList.value.length / STAFF_PER_PAGE)))
+const pagedStaffList = computed(() => {
+  const start = (staffPage.value - 1) * STAFF_PER_PAGE
+  return staffList.value.slice(start, start + STAFF_PER_PAGE)
+})
+
+// Forgot Password Requests pagination
+const fpwPage = ref(1)
+const FPW_PER_PAGE = 10
+const fpwTotalPages = computed(() => Math.max(1, Math.ceil(filteredRequests.value.length / FPW_PER_PAGE)))
+const pagedFilteredRequests = computed(() => {
+  const start = (fpwPage.value - 1) * FPW_PER_PAGE
+  return filteredRequests.value.slice(start, start + FPW_PER_PAGE)
+})
+
+// Staff Reports pagination
+const reportsPage = ref(1)
+const REPORTS_PER_PAGE = 10
+const reportsTotalPages = computed(() => Math.max(1, Math.ceil(filteredReports.value.length / REPORTS_PER_PAGE)))
+const pagedFilteredReports = computed(() => {
+  const start = (reportsPage.value - 1) * REPORTS_PER_PAGE
+  return filteredReports.value.slice(start, start + REPORTS_PER_PAGE)
+})
 
 // Reports
 const reports = ref([])
@@ -1519,6 +1627,10 @@ const submitPasswordReset = async () => {
 
 const showBackToTop = ref(false)
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
+// Reset pages when filters change
+watch(statusFilter, () => { fpwPage.value = 1 })
+watch(reportsFilter, () => { reportsPage.value = 1 })
 
 onMounted(async () => {
   await loadAll()

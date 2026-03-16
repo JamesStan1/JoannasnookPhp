@@ -262,12 +262,14 @@ class EventController {
                        SET paid_amount    = ?,
                            payment_status = ?,
                            payment_date   = ?,
+                           processed_by   = ?,
                            updated_at     = ?
                      WHERE id = ?
                 ")->execute([
                     $downPayment,
                     $payStatus,
                     $payStatus !== 'pending' ? $now : null,
+                    $user['user_id'],
                     $now,
                     $existingBill['id'],
                 ]);
@@ -285,13 +287,14 @@ class EventController {
                     INSERT INTO bills
                       (guest_id, event_id, bill_type, bill_number,
                        subtotal, discount, tax, total_amount,
-                       payment_status, paid_amount, payment_date, created_at, updated_at)
-                    VALUES (?,?,'event',?,?,0,0,?,?,?,?,?,?)
+                       payment_status, paid_amount, payment_date, processed_by, created_at, updated_at)
+                    VALUES (?,?,'event',?,?,0,0,?,?,?,?,?,?,?)
                 ")->execute([
                     $guestId, $id, $billNumber,
                     $totalAmount, $totalAmount,
                     $payStatus, $downPayment,
                     $payStatus !== 'pending' ? $now : null,
+                    $user['user_id'],
                     $now, $now,
                 ]);
 
@@ -365,6 +368,7 @@ class EventController {
                        payment_status = ?,
                        payment_method = ?,
                        payment_date   = ?,
+                       processed_by   = ?,
                        updated_at     = ?
                  WHERE id = ?
             ")->execute([
@@ -372,6 +376,7 @@ class EventController {
                 $paymentStatus,
                 $paymentMethod,
                 $paymentStatus !== 'pending' ? $now : null,
+                $user['user_id'],
                 $now,
                 $existingBill['id'],
             ]);
@@ -391,8 +396,8 @@ class EventController {
                   (guest_id, event_id, bill_type, bill_number,
                    subtotal, discount, tax, total_amount,
                    payment_method, payment_status, paid_amount, payment_date,
-                   created_at, updated_at)
-                VALUES (?,?,'event',?,?,0,0,?,?,?,?,?,?,?)
+                   processed_by, created_at, updated_at)
+                VALUES (?,?,'event',?,?,0,0,?,?,?,?,?,?,?,?)
             ")->execute([
                 $guestId, $id, $billNumber,
                 $totalAmount, $totalAmount,
@@ -400,6 +405,7 @@ class EventController {
                 $paymentStatus,
                 $newDownPayment,
                 $paymentStatus !== 'pending' ? $now : null,
+                $user['user_id'],
                 $now, $now,
             ]);
 

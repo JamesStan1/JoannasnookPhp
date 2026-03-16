@@ -38,13 +38,13 @@
       </div>
 
       <!-- Mobile nav menu -->
-      <div v-if="mobileNavOpen" class="md:hidden bg-white border-t border-gray-100 px-6 py-5 flex flex-col gap-5">
+      <div v-if="mobileNavOpen" class="md:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-100 px-6 py-5 flex flex-col gap-5 shadow-lg z-50 overflow-y-auto max-h-[calc(100vh-6rem)]">
         <a href="#home" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Home</a>
         <a href="#about" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">About Us</a>
         <a href="#gallery" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Gallery</a>
         <a href="#services" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Services</a>
         <a href="#contact" @click="mobileNavOpen=false" class="text-[11px] text-gray-500 hover:text-green-800 font-light tracking-[0.18em] uppercase py-2 border-b border-gray-50 transition">Contact</a>
-        <button @click="navigateToLogin; mobileNavOpen=false" class="text-[11px] border border-green-800 text-green-800 font-light py-3 px-6 tracking-[0.18em] uppercase text-center transition">Staff Login</button>
+        <button @click="navigateToLogin(); mobileNavOpen=false" class="text-[11px] border border-green-800 text-green-800 font-light py-3 px-6 tracking-[0.18em] uppercase text-center transition">Staff Login</button>
       </div>
     </header>
 
@@ -1688,8 +1688,10 @@ const galleryAlbums        = ref([])
 const galleryOpenAlbum     = ref(null)
 const galleryLightboxPhoto = ref(null)
 
+const UPLOADS_BASE = (import.meta.env.VITE_UPLOADS_URL || 'http://localhost:8000/uploads').replace(/\/$/, '')
+
 function publicPhotoUrl(filename) {
-  return `http://localhost:8000/uploads/gallery/${filename}`
+  return `${UPLOADS_BASE}/gallery/${filename}`
 }
 
 async function fetchPublicGallery() {

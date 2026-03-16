@@ -28,7 +28,7 @@
       <!-- ══════════════════════════════════════════════════════════════════ -->
       <!-- STAT CARDS ROW                                                     -->
       <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- ── 1. UPCOMING EVENTS ── -->
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
@@ -165,6 +165,19 @@
                   <p class="text-xs text-gray-400 font-light">{{ rooms.length }} rooms total</p>
                 </div>
               </div>
+              <!-- Live indicator -->
+              <div class="flex items-center gap-1.5">
+                <Transition name="fade-quick">
+                  <span v-if="roomsJustChanged" class="text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Updated</span>
+                </Transition>
+                <span class="flex items-center gap-1 text-[10px] text-gray-400" :title="roomsLastUpdatedLabel ? 'Last checked: ' + roomsLastUpdatedLabel : ''">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  Live
+                </span>
+              </div>
             </div>
             <!-- Legend -->
             <div class="flex flex-wrap gap-x-4 gap-y-1">
@@ -172,7 +185,10 @@
                 <span class="w-3 h-3 rounded-sm bg-green-500 inline-block"></span>Available
               </span>
               <span class="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium uppercase tracking-wide">
-                <span class="w-3 h-3 rounded-sm bg-red-500 inline-block"></span>Occupied/Reserved
+                <span class="w-3 h-3 rounded-sm bg-red-500 inline-block"></span>Occupied
+              </span>
+              <span class="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium uppercase tracking-wide">
+                <span class="w-3 h-3 rounded-sm bg-blue-500 inline-block"></span>Reserved
               </span>
               <span class="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium uppercase tracking-wide">
                 <span class="w-3 h-3 rounded-sm bg-amber-700 inline-block"></span>Dirty
@@ -200,6 +216,57 @@
                 <span class="text-[8px] text-white/80 font-light leading-tight truncate w-full text-center">{{ roomLabel(room) }}</span>
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- ── 4. LOW STOCK ALERTS ── -->
+        <div
+          class="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+          @click="showLowStockModal = true"
+        >
+          <!-- Card Header -->
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            <div class="flex items-center gap-3">
+              <span class="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+              </span>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">Low Stock Alerts</p>
+                <p class="text-xs text-gray-400 font-light">Below minimum level</p>
+              </div>
+            </div>
+            <span :class="['text-xl font-bold', lowStockItems.length > 0 ? 'text-orange-500' : 'text-gray-400']">{{ lowStockItems.length }}</span>
+          </div>
+
+          <!-- Low Stock Item List -->
+          <div class="flex-1 overflow-y-auto max-h-72 divide-y divide-gray-50">
+            <div v-if="lowStockItems.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+              <svg class="w-10 h-10 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <p class="text-sm font-light">All items stocked</p>
+            </div>
+
+            <div v-for="item in lowStockItems" :key="item.id"
+              class="px-5 py-3 hover:bg-orange-50/30 transition-colors">
+              <div class="flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">{{ item.name }}</p>
+                  <p class="text-[10px] text-gray-400 font-light capitalize">{{ item.category }}</p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <span class="text-sm font-bold text-orange-500">{{ item.current_stock }}</span>
+                  <span class="text-[10px] text-gray-400"> / {{ item.minimum_stock }} min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer hint -->
+          <div class="px-5 py-2.5 border-t border-gray-50 bg-gray-50/50">
+            <p class="text-[10px] text-gray-400 font-light text-center">Click to view full details</p>
           </div>
         </div>
 
@@ -327,6 +394,85 @@
       </div>
     </Transition>
 
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- LOW STOCK MODAL                                                     -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <Transition name="modal-fade">
+      <div v-if="showLowStockModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+        @click.self="showLowStockModal = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+
+          <!-- Modal Header -->
+          <div class="px-6 py-4 flex items-center justify-between bg-orange-500">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-lg font-bold text-white">Low Stock Alerts</p>
+                <p class="text-xs text-white/80 font-light">{{ lowStockItems.length }} item{{ lowStockItems.length !== 1 ? 's' : '' }} below minimum</p>
+              </div>
+            </div>
+            <button @click="showLowStockModal = false"
+              class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="px-6 py-4 max-h-[60vh] overflow-y-auto">
+            <div v-if="lowStockItems.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+              <svg class="w-10 h-10 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <p class="text-sm font-light">All items are sufficiently stocked</p>
+            </div>
+
+            <table v-else class="w-full text-sm">
+              <thead>
+                <tr class="text-left border-b border-gray-100">
+                  <th class="pb-2 font-semibold text-gray-500 text-xs uppercase tracking-wide">Item</th>
+                  <th class="pb-2 font-semibold text-gray-500 text-xs uppercase tracking-wide text-center">Current Qty</th>
+                  <th class="pb-2 font-semibold text-gray-500 text-xs uppercase tracking-wide text-center">Min Required</th>
+                  <th class="pb-2 font-semibold text-gray-500 text-xs uppercase tracking-wide text-center">Shortage</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                <tr v-for="item in lowStockItems" :key="item.id" class="hover:bg-orange-50/30 transition-colors">
+                  <td class="py-3 pr-2">
+                    <p class="font-medium text-gray-800">{{ item.name }}</p>
+                    <p class="text-[10px] text-gray-400 capitalize">{{ item.category }}{{ item.unit ? ' · ' + item.unit : '' }}</p>
+                  </td>
+                  <td class="py-3 text-center">
+                    <span :class="['font-bold text-sm', item.current_stock <= 0 ? 'text-red-600' : 'text-orange-500']">{{ item.current_stock }}</span>
+                  </td>
+                  <td class="py-3 text-center">
+                    <span class="text-gray-600 font-medium">{{ item.minimum_stock }}</span>
+                  </td>
+                  <td class="py-3 text-center">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600">-{{ item.minimum_stock - item.current_stock }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="px-6 pb-5 pt-3 border-t border-gray-100">
+            <button @click="showLowStockModal = false"
+              class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition-colors">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
   </div>
 </template>
 
@@ -335,14 +481,30 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import api from '../services/api'
 
 // ── State ──────────────────────────────────────────────────────────────────────
-const loading     = ref(true)
-const data        = ref(null)
-const selectedRoom = ref(null)
+const loading           = ref(true)
+const data              = ref(null)
+const selectedRoom      = ref(null)
+const lowStockItems     = ref([])
+const showLowStockModal = ref(false)
+
+// Live room status tracking
+const roomsUpdatedAt  = ref(null)   // timestamp of last rooms refresh
+const roomsJustChanged = ref(false) // brief flash when changes detected
 
 // ── Computed data ──────────────────────────────────────────────────────────────
 const upcomingEvents = computed(() => data.value?.upcoming_events ?? [])
 const readyOrdersRaw = computed(() => data.value?.ready_orders ?? [])
 const rooms          = computed(() => data.value?.rooms ?? [])
+
+const roomsLastUpdatedLabel = computed(() => {
+  if (!roomsUpdatedAt.value) return null
+  const now = new Date()
+  const diff = Math.floor((now - roomsUpdatedAt.value) / 1000)
+  if (diff < 5)  return 'Just now'
+  if (diff < 60) return `${diff}s ago`
+  const mins = Math.floor(diff / 60)
+  return `${mins}m ago`
+})
 
 // Group ready orders by invoice_id
 const readyInvoices = computed(() => {
@@ -395,7 +557,8 @@ function isRoomReserved(room) {
 function roomColorClass(room) {
   const s = room.status
   const hasReservation = room.res_id && room.res_status
-  if (s === 'occupied' || hasReservation) return 'bg-red-500 hover:bg-red-600'
+  if (s === 'occupied') return 'bg-red-500 hover:bg-red-600'
+  if (hasReservation)   return 'bg-blue-500 hover:bg-blue-600'
   if (s === 'dirty')       return 'bg-amber-700 hover:bg-amber-800'
   if (s === 'maintenance') return 'bg-yellow-400 hover:bg-yellow-500'
   return 'bg-green-500 hover:bg-green-600'  // available
@@ -405,7 +568,8 @@ function roomModalHeaderClass(room) {
   if (!room) return 'bg-gray-700'
   const s = room.status
   const hasReservation = room.res_id && room.res_status
-  if (s === 'occupied' || hasReservation) return 'bg-red-500'
+  if (s === 'occupied') return 'bg-red-500'
+  if (hasReservation)   return 'bg-blue-500'
   if (s === 'dirty')       return 'bg-amber-700'
   if (s === 'maintenance') return 'bg-yellow-500'
   return 'bg-green-600'
@@ -414,7 +578,8 @@ function roomModalHeaderClass(room) {
 function roomStatusBadge(room) {
   const s = room.status
   const hasReservation = room.res_id && room.res_status
-  if (s === 'occupied' || hasReservation) return 'bg-red-100 text-red-700'
+  if (s === 'occupied') return 'bg-red-100 text-red-700'
+  if (hasReservation)   return 'bg-blue-100 text-blue-700'
   if (s === 'dirty')       return 'bg-amber-100 text-amber-800'
   if (s === 'maintenance') return 'bg-yellow-100 text-yellow-800'
   return 'bg-green-100 text-green-700'
@@ -456,8 +621,13 @@ function eventStatusClass(status) {
 async function loadAll() {
   loading.value = true
   try {
-    const res = await api.get('/front-desk/dashboard')
-    data.value = res.data?.data ?? res.data
+    const [dashRes, stockRes] = await Promise.all([
+      api.get('/front-desk/dashboard'),
+      api.get('/inventory/low-stock'),
+    ])
+    data.value = dashRes.data?.data ?? dashRes.data
+    lowStockItems.value = stockRes.data?.data ?? stockRes.data ?? []
+    roomsUpdatedAt.value = new Date()
   } catch (e) {
     console.error('Front desk dashboard load error:', e)
   } finally {
@@ -465,20 +635,48 @@ async function loadAll() {
   }
 }
 
+// Silent room-only poll — compare statuses and update in place if changed
+async function pollRooms() {
+  try {
+    const res = await api.get('/front-desk/rooms')
+    const fresh = (res.data?.data ?? res.data)?.rooms
+    if (!fresh || !data.value) return
+
+    // Build a compact fingerprint of the current rooms (id + status + res_status)
+    const fingerprint = (list) =>
+      list.map(r => `${r.id}:${r.status}:${r.res_id ?? ''}:${r.res_status ?? ''}`).join('|')
+
+    if (fingerprint(fresh) !== fingerprint(data.value.rooms)) {
+      data.value = { ...data.value, rooms: fresh }
+      roomsUpdatedAt.value = new Date()
+      // Brief flash to signal the update
+      roomsJustChanged.value = true
+      setTimeout(() => { roomsJustChanged.value = false }, 2000)
+    } else {
+      roomsUpdatedAt.value = new Date()
+    }
+  } catch (e) {
+    // Silently ignore poll errors — avoid spamming console on every tick
+  }
+}
+
 function openRoomModal(room) {
   selectedRoom.value = room
 }
 
-// ── Auto-refresh every 30 seconds ─────────────────────────────────────────────
-let refreshTimer = null
+// ── Timers ─────────────────────────────────────────────────────────────────────
+let refreshTimer  = null   // full dashboard every 60 s
+let roomPollTimer = null   // rooms-only every 10 s
 
 onMounted(() => {
   loadAll()
-  refreshTimer = setInterval(loadAll, 30000)
+  refreshTimer  = setInterval(loadAll,   60000)
+  roomPollTimer = setInterval(pollRooms, 10000)
 })
 
 onBeforeUnmount(() => {
-  if (refreshTimer) clearInterval(refreshTimer)
+  if (refreshTimer)  clearInterval(refreshTimer)
+  if (roomPollTimer) clearInterval(roomPollTimer)
 })
 </script>
 
@@ -489,6 +687,15 @@ onBeforeUnmount(() => {
 }
 .modal-fade-enter-from,
 .modal-fade-leave-to {
+  opacity: 0;
+}
+
+.fade-quick-enter-active,
+.fade-quick-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-quick-enter-from,
+.fade-quick-leave-to {
   opacity: 0;
 }
 </style>

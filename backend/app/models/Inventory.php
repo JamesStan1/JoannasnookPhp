@@ -46,10 +46,10 @@ class Inventory extends BaseModel {
         return $stmt->execute([$id]);
     }
 
-    public function getLowStockItems($threshold = 10) {
-        $query = "SELECT * FROM {$this->table} WHERE current_stock <= ? ORDER BY current_stock ASC";
+    public function getLowStockItems() {
+        $query = "SELECT * FROM {$this->table} WHERE deleted_at IS NULL AND current_stock <= minimum_stock ORDER BY current_stock ASC";
         $stmt = $this->db->prepare($query);
-        $stmt->execute([$threshold]);
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 

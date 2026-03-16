@@ -518,20 +518,47 @@
 
     <!-- CHECKOUT BLOCKED (unpaid balance) -->
     <div v-if="checkoutBlockedRes" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <div class="flex flex-col items-center text-center mb-4">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-gray-800 mb-1">Outstanding Balance</p>
+          <p class="text-xs text-gray-500">
+            <strong>{{ checkoutBlockedRes.guestName }}</strong> (Room {{ checkoutBlockedRes.roomNumber }}) has an unpaid balance.
+          </p>
         </div>
-        <p class="text-sm font-semibold text-gray-800 mb-1">Cannot Check Out</p>
-        <p class="text-xs text-gray-500 mb-3">
-          <strong>{{ checkoutBlockedRes.guestName }}</strong> (Room {{ checkoutBlockedRes.roomNumber }}) still has an unpaid balance.
-        </p>
-        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5">
-          <p class="text-xs text-orange-600 font-medium">Outstanding Balance</p>
-          <p class="text-xl font-bold text-orange-700">&#x20b1;{{ Number(checkoutBlockedRes.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}</p>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-5 text-center">
+          <p class="text-xs text-orange-600 font-medium mb-0.5">Amount Due</p>
+          <p class="text-2xl font-bold text-orange-700">&#x20b1;{{ Number(checkoutBlockedRes.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}</p>
         </div>
-        <p class="text-xs text-gray-400 mb-5">Please settle the full remaining balance before completing the checkout.</p>
-        <button @click="checkoutBlockedRes = null" class="w-full py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition">Understood</button>
+
+        <!-- Pay Balance Form -->
+        <div v-if="showPayForm" class="mb-4">
+          <p class="text-xs font-medium text-gray-600 mb-2">Select Payment Method</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button v-for="opt in [{ value:'cash', label:'Cash' }, { value:'credit_card', label:'Credit Card' }, { value:'debit_card', label:'Debit Card' }, { value:'gcash', label:'GCash' }]"
+              :key="opt.value"
+              @click="payBalanceMethod = opt.value"
+              :class="payBalanceMethod === opt.value ? 'border-green-600 bg-green-50 text-green-800 font-semibold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
+              class="py-2 px-3 text-xs border rounded-xl transition text-center">
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+
+        <div v-if="!showPayForm" class="flex gap-2">
+          <button @click="checkoutBlockedRes = null" class="flex-1 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">Close</button>
+          <button @click="showPayForm = true" class="flex-1 py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition font-medium">Pay Balance</button>
+        </div>
+        <div v-else class="flex gap-2">
+          <button @click="showPayForm = false" :disabled="payBalanceSaving" class="flex-1 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition disabled:opacity-50">Back</button>
+          <button @click="submitPayBalance" :disabled="payBalanceSaving"
+            class="flex-1 py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-900 transition font-medium flex items-center justify-center gap-1.5 disabled:opacity-60">
+            <svg v-if="payBalanceSaving" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+            {{ payBalanceSaving ? 'Processing...' : 'Confirm Payment & Check Out' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -713,8 +740,8 @@ const prStore = usePendingReservationsStore()
 const tabs = [
   { key: 'online',     label: '🌐 Online Requests' },
   { key: 'pending',    label: 'Pending' },
-  { key: 'approved',   label: 'Approved' },
-  { key: 'checked_in', label: 'Checked In' },
+  { key: 'approved',   label: 'Reserved' },
+  { key: 'checked_in', label: 'Occupied' },
   { key: 'rejected',   label: 'Rejected' },
   { key: 'all',        label: 'All' },
 ]
@@ -744,6 +771,9 @@ const dateFilter   = ref('')
 const viewTarget   = ref(null)
 const rejectTarget = ref(null)
 const checkoutBlockedRes = ref(null)
+const payBalanceMethod = ref('cash')
+const payBalanceSaving = ref(false)
+const showPayForm = ref(false)
 
 // ── Tab counts ────────────────────────────────────────────────────────────────
 const tabCounts = computed(() => ({
@@ -925,10 +955,28 @@ async function doReject() {
 function handleCheckOut(res) {
   const balance = Number(res.remaining_balance || 0) + Number(res.cafe_payment || 0)
   if (balance > 0.01) {
-    checkoutBlockedRes.value = { guestName: res.guest_name, roomNumber: res.room_number, balance }
+    checkoutBlockedRes.value = { id: res.id, guestName: res.guest_name, roomNumber: res.room_number, balance, _res: res }
+    payBalanceMethod.value = 'cash'
+    showPayForm.value = false
     return
   }
   doAction(res.id, 'check-out')
+}
+
+async function submitPayBalance() {
+  if (!checkoutBlockedRes.value) return
+  payBalanceSaving.value = true
+  try {
+    await api.post(`/reservations/${checkoutBlockedRes.value.id}/pay-balance`, { method: payBalanceMethod.value })
+    const resId = checkoutBlockedRes.value.id
+    checkoutBlockedRes.value = null
+    showPayForm.value = false
+    await doAction(resId, 'check-out')
+  } catch (e) {
+    toast.error(e.response?.data?.message ?? 'Payment failed')
+  } finally {
+    payBalanceSaving.value = false
+  }
 }
 
 async function doAction(id, action) {
@@ -936,6 +984,22 @@ async function doAction(id, action) {
     await api.put(`/reservations/${id}/${action}`)
     await fetchAll()
   } catch (e) {
+    if (action === 'check-out' && e.response?.status === 422) {
+      const balance = e.response?.data?.balance ?? 0
+      if (balance > 0.01) {
+        const res = reservations.value.find(r => r.id == id)
+        checkoutBlockedRes.value = {
+          id,
+          guestName: res?.guest_name ?? '',
+          roomNumber: res?.room_number ?? '',
+          balance,
+          _res: res,
+        }
+        payBalanceMethod.value = 'cash'
+        showPayForm.value = false
+        return
+      }
+    }
     toast.error(e.response?.data?.message ?? `Error: ${action}`)
   }
 }
@@ -1146,13 +1210,13 @@ function formatDateTime(d) {
   return new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 function statusLabel(status) {
-  const map = { pending:'Pending', approved:'Approved', checked_in:'Checked In', checked_out:'Checked Out', cancelled:'Rejected' }
+  const map = { pending:'Pending', approved:'Reserved', checked_in:'Occupied', checked_out:'Checked Out', cancelled:'Rejected' }
   return map[status] ?? status
 }
 function statusBadge(status) {
   const map = {
     pending:     'bg-yellow-100 text-yellow-700',
-    approved:    'bg-green-100 text-green-800',
+    approved:    'bg-blue-100 text-blue-700',
     checked_in:  'bg-green-100 text-green-700',
     checked_out: 'bg-gray-100 text-gray-500',
     cancelled:   'bg-red-100 text-red-600',

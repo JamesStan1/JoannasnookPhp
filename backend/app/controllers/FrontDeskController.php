@@ -87,4 +87,47 @@ class FrontDeskController {
             'rooms'           => $rooms,
         ], 200);
     }
+
+    // GET /api/front-desk/rooms — lightweight room status poll
+    public function getRooms() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'manager', 'front_desk']);
+
+        $db = $this->db();
+
+        $stmt = $db->prepare("
+            SELECT r.*,
+                   res.id            AS res_id,
+                   res.check_in_date,
+                   res.check_out_date,
+                   res.status        AS res_status,
+                   res.number_of_guests AS res_guests,
+                   res.down_payment  AS res_down_payment,
+                   res.special_requests,
+                   CONCAT('RES-', LPAD(res.id, 5, '0')) AS res_reference,
+                   u.name            AS guest_name,
+                   u.email           AS guest_email
+            FROM rooms r
+            LEFT JOIN reservations res ON res.id = (
+                SELECT r2.id
+                FROM reservations r2
+                WHERE r2.room_id = r.id
+                  AND r2.status IN ('checked_in', 'approved')
+                  AND r2.check_out_date >= CURDATE()
+                ORDER BY
+                    CASE r2.status WHEN 'checked_in' THEN 0 ELSE 1 END,
+                    r2.check_in_date ASC
+                LIMIT 1
+            )
+            LEFT JOIN users u ON u.id = res.guest_id
+            WHERE r.deleted_at IS NULL
+            ORDER BY
+                CAST(r.room_number AS UNSIGNED) ASC,
+                r.room_number ASC
+        ");
+        $stmt->execute();
+        $rooms = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return response(['rooms' => $rooms], 200);
+    }
 }

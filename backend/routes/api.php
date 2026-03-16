@@ -108,6 +108,7 @@ $router->put('/api/reservations/{id}/approve', 'ReservationController', 'approve
 $router->put('/api/reservations/{id}/check-in', 'ReservationController', 'checkIn');
 $router->put('/api/reservations/{id}/check-out', 'ReservationController', 'checkOut');
 $router->put('/api/reservations/{id}/cancel', 'ReservationController', 'cancel');
+$router->post('/api/reservations/{id}/pay-balance', 'ReservationController', 'payBalance');
 $router->put('/api/reservations/{id}', 'ReservationController', 'update');
 $router->get('/api/admin/reservations', 'ReservationController', 'adminGetAll');
 $router->get('/api/admin/reservations/search-guests', 'ReservationController', 'searchGuests');
@@ -279,6 +280,7 @@ $router->put('/api/admin/reports/{id}/status', 'ReportController', 'updateReport
 
 // Front Desk Dashboard
 $router->get('/api/front-desk/dashboard', 'FrontDeskController', 'getDashboard');
+$router->get('/api/front-desk/rooms', 'FrontDeskController', 'getRooms');
 
 // IT Dashboard routes
 $router->get('/api/it/system-logs',                        'AdminController', 'getSystemLogs');
