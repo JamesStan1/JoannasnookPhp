@@ -21,6 +21,7 @@ class EventPackageController {
         $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/event-packages/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
         move_uploaded_file($file['tmp_name'], $dir . $name);
+        @chmod($dir . $name, 0644);
         return 'uploads/event-packages/' . $name;
     }
 

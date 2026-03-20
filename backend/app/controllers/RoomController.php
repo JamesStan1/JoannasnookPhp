@@ -32,6 +32,7 @@ class RoomController {
         $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/rooms/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
         move_uploaded_file($file['tmp_name'], $dir . $name);
+        @chmod($dir . $name, 0644);
         return 'uploads/rooms/' . $name;
     }
 

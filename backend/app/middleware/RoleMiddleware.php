@@ -8,9 +8,13 @@ class RoleMiddleware {
             $requiredRoles = [$requiredRoles];
         }
 
-        // Manager and IT have the same access as admin across all modules
+        // IT is a superuser — bypasses all role restrictions.
+        // Manager also gets admin-level access wherever admin is required.
         $effectiveRole = $user['role'];
-        if (($effectiveRole === 'manager' || $effectiveRole === 'it') && in_array('admin', $requiredRoles)) {
+        if ($effectiveRole === 'it') {
+            return true;
+        }
+        if ($effectiveRole === 'manager' && in_array('admin', $requiredRoles)) {
             return true;
         }
 

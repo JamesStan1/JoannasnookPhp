@@ -319,10 +319,10 @@ function setPhotoPage(albumId, n, album) {
 }
 
 // -- Helpers -------------------------------------------------------------------
-const UPLOADS_BASE = (import.meta.env.VITE_UPLOADS_URL || 'http://localhost:8000/uploads').replace(/\/$/, '')
+const GALLERY_URL = (import.meta.env.VITE_GALLERY_URL || (import.meta.env.VITE_UPLOADS_URL || 'http://localhost:8000/uploads') + '/gallery').replace(/\/$/, '')
 
 function photoUrl(filename) {
-  return `${UPLOADS_BASE}/gallery/${filename}`
+  return `${GALLERY_URL}/${filename}`
 }
 
 // -- API -----------------------------------------------------------------------

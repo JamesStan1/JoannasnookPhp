@@ -5,3 +5,20 @@
 </IfModule>
 
 Options -Indexes
+
+# Apache 2.4: explicitly grant read access to this directory.
+# Required on Hostinger — without this, parent Require directives can block images.
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+
+# Block execution of PHP/script files that end up in uploads (security hardening).
+<FilesMatch "\.(php|php5|phtml|pl|py|cgi|sh)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

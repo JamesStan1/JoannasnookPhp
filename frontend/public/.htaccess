@@ -8,6 +8,11 @@
     # Serve uploaded files directly — never route through index.php
     RewriteRule ^api/uploads/ - [L]
 
+    # Serve Gallery and other public media folders directly
+    RewriteRule ^Gallery/ - [L]
+    RewriteRule ^gallery/ - [L]
+    RewriteRule ^uploads/ - [L]
+
     # Route all /api/* requests directly to api/index.php
     # (more reliable on shared hosting than relying on the child .htaccess)
     RewriteRule ^api(/.*)?$ api/index.php [QSA,L]

@@ -99,7 +99,8 @@ const routes = [
 
   // ── Access Denied ──
   { path: '/unauthorized', name: 'Unauthorized', component: () => import('../pages/Unauthorized.vue') },
-  { path: '/:pathMatch(.*)*', redirect: '/unauthorized' },
+  // 404 – unmatched paths redirect to home (avoids misleading "Access Denied" for bad URLs)
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 const router = createRouter({

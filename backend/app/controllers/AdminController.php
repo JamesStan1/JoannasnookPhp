@@ -1363,6 +1363,17 @@ class AdminController {
 
     // ── Gallery ──────────────────────────────────────────────────────────────
 
+    /**
+     * Resolve the filesystem directory where gallery photos are stored.
+     * Always uses uploads/gallery/ so the files are served via the already-
+     * configured api/uploads/ path (which has Require all granted).
+     */
+    private function galleryDir(): string {
+        $dir = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        return $dir;
+    }
+
     /** Public: all albums with their photos (for homepage gallery). */
     public function getPublicGallery() {
         $db = \Database::connect();
@@ -1424,10 +1435,11 @@ class AdminController {
         $db = \Database::connect();
 
         // Remove physical files first
+        $galleryDir = $this->galleryDir();
         $stmt = $db->prepare("SELECT filename FROM gallery_photos WHERE album_id = :id");
         $stmt->execute([':id' => (int)$albumId]);
         foreach ($stmt->fetchAll() as $row) {
-            $path = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/' . $row['filename'];
+            $path = $galleryDir . $row['filename'];
             if (file_exists($path)) @unlink($path);
         }
 
@@ -1436,7 +1448,7 @@ class AdminController {
         $album->execute([':id' => (int)$albumId]);
         $row = $album->fetch();
         if ($row && $row['cover_photo']) {
-            $cover = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/' . $row['cover_photo'];
+            $cover = $galleryDir . $row['cover_photo'];
             if (file_exists($cover)) @unlink($cover);
         }
 
@@ -1467,9 +1479,9 @@ class AdminController {
 
         $ext  = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $name = uniqid('gallery_', true) . '.' . $ext;
-        $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/';
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        $dir  = $this->galleryDir();
         if (!move_uploaded_file($file['tmp_name'], $dir . $name)) return error('Failed to save image', 500);
+        @chmod($dir . $name, 0644);
 
         $caption = trim($_POST['caption'] ?? '');
         $ins = $db->prepare("INSERT INTO gallery_photos (album_id, filename, caption) VALUES (:album, :file, :cap)");
@@ -1498,7 +1510,7 @@ class AdminController {
         if (!$photo) return error('Photo not found', 404);
 
         // Remove file
-        $path = rtrim(UPLOADS_BASE_PATH, '/') . '/gallery/' . $photo['filename'];
+        $path = $this->galleryDir() . $photo['filename'];
         if (file_exists($path)) @unlink($path);
 
         $db->prepare("DELETE FROM gallery_photos WHERE id = :id")->execute([':id' => (int)$photoId]);

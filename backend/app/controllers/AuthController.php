@@ -219,6 +219,7 @@ class AuthController {
         if (!move_uploaded_file($file['tmp_name'], $destPath)) {
             return error('Failed to save file', 500);
         }
+        @chmod($destPath, 0644);
 
         // Store only the filename in DB
         $userModel->update($userId, [
