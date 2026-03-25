@@ -539,11 +539,16 @@
           <div class="grid grid-cols-2 gap-2">
             <button v-for="opt in [{ value:'cash', label:'Cash' }, { value:'credit_card', label:'Credit Card' }, { value:'debit_card', label:'Debit Card' }, { value:'gcash', label:'GCash' }]"
               :key="opt.value"
-              @click="payBalanceMethod = opt.value"
+              @click="payBalanceMethod = opt.value; payBalanceRef = ''"
               :class="payBalanceMethod === opt.value ? 'border-green-600 bg-green-50 text-green-800 font-semibold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
               class="py-2 px-3 text-xs border rounded-xl transition text-center">
               {{ opt.label }}
             </button>
+          </div>
+          <div v-if="payBalanceMethod !== 'cash'" class="mt-3">
+            <label class="text-xs font-medium text-gray-600 mb-1 block">Reference Number <span class="text-red-500">*</span></label>
+            <input v-model="payBalanceRef" type="text" placeholder="Enter reference number"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-green-500" />
           </div>
         </div>
 
@@ -772,6 +777,7 @@ const viewTarget   = ref(null)
 const rejectTarget = ref(null)
 const checkoutBlockedRes = ref(null)
 const payBalanceMethod = ref('cash')
+const payBalanceRef = ref('')
 const payBalanceSaving = ref(false)
 const showPayForm = ref(false)
 
@@ -957,6 +963,7 @@ function handleCheckOut(res) {
   if (balance > 0.01) {
     checkoutBlockedRes.value = { id: res.id, guestName: res.guest_name, roomNumber: res.room_number, balance, _res: res }
     payBalanceMethod.value = 'cash'
+    payBalanceRef.value = ''
     showPayForm.value = false
     return
   }
@@ -965,12 +972,17 @@ function handleCheckOut(res) {
 
 async function submitPayBalance() {
   if (!checkoutBlockedRes.value) return
+  if (payBalanceMethod.value !== 'cash' && !payBalanceRef.value.trim()) {
+    toast.warning('Please enter a reference number for this payment method.')
+    return
+  }
   payBalanceSaving.value = true
   try {
-    await api.post(`/reservations/${checkoutBlockedRes.value.id}/pay-balance`, { method: payBalanceMethod.value })
+    await api.post(`/reservations/${checkoutBlockedRes.value.id}/pay-balance`, { method: payBalanceMethod.value, reference_number: payBalanceRef.value.trim() || null })
     const resId = checkoutBlockedRes.value.id
     checkoutBlockedRes.value = null
     showPayForm.value = false
+    payBalanceRef.value = ''
     await doAction(resId, 'check-out')
   } catch (e) {
     toast.error(e.response?.data?.message ?? 'Payment failed')
@@ -996,6 +1008,7 @@ async function doAction(id, action) {
           _res: res,
         }
         payBalanceMethod.value = 'cash'
+        payBalanceRef.value = ''
         showPayForm.value = false
         return
       }

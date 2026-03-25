@@ -296,6 +296,11 @@
             Reports
             <span v-if="reportsSummary.pending > 0" class="ml-0.5 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">{{ reportsSummary.pending }}</span>
           </button>
+          <button @click="scrollToSection('section-payment-settings')"
+            class="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 transition-all border border-purple-100 hover:border-purple-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            Payment Settings
+          </button>
         </div>
       </div>
     </div>
@@ -1158,6 +1163,161 @@
         </div>
       </div>
 
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- PAYMENT SETTINGS                                                     -->
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <div id="section-payment-settings" class="bg-white rounded-2xl border border-purple-100 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+        <!-- Section Header -->
+        <div class="px-6 py-5 bg-gradient-to-r from-purple-50 to-purple-100 border-b border-purple-200">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-md">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-900">Payment Settings</h2>
+                <p class="text-xs text-gray-500">Manage payment methods shown on the Online Reservation Form</p>
+              </div>
+            </div>
+            <button @click="openAddPaymentMethod"
+              class="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-xl shadow transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add Method
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Methods List -->
+        <div class="p-6 space-y-3">
+          <p v-if="!paymentMethods.length" class="text-sm text-gray-400 text-center py-6">No payment methods yet. Click <strong>Add Method</strong> to create one.</p>
+          <div v-for="(pm, idx) in paymentMethods" :key="pm.id"
+            class="flex items-start gap-4 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-purple-300 transition-colors">
+            <!-- Icon & Toggle -->
+            <div class="flex flex-col items-center gap-2 flex-shrink-0">
+              <span class="text-2xl leading-none">{{ pm.icon || '💳' }}</span>
+              <button @click="togglePaymentMethodActive(pm)"
+                :class="pm.is_active ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-300 hover:bg-gray-400'"
+                class="w-9 h-5 rounded-full transition-colors relative"
+                :title="pm.is_active ? 'Active – click to deactivate' : 'Inactive – click to activate'">
+                <span :class="pm.is_active ? 'translate-x-4' : 'translate-x-0.5'"
+                  class="block w-4 h-4 bg-white rounded-full shadow transition-transform absolute top-0.5"></span>
+              </button>
+            </div>
+            <!-- Details -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-800">{{ pm.name }}</p>
+              <p v-if="pm.account_name" class="text-xs text-gray-500">{{ pm.account_name }}</p>
+              <p class="text-sm font-mono font-semibold text-purple-700 tracking-wider mt-0.5">{{ pm.account_number || '—' }}</p>
+              <p v-if="pm.instructions" class="text-xs text-gray-400 mt-1 leading-relaxed">{{ pm.instructions }}</p>
+              <p class="text-xs mt-1" :class="pm.is_active ? 'text-green-600' : 'text-gray-400'">
+                {{ pm.is_active ? '● Visible on reservation form' : '○ Hidden from guests' }}
+              </p>
+            </div>
+            <!-- Sort controls -->
+            <div class="flex flex-col gap-1 flex-shrink-0">
+              <button @click="movePaymentMethod(idx, -1)" :disabled="idx === 0"
+                class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors text-gray-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+              </button>
+              <button @click="movePaymentMethod(idx, 1)" :disabled="idx === paymentMethods.length - 1"
+                class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors text-gray-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+            </div>
+            <!-- Actions -->
+            <div class="flex gap-2 flex-shrink-0">
+              <button @click="openEditPaymentMethod(pm)"
+                class="px-3 py-1.5 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-lg transition-colors border border-blue-200">
+                Edit
+              </button>
+              <button @click="confirmDeletePaymentMethod(pm)"
+                class="px-3 py-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg transition-colors border border-red-200">
+                Delete
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 pt-1">Changes are reflected immediately on the homepage Services section and Online Reservation Form.</p>
+        </div>
+      </div>
+
+      <!-- ─── Add / Edit Payment Method Modal ─── -->
+      <transition name="fade">
+        <div v-if="pmModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="closePmModal">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 class="text-base font-bold text-gray-900">{{ pmModalMode === 'add' ? 'Add Payment Method' : 'Edit Payment Method' }}</h3>
+              <button @click="closePmModal" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+              <!-- Name -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Method Name <span class="text-red-500">*</span></label>
+                <input v-model="pmForm.name" type="text" placeholder="e.g. GCash, Maya, BDO"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all" />
+              </div>
+              <!-- Account Name -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Account Name</label>
+                <input v-model="pmForm.account_name" type="text" placeholder="e.g. Joanna's Nook"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all" />
+              </div>
+              <!-- Account Number -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Account Number</label>
+                <input v-model="pmForm.account_number" type="text" placeholder="e.g. 09xxxxxxxxx"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all" />
+              </div>
+              <!-- Icon -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Icon (emoji)</label>
+                <input v-model="pmForm.icon" type="text" placeholder="💳" maxlength="4"
+                  class="w-24 px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all" />
+              </div>
+              <!-- Instructions -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Instructions for guests</label>
+                <textarea v-model="pmForm.instructions" rows="2" placeholder="e.g. Send to our number and upload screenshot as proof."
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all resize-none"></textarea>
+              </div>
+              <!-- Active -->
+              <div class="flex items-center gap-3">
+                <input v-model="pmForm.is_active" type="checkbox" id="pm-active" class="w-4 h-4 accent-purple-600" />
+                <label for="pm-active" class="text-sm text-gray-700 cursor-pointer">Show on reservation form (active)</label>
+              </div>
+            </div>
+            <div class="px-6 pb-6 flex gap-3 justify-end">
+              <button @click="closePmModal" class="px-5 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
+              <button @click="savePmModal" :disabled="pmSaving"
+                class="px-5 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow transition-all disabled:opacity-50">
+                {{ pmSaving ? 'Saving...' : pmModalMode === 'add' ? 'Add Method' : 'Save Changes' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <!-- ─── Delete Confirmation Modal ─── -->
+      <transition name="fade">
+        <div v-if="pmDeleteTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @click.self="pmDeleteTarget = null">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <h3 class="text-base font-bold text-gray-900 mb-1">Delete Payment Method?</h3>
+            <p class="text-sm text-gray-500 mb-5">Remove <strong class="text-gray-800">{{ pmDeleteTarget?.name }}</strong>? This cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+              <button @click="pmDeleteTarget = null" class="px-5 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl">Cancel</button>
+              <button @click="executeDeletePaymentMethod" :disabled="pmSaving"
+                class="px-5 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl shadow disabled:opacity-50">
+                {{ pmSaving ? 'Deleting...' : 'Delete' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
     </div>
 
     <!-- Back to Top -->
@@ -1288,6 +1448,20 @@ const readNotifIds = ref(JSON.parse(localStorage.getItem('it_read_notifications'
 // Toast messages
 const successMessage = ref('')
 const errorMessage = ref('')
+
+// Payment Settings (legacy – kept for backward-compat with existing settings)
+const paymentSettings = ref({ gcash_number: '', maya_number: '' })
+const paymentSaving = ref(false)
+
+// Payment Methods (dynamic list)
+const paymentMethods = ref([])
+const pmModalOpen = ref(false)
+const pmModalMode = ref('add') // 'add' | 'edit'
+const pmEditId = ref(null)
+const pmSaving = ref(false)
+const pmDeleteTarget = ref(null)
+const pmFormDefault = () => ({ name: '', account_name: '', account_number: '', icon: '💳', instructions: '', is_active: true, sort_order: 0 })
+const pmForm = ref(pmFormDefault())
 
 const showSuccess = (message) => {
   successMessage.value = message
@@ -1545,6 +1719,126 @@ const updateReportStatus = async (reportId, status) => {
   }
 }
 
+const loadPaymentSettings = async () => {
+  try {
+    const res = await api.get('/it/payment-settings')
+    const data = res.data?.data ?? res.data ?? {}
+    paymentSettings.value = {
+      gcash_number: data.gcash_number ?? '',
+      maya_number:  data.maya_number  ?? '',
+    }
+  } catch (err) {
+    console.error('Failed to load payment settings:', err)
+  }
+}
+
+const savePaymentSettings = async () => {
+  paymentSaving.value = true
+  try {
+    await api.put('/it/payment-settings', paymentSettings.value)
+    showSuccess('Payment settings saved successfully')
+  } catch (err) {
+    console.error('Failed to save payment settings:', err)
+    showError('Failed to save payment settings')
+  } finally {
+    paymentSaving.value = false
+  }
+}
+
+// ─── Payment Methods CRUD ───────────────────────────────────────────────────
+const loadPaymentMethods = async () => {
+  try {
+    const res = await api.get('/it/payment-methods')
+    paymentMethods.value = res.data?.data ?? res.data ?? []
+  } catch (err) {
+    console.error('Failed to load payment methods:', err)
+  }
+}
+
+const openAddPaymentMethod = () => {
+  pmForm.value = pmFormDefault()
+  pmEditId.value = null
+  pmModalMode.value = 'add'
+  pmModalOpen.value = true
+}
+
+const openEditPaymentMethod = (pm) => {
+  pmForm.value = { name: pm.name, account_name: pm.account_name, account_number: pm.account_number, icon: pm.icon || '💳', instructions: pm.instructions || '', is_active: !!pm.is_active, sort_order: pm.sort_order || 0 }
+  pmEditId.value = pm.id
+  pmModalMode.value = 'edit'
+  pmModalOpen.value = true
+}
+
+const closePmModal = () => { pmModalOpen.value = false }
+
+const savePmModal = async () => {
+  if (!pmForm.value.name.trim()) { showError('Method name is required'); return }
+  pmSaving.value = true
+  try {
+    const payload = { ...pmForm.value, is_active: pmForm.value.is_active ? 1 : 0 }
+    if (pmModalMode.value === 'add') {
+      await api.post('/it/payment-methods', payload)
+      showSuccess('Payment method added')
+    } else {
+      await api.put(`/it/payment-methods/${pmEditId.value}`, payload)
+      showSuccess('Payment method updated')
+    }
+    closePmModal()
+    await loadPaymentMethods()
+  } catch (err) {
+    showError('Failed to save payment method')
+  } finally {
+    pmSaving.value = false
+  }
+}
+
+const confirmDeletePaymentMethod = (pm) => { pmDeleteTarget.value = pm }
+
+const executeDeletePaymentMethod = async () => {
+  if (!pmDeleteTarget.value) return
+  pmSaving.value = true
+  try {
+    await api.delete(`/it/payment-methods/${pmDeleteTarget.value.id}`)
+    showSuccess('Payment method deleted')
+    pmDeleteTarget.value = null
+    await loadPaymentMethods()
+  } catch (err) {
+    showError('Failed to delete payment method')
+  } finally {
+    pmSaving.value = false
+  }
+}
+
+const togglePaymentMethodActive = async (pm) => {
+  try {
+    await api.put(`/it/payment-methods/${pm.id}`, { ...pm, is_active: pm.is_active ? 0 : 1 })
+    await loadPaymentMethods()
+  } catch (err) {
+    showError('Failed to update payment method')
+  }
+}
+
+const movePaymentMethod = async (idx, direction) => {
+  const list = [...paymentMethods.value]
+  const other = idx + direction
+  if (other < 0 || other >= list.length) return
+  // Swap sort_order values then save both
+  const aOrder = list[other].sort_order
+  const bOrder = list[idx].sort_order
+  // If orders are the same, use index-based values
+  const newA = bOrder === aOrder ? other : bOrder
+  const newB = bOrder === aOrder ? idx : aOrder
+  try {
+    await Promise.all([
+      api.put(`/it/payment-methods/${list[idx].id}`,   { ...list[idx],   sort_order: newA }),
+      api.put(`/it/payment-methods/${list[other].id}`, { ...list[other], sort_order: newB }),
+    ])
+    await loadPaymentMethods()
+  } catch (err) {
+    showError('Failed to reorder payment methods')
+  }
+}
+
 const loadAll = async () => {
   loading.value = true
   try {
@@ -1554,6 +1848,8 @@ const loadAll = async () => {
       loadForgotPasswordRequests(),
       loadReports(),
       fetchSalesAuditLogs(),
+      loadPaymentSettings(),
+      loadPaymentMethods(),
     ])
     lastUpdated.value = new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' })
     showSuccess('Dashboard data refreshed successfully')

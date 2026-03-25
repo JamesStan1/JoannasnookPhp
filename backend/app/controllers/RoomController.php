@@ -31,7 +31,7 @@ class RoomController {
         $name = uniqid('room_', true) . '.' . strtolower($ext);
         $dir  = rtrim(UPLOADS_BASE_PATH, '/') . '/rooms/';
         if (!is_dir($dir)) mkdir($dir, 0755, true);
-        move_uploaded_file($file['tmp_name'], $dir . $name);
+        if (!move_uploaded_file($file['tmp_name'], $dir . $name)) return null;
         @chmod($dir . $name, 0644);
         return 'uploads/rooms/' . $name;
     }

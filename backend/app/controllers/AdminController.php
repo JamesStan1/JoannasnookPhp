@@ -44,12 +44,117 @@ class AdminController {
 
     public function getPublicSettings() {
         $settingsModel = new Settings();
-        $keys = ['hotel_name', 'hotel_email', 'hotel_phone', 'hotel_address'];
+        $keys = ['hotel_name', 'hotel_email', 'hotel_phone', 'hotel_address', 'gcash_number', 'maya_number'];
         $result = [];
         foreach ($keys as $key) {
             $result[$key] = $settingsModel->get($key, '');
         }
         return response($result, 200);
+    }
+
+    public function getPublicPaymentMethods() {
+        $model = new \App\Models\PaymentMethod();
+        return response($model->getActive(), 200);
+    }
+
+    public function getPaymentMethods() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $model = new \App\Models\PaymentMethod();
+        return response($model->getAll(), 200);
+    }
+
+    public function createPaymentMethod() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $data = json_decode(file_get_contents('php://input'), true) ?? [];
+        if (empty(trim($data['name'] ?? ''))) {
+            return response([], 422, 'Payment method name is required');
+        }
+
+        $model = new \App\Models\PaymentMethod();
+        $id = $model->createMethod($data);
+        $created = $model->findById($id);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'create', 'payment_methods', 'Payment method created: ' . ($data['name'] ?? ''));
+
+        return response($created, 201, 'Payment method created');
+    }
+
+    public function updatePaymentMethod($id) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $data = json_decode(file_get_contents('php://input'), true) ?? [];
+        if (empty(trim($data['name'] ?? ''))) {
+            return response([], 422, 'Payment method name is required');
+        }
+
+        $model = new \App\Models\PaymentMethod();
+        $existing = $model->findById((int)$id);
+        if (!$existing) {
+            return response([], 404, 'Payment method not found');
+        }
+
+        $model->updateMethod((int)$id, $data);
+        $updated = $model->findById((int)$id);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'update', 'payment_methods', 'Payment method updated: ' . ($data['name'] ?? ''));
+
+        return response($updated, 200, 'Payment method updated');
+    }
+
+    public function deletePaymentMethod($id) {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $model = new \App\Models\PaymentMethod();
+        $existing = $model->findById((int)$id);
+        if (!$existing) {
+            return response([], 404, 'Payment method not found');
+        }
+
+        $model->deleteMethod((int)$id);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'delete', 'payment_methods', 'Payment method deleted: ' . ($existing['name'] ?? ''));
+
+        return response([], 200, 'Payment method deleted');
+    }
+
+    public function getPaymentSettings() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $settingsModel = new Settings();
+        return response([
+            'gcash_number' => $settingsModel->get('gcash_number', ''),
+            'maya_number'  => $settingsModel->get('maya_number', ''),
+        ], 200);
+    }
+
+    public function updatePaymentSettings() {
+        $user = \App\Middleware\AuthMiddleware::handle();
+        \App\Middleware\RoleMiddleware::handle($user, ['admin', 'it']);
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $allowed = ['gcash_number', 'maya_number'];
+
+        $settingsModel = new Settings();
+        foreach ($allowed as $key) {
+            if (isset($data[$key])) {
+                $settingsModel->set($key, trim($data[$key]));
+            }
+        }
+
+        $auditLog = new AuditLog();
+        $auditLog->log($user['user_id'], 'update', 'settings', 'Payment settings updated');
+
+        return response([], 200, 'Payment settings updated');
     }
 
     public function getSettings() {

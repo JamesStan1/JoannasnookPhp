@@ -323,7 +323,7 @@
         </div>
         <div class="p-5 space-y-3">
           <div v-if="viewingRoom.image_url" class="rounded-xl overflow-hidden h-40 bg-gray-100 mb-1">
-            <img :src="roomImageUrl(viewingRoom)" class="w-full h-full object-cover" />
+            <img :src="roomImageUrl(viewingRoom)" class="w-full h-full object-cover" @error="e => e.target.closest('div').style.display='none'" />
           </div>
           <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <span class="text-xs text-gray-500">Room Number</span>

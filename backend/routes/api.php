@@ -79,6 +79,7 @@ $router = new Router();
 $router->get('/api/public/rooms', 'RoomController', 'getAll');
 $router->get('/api/public/event-packages', 'EventPackageController', 'getPublic');
 $router->get('/api/public/settings', 'AdminController', 'getPublicSettings');
+$router->get('/api/public/payment-methods', 'AdminController', 'getPublicPaymentMethods');
 $router->get('/api/public/gallery', 'AdminController', 'getPublicGallery');
 
 // Auth routes
@@ -293,5 +294,11 @@ $router->put('/api/it/forgot-password-requests/{id}/resolve', 'AdminController',
 $router->put('/api/it/staff-password/{id}',                'AdminController', 'resetStaffPassword');
 $router->get('/api/it/reports',                            'AdminController', 'getITReports');
 $router->put('/api/it/reports/{id}/status',                'AdminController', 'updateITReportStatus');
+$router->get('/api/it/payment-settings',                   'AdminController', 'getPaymentSettings');
+$router->put('/api/it/payment-settings',                   'AdminController', 'updatePaymentSettings');
+$router->get('/api/it/payment-methods',                    'AdminController', 'getPaymentMethods');
+$router->post('/api/it/payment-methods',                   'AdminController', 'createPaymentMethod');
+$router->put('/api/it/payment-methods/{id}',               'AdminController', 'updatePaymentMethod');
+$router->delete('/api/it/payment-methods/{id}',            'AdminController', 'deletePaymentMethod');
 
 return $router;

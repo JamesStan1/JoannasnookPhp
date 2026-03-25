@@ -71,6 +71,11 @@ if (file_exists($APP_ROOT . '/.env')) {
 // Serve static files directly when using PHP's built-in development server.
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $staticFile  = __DIR__ . $requestPath;
+// When the Vite dev proxy forwards /api/uploads/... without stripping the /api
+// prefix, the file won't be found at __DIR__/api/uploads/... — try without /api.
+if (!is_file($staticFile) && preg_match('#^/api(/.+)$#', $requestPath, $_sm)) {
+    $staticFile = __DIR__ . $_sm[1];
+}
 if ($requestPath !== '/' && $requestPath !== '/index.php' && is_file($staticFile)) {
     $ext  = strtolower(pathinfo($staticFile, PATHINFO_EXTENSION));
     $mime = [

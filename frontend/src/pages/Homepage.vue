@@ -633,6 +633,49 @@
           </div>
         </div>
 
+        <!-- ── Payment Options ── -->
+        <div class="mb-24 svc-reveal svc-reveal--up" style="--svc-delay:0ms">
+          <div class="text-center mb-10">
+            <p class="text-base tracking-[0.4em] text-gray-400 uppercase mb-3">Online Payment</p>
+            <h2 class="text-4xl font-extralight text-green-800 tracking-wider">Payment Options</h2>
+            <p class="text-lg text-gray-400 font-light mt-3 tracking-wider">We accept mobile payments for your down payment and reservations</p>
+            <div class="flex items-center justify-center gap-3 mt-5">
+              <div class="h-px w-10 bg-gray-200"></div>
+              <div class="w-1 h-1 rounded-full bg-amber-400"></div>
+              <div class="h-px w-10 bg-gray-200"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <template v-if="paymentMethods.length">
+              <div v-for="pm in paymentMethods" :key="pm.id"
+                class="bg-white border border-gray-100 shadow-xl rounded-2xl p-8 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
+                  <span class="text-3xl">{{ pm.icon || '💳' }}</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ pm.name }}</h3>
+                <p v-if="pm.account_name" class="text-xs text-gray-400 mb-1">{{ pm.account_name }}</p>
+                <p class="text-xs text-gray-400 mb-3">Send your down payment via {{ pm.name }}</p>
+                <p class="text-2xl font-bold text-gray-800 tracking-wider">{{ pm.account_number || '—' }}</p>
+              </div>
+            </template>
+            <!-- Fallback: show legacy GCash/Maya from settings if no dynamic methods exist -->
+            <template v-else>
+              <div class="bg-white border border-gray-100 shadow-xl rounded-2xl p-8 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-4"><span class="text-3xl">📱</span></div>
+                <h3 class="text-lg font-semibold text-blue-700 mb-1">GCash</h3>
+                <p class="text-xs text-gray-400 mb-3">Send your down payment via GCash</p>
+                <p class="text-2xl font-bold text-gray-800 tracking-wider">{{ contactInfo.gcash_number || '—' }}</p>
+              </div>
+              <div class="bg-white border border-gray-100 shadow-xl rounded-2xl p-8 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-4"><span class="text-3xl">💳</span></div>
+                <h3 class="text-lg font-semibold text-green-700 mb-1">Maya</h3>
+                <p class="text-xs text-gray-400 mb-3">Send your down payment via Maya</p>
+                <p class="text-2xl font-bold text-gray-800 tracking-wider">{{ contactInfo.maya_number || '—' }}</p>
+              </div>
+            </template>
+          </div>
+        </div>
+
         <!-- ── Why Choose Joanna's Nook ── -->
         <div class="mb-4 py-20 border-t border-gray-100">
           <div class="text-center mb-16 svc-reveal svc-reveal--up" style="--svc-delay:0ms">
@@ -1578,10 +1621,34 @@
               <div class="min-w-0">
                 <p class="text-xs font-semibold text-gray-800 mb-2">Select a Payment Method</p>
                 <div class="space-y-1.5">
-                  <div class="flex items-center gap-2.5 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
-                    <span class="text-base leading-none">📱</span>
-                    <div><p class="text-xs font-semibold text-amber-700">GCash</p><p class="text-xs text-amber-600 font-light">Send to our GCash number and upload the screenshot as proof.</p></div>
-                  </div>
+                  <!-- Dynamic payment methods from IT settings -->
+                  <template v-if="paymentMethods.length">
+                    <div v-for="pm in paymentMethods" :key="pm.id"
+                      class="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                      <span class="text-base leading-none">{{ pm.icon || '💳' }}</span>
+                      <div>
+                        <p class="text-xs font-semibold text-gray-800">{{ pm.name }}<span v-if="pm.account_number" class="ml-1 font-bold">· {{ pm.account_number }}</span></p>
+                        <p v-if="pm.instructions" class="text-xs text-gray-500 font-light">{{ pm.instructions }}</p>
+                      </div>
+                    </div>
+                  </template>
+                  <!-- Fallback: static legacy entries -->
+                  <template v-else>
+                    <div class="flex items-center gap-2.5 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                      <span class="text-base leading-none">📱</span>
+                      <div>
+                        <p class="text-xs font-semibold text-amber-700">GCash<span v-if="contactInfo.gcash_number" class="ml-1 font-bold">· {{ contactInfo.gcash_number }}</span></p>
+                        <p class="text-xs text-amber-600 font-light">Send to our GCash number and upload the screenshot as proof.</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 bg-purple-50 border border-purple-100 rounded-lg px-3 py-2">
+                      <span class="text-base leading-none">💳</span>
+                      <div>
+                        <p class="text-xs font-semibold text-purple-700">Maya<span v-if="contactInfo.maya_number" class="ml-1 font-bold">· {{ contactInfo.maya_number }}</span></p>
+                        <p class="text-xs text-purple-600 font-light">Send to our Maya number and upload the screenshot as proof.</p>
+                      </div>
+                    </div>
+                  </template>
                   <div class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
                     <span class="text-base leading-none">💵</span>
                     <div><p class="text-xs font-semibold text-emerald-800">Cash On-Site</p><p class="text-xs text-emerald-600 font-light">Pay at the front desk on or before your check-in date.</p></div>
@@ -1706,7 +1773,10 @@ const contactInfo = ref({
   hotel_phone:   '',
   hotel_address: '',
   hotel_email:   '',
+  gcash_number:  '',
+  maya_number:   '',
 })
+const paymentMethods = ref([])
 const selectedRoomGroup = ref(null)
 const selectedEvent = ref(null)
 const pkgCarouselIndex = ref(0)
@@ -1953,7 +2023,7 @@ function mapRoom(r) {
     id: r.id,
     roomNumber: r.room_number,
     status: r.status || 'available',
-    name: r.type,
+    name: (r.type || '').trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
     label: (r.type || '').toUpperCase(),
     priceNum: parseFloat(r.price) || 0,
     guests: r.capacity || 2,
@@ -2007,16 +2077,18 @@ const initContactMap = () => {
 // ── Fetch ─────────────────────────────────────────────────────────────────────
 onMounted(async () => {
   try {
-    const [roomsRes, packagesRes, settingsRes] = await Promise.all([
+    const [roomsRes, packagesRes, settingsRes, pmRes] = await Promise.all([
       api.get('/public/rooms'),
       api.get('/public/event-packages'),
       api.get('/public/settings'),
+      api.get('/public/payment-methods'),
     ])
     rooms.value = (roomsRes.data.data || []).map(mapRoom)
     eventPackages.value = (packagesRes.data.data || []).map(mapPackage)
     if (settingsRes.data?.data) {
       contactInfo.value = { ...contactInfo.value, ...settingsRes.data.data }
     }
+    paymentMethods.value = pmRes.data?.data ?? pmRes.data ?? []
   } catch (e) {
     console.error('Failed to load homepage data:', e)
   }
