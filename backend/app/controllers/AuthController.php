@@ -24,12 +24,20 @@ class AuthController {
             return error('Invalid credentials', 401);
         }
 
-        // Update last login
-        $userModel->updateLastLogin($user['id']);
+        // Update last login — wrapped so a missing column never breaks login
+        try {
+            $userModel->updateLastLogin($user['id']);
+        } catch (\Exception $e) {
+            error_log('updateLastLogin failed: ' . $e->getMessage());
+        }
 
-        // Log login activity
-        $auditLog = new \App\Models\AuditLog();
-        $auditLog->log($user['id'], 'login', 'auth', 'User login successful');
+        // Log login activity — wrapped so a missing table never breaks login
+        try {
+            $auditLog = new \App\Models\AuditLog();
+            $auditLog->log($user['id'], 'login', 'auth', 'User login successful');
+        } catch (\Exception $e) {
+            error_log('AuditLog login failed: ' . $e->getMessage());
+        }
 
         $token = JwtService::generate($user);
 

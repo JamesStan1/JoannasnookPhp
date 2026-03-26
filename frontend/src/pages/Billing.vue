@@ -12,41 +12,42 @@
 
     <!-- ── Tabs ── -->
     <div class="flex items-center gap-6 border-b border-gray-200 mb-5">
+      <!-- H4 – Consistency: all tabs share the same active green indicator -->
       <button @click="activeTab = 'room'"
         :class="[
           'pb-3 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors',
           activeTab === 'room'
-            ? 'border-blue-600 text-amber-600'
+            ? 'border-green-700 text-green-700'
             : 'border-transparent text-gray-500 hover:text-gray-700'
         ]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
         </svg>
-        Room Bills <span class="px-1.5 py-0.5 bg-green-100 text-amber-600 rounded text-xs font-semibold">{{ roomBills.length }}</span>
+        Room Bills <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-semibold">{{ roomBills.length }}</span>
       </button>
       <button @click="activeTab = 'event'"
         :class="[
           'pb-3 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors',
           activeTab === 'event'
-            ? 'border-blue-600 text-amber-600'
+            ? 'border-green-700 text-green-700'
             : 'border-transparent text-gray-500 hover:text-gray-700'
         ]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
         </svg>
-        Event Bills <span class="px-1.5 py-0.5 bg-green-100 text-amber-600 rounded text-xs font-semibold">{{ eventBills.length }}</span>
+        Event Bills <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-semibold">{{ eventBills.length }}</span>
       </button>
       <button @click="activeTab = 'pos'"
         :class="[
           'pb-3 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors',
           activeTab === 'pos'
-            ? 'border-orange-500 text-orange-500'
+            ? 'border-green-700 text-green-700'
             : 'border-transparent text-gray-500 hover:text-gray-700'
         ]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-3m-4-4h4m-4 0a1 1 0 00-1 1v1m-1-1a1 1 0 011-1h4a1 1 0 011 1v1m-5 0h4"/>
         </svg>
-        POS Receipts <span class="px-1.5 py-0.5 bg-orange-100 text-orange-600 rounded text-xs font-semibold">{{ posOrders.length }}</span>
+        POS Receipts <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs font-semibold">{{ posOrders.length }}</span>
       </button>
     </div>
 
@@ -57,10 +58,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <input v-model="search" type="text" placeholder="Search by customer, invoice #, room, event, or cashier..."
-          class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 shadow-sm"/>
+          class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm"/>
       </div>
       <select v-model="periodFilter"
-        class="border border-gray-200 rounded-lg text-sm px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 shadow-sm text-gray-600 min-w-[120px]">
+        class="border border-gray-200 rounded-lg text-sm px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-200 shadow-sm text-gray-600 min-w-[120px]">
         <option value="all">All Time</option>
         <option value="today">Today</option>
         <option value="week">This Week</option>
@@ -112,13 +113,14 @@
                 <td class="px-5 py-3.5 font-semibold text-amber-600">&#x20B1;{{ formatMoney(bill.total_amount) }}</td>
                 <td class="px-5 py-3.5">
                   <div class="flex items-center gap-3">
-                    <button @click="openDetail(bill)" title="View" class="text-green-600 hover:text-green-800 transition-colors">
-                      <svg class="w-4.5 h-4.5 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- H6 – Recognition rather than recall: aria-label makes intent clear even without tooltip -->
+                    <button @click="openDetail(bill)" title="View bill details" aria-label="View bill details" class="text-green-600 hover:text-green-800 transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                       </svg>
                     </button>
-                    <button @click="printBill(bill)" title="Print" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <button @click="printBill(bill)" title="Print bill" aria-label="Print bill" class="text-gray-400 hover:text-gray-600 transition-colors">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                       </svg>
@@ -172,13 +174,13 @@
                 </td>
                 <td class="px-5 py-3.5">
                   <div class="flex items-center gap-3">
-                    <button @click="openDetail(bill)" title="View" class="text-green-600 hover:text-green-800 transition-colors">
+                    <button @click="openDetail(bill)" title="View bill details" aria-label="View bill details" class="text-green-600 hover:text-green-800 transition-colors">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                       </svg>
                     </button>
-                    <button @click="printBill(bill)" title="Print" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <button @click="printBill(bill)" title="Print bill" aria-label="Print bill" class="text-gray-400 hover:text-gray-600 transition-colors">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                       </svg>
@@ -368,7 +370,7 @@ const periodFilter = ref('all')
 const detailBill  = ref(null)
 
 // ── Derived lists ──────────────────────────────────────────
-const roomBills  = computed(() => allBills.value.filter(b => b.bill_type === 'room' || b.bill_type === 'room_service'))
+const roomBills  = computed(() => allBills.value.filter(b => b.bill_type === 'room' || b.bill_type === 'room_service' || b.bill_type === 'restaurant'))
 const eventBills = computed(() => allBills.value.filter(b => b.bill_type === 'event'))
 
 function applyPeriod(bills) {

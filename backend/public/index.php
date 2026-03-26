@@ -93,6 +93,24 @@ if ($requestPath !== '/' && $requestPath !== '/index.php' && is_file($staticFile
 
 header('Content-Type: application/json');
 
+// Global exception handler — catches any uncaught PDOException or other Throwable
+// and returns a JSON 500 instead of a raw PHP fatal-error page.
+set_exception_handler(function (\Throwable $e) {
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+    }
+    $debug = ($_ENV['APP_DEBUG'] ?? getenv('APP_DEBUG')) === 'true';
+    echo json_encode([
+        'success' => false,
+        'message' => 'An unexpected server error occurred.',
+        'debug'   => $debug
+            ? $e->getMessage() . ' in ' . basename($e->getFile()) . ':' . $e->getLine()
+            : null,
+    ]);
+    exit;
+});
+
 // Load bootstrap
 require_once $APP_ROOT . '/app/helpers/Bootstrap.php';
 

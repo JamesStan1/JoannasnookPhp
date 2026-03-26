@@ -84,7 +84,12 @@ class Reservation extends BaseModel {
                    GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) as nights,
                    (rm.price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)) as total_amount,
                    ((rm.price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)) - COALESCE(r.down_payment, 0)) as remaining_balance,
-                   0 as cafe_payment
+                   COALESCE((
+                       SELECT SUM(b.total_amount)
+                       FROM bills b
+                       WHERE b.reservation_id = r.id
+                         AND b.bill_type IN ('restaurant', 'room_service')
+                   ), 0) as cafe_payment
             FROM {$this->table} r
             JOIN users u ON r.guest_id = u.id
             JOIN rooms rm ON r.room_id = rm.id

@@ -82,12 +82,13 @@ const styles = {
     text:    'text-gray-700',
     bar:     'bg-yellow-400',
   },
+  // H4 – Consistency: info type uses blue to distinguish it from success (green)
   info: {
-    wrapper: 'bg-white border-green-200 shadow-blue-100/60',
-    iconBg:  'bg-green-100',
-    icon:    'text-amber-600',
+    wrapper: 'bg-white border-blue-200 shadow-blue-100/60',
+    iconBg:  'bg-blue-100',
+    icon:    'text-blue-600',
     text:    'text-gray-700',
-    bar:     'bg-green-500',
+    bar:     'bg-blue-400',
   },
 }
 </script>

@@ -86,7 +86,17 @@ class ReservationController {
         \App\Middleware\RoleMiddleware::handle($user, ['admin']);
 
         $reservationModel = new Reservation();
+        $reservation = $reservationModel->findById($id);
+
+        if (!$reservation) {
+            return error('Reservation not found', 404);
+        }
+
         $reservationModel->updateStatus($id, 'approved');
+
+        // Mark room as reserved (it becomes occupied only at actual check-in)
+        $roomModel = new Room();
+        $roomModel->updateRoomStatus($reservation['room_id'], 'reserved');
 
         $auditLog = new \App\Models\AuditLog();
         $auditLog->log($user['user_id'], 'update', 'reservations', "Reservation approved: $id");
@@ -240,26 +250,28 @@ class ReservationController {
         $db  = $reservationModel->getDb();
         $now = date('Y-m-d H:i:s');
 
-        // Try to find the most recent room bill for this reservation
-        $billStmt = $db->prepare(
-            "SELECT id, total_amount, COALESCE(paid_amount, 0) AS paid_amount
-             FROM bills WHERE reservation_id = ? AND bill_type = 'room'
-             ORDER BY created_at DESC LIMIT 1"
+        // Pay ALL unpaid bills for this reservation (room, restaurant, room_service, etc.)
+        $billsStmt = $db->prepare(
+            "SELECT id, total_amount, COALESCE(paid_amount, 0) AS paid_amount, bill_type
+             FROM bills WHERE reservation_id = ? AND payment_status != 'paid'
+             ORDER BY created_at ASC"
         );
-        $billStmt->execute([$id]);
-        $bill = $billStmt->fetch(\PDO::FETCH_ASSOC);
+        $billsStmt->execute([$id]);
+        $unpaidBills = $billsStmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        if ($bill) {
-            $balance = (float)$bill['total_amount'] - (float)$bill['paid_amount'];
-            if ($balance > 0.01) {
-                $newPaid = (float)$bill['paid_amount'] + $balance;
-                $db->prepare(
-                    "UPDATE bills
-                     SET paid_amount = ?, payment_status = 'paid',
-                         payment_method = ?, payment_date = ?,
-                         processed_by = ?, updated_at = ?
-                     WHERE id = ?"
-                )->execute([$newPaid, $method, $now, $user['user_id'], $now, $bill['id']]);
+        if (!empty($unpaidBills)) {
+            foreach ($unpaidBills as $bill) {
+                $balance = (float)$bill['total_amount'] - (float)$bill['paid_amount'];
+                if ($balance > 0.01) {
+                    $newPaid = (float)$bill['paid_amount'] + $balance;
+                    $db->prepare(
+                        "UPDATE bills
+                         SET paid_amount = ?, payment_status = 'paid',
+                             payment_method = ?, payment_date = ?,
+                             processed_by = ?, updated_at = ?
+                         WHERE id = ?"
+                    )->execute([$newPaid, $method, $now, $user['user_id'], $now, $bill['id']]);
+                }
             }
         } else {
             // No bill yet — calculate from room price × nights minus down payment
@@ -326,6 +338,18 @@ class ReservationController {
         }
 
         $reservationModel->updateStatus($id, 'cancelled');
+
+        // Free the room only if no other active reservation holds it
+        $roomModel = new Room();
+        $db = $reservationModel->getDb();
+        $activeStmt = $db->prepare(
+            "SELECT COUNT(*) FROM reservations
+             WHERE room_id = ? AND id != ? AND status IN ('approved', 'checked_in')"
+        );
+        $activeStmt->execute([$reservation['room_id'], $id]);
+        if ((int)$activeStmt->fetchColumn() === 0) {
+            $roomModel->updateRoomStatus($reservation['room_id'], 'available');
+        }
 
         $auditLog = new \App\Models\AuditLog();
         $auditLog->log($user['user_id'], 'delete', 'reservations', "Reservation cancelled: $id");
@@ -414,14 +438,19 @@ class ReservationController {
             }
         }
 
-        // Update guest profile with extra fields that exist on the users table
+        // Update guest profile — wrapped in try/catch in case address/nationality
+        // columns haven't been added to the users table yet (pending migration).
         $profileUpdate = array_filter([
             'phone'       => $data['contact_number'] ?? null,
             'address'     => $data['address']        ?? null,
             'nationality' => $data['nationality']    ?? null,
         ]);
         if (!empty($profileUpdate)) {
-            $userModel->update($guestId, $profileUpdate);
+            try {
+                $userModel->update($guestId, $profileUpdate);
+            } catch (\Exception $e) {
+                error_log('Walk-in profile update failed (run users_guest_profile migration): ' . $e->getMessage());
+            }
         }
 
         $reservationData = [
@@ -442,9 +471,10 @@ class ReservationController {
         $reservationModel = new Reservation();
         $id = $reservationModel->create($reservationData);
 
-        // Set room to occupied
+        // Set room status: 'occupied' if check-in is today, 'reserved' if it's a future date
         $roomModel = new \App\Models\Room();
-        $roomModel->updateRoomStatus($data['room_id'], 'occupied');
+        $checkInIsToday = $data['check_in_date'] === date('Y-m-d');
+        $roomModel->updateRoomStatus($data['room_id'], $checkInIsToday ? 'occupied' : 'reserved');
 
         $auditLog = new \App\Models\AuditLog();
         $auditLog->log($user['user_id'], 'create', 'reservations', "Walk-in reservation created: $id");

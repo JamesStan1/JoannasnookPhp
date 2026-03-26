@@ -259,13 +259,6 @@
           </svg>
           Print Receipt Preview
         </button>
-        <button @click="openBillPreview" :disabled="cart.length === 0"
-          class="w-full py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition disabled:opacity-40">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          Generate Bill (A4)
-        </button>
         <button @click="processPayment"
           :disabled="cart.length === 0 || processing || (!chargeToRoom && !paymentMethod) || (!chargeToRoom && (paymentMethod === 'gcash' || paymentMethod === 'bank_transfer') && !referenceNumber.trim())"
           class="w-full py-3 bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition shadow-md shadow-blue-200">
@@ -508,30 +501,7 @@ function printThermalReceipt(data) {
   setTimeout(() => win.print(), 300)
 }
 
-function printA4Bill(data) {
-  if (!data) data = buildReceiptData()
-  const rows = data.items.map(i =>
-    '<tr><td>' + i.item_name + '</td><td style="text-align:center">' + i.quantity + '</td><td style="text-align:right">P' + Number(i.unit_price).toFixed(2) + '</td><td style="text-align:right">P' + Number(i.unit_price * i.quantity).toFixed(2) + '</td></tr>'
-  ).join('')
-
-  const win = window.open('', '_blank', 'width=850,height=1100')
-  win.document.write('<!DOCTYPE html><html><head><title>Bill ' + (data.invoice_id || '') + '</title>'
-    + '<style>body{font-family:Arial,sans-serif;padding:40px;color:#111;font-size:13px}h1{font-size:22px;color:#1e40af;margin:0}.sub{color:#555;font-size:12px;margin-top:2px}.header{display:flex;justify-content:space-between;margin-bottom:28px}.info-block{font-size:12px}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#f1f5f9;padding:8px 12px;text-align:left;font-size:12px;border-bottom:2px solid #e2e8f0}td{padding:8px 12px;border-bottom:1px solid #f0f0f0}.totals{float:right;width:260px;margin-top:10px}.totals td{padding:5px 12px}.grand td{font-weight:bold;font-size:15px;color:#1e40af;border-top:2px solid #1e40af}.footer{text-align:center;margin-top:60px;font-size:11px;color:#999}@media print{body{padding:20px}}</style>'
-    + '</head><body>'
-    + '<div class="header"><div><h1>Joanna\'s Nook Bed &amp; Breakfast</h1><div class="sub">Official Bill / Statement of Account</div></div>'
-    + '<div class="info-block" style="text-align:right">' + (data.invoice_id ? '<div><b>Invoice #:</b> ' + data.invoice_id + '</div>' : '') + '<div><b>Date:</b> ' + data.generated_at + '</div><div><b>Cashier:</b> ' + data.cashier + '</div></div></div>'
-    + '<div class="info-block" style="margin-bottom:16px"><div><b>Customer:</b> ' + data.customer_name + '</div>' + (data.charge_to_room ? '<div><b>Room:</b> ' + data.room_number + ' (Charged to Room)</div>' : '') + '</div>'
-    + '<table><thead><tr><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Amount</th></tr></thead><tbody>' + rows + '</tbody></table>'
-    + '<table class="totals"><tr><td>Subtotal</td><td style="text-align:right">P' + Number(data.subtotal).toFixed(2) + '</td></tr>' + (data.discount > 0 ? '<tr><td>Discount' + (data.discount_label ? ' &mdash; ' + data.discount_label : '') + '</td><td style="text-align:right">-P' + Number(data.discount).toFixed(2) + '</td></tr>' : '') + '<tr class="grand"><td>TOTAL DUE</td><td style="text-align:right">P' + Number(data.total).toFixed(2) + '</td></tr><tr><td style="color:#555;font-size:12px">Payment Method</td><td style="text-align:right;color:#555;font-size:12px">' + String(data.payment_method).toUpperCase() + '</td></tr>' + (data.reference_number ? '<tr><td style="color:#555;font-size:12px">Reference #</td><td style="text-align:right;color:#555;font-size:12px">' + data.reference_number + '</td></tr>' : '') + '</table>'
-    + '<br style="clear:both"/>'
-    + '<div class="footer">Joanna\'s Nook Bed &amp; Breakfast - Balingasag, Misamis Oriental - Thank you for your business!</div>'
-    + '</body></html>')
-  win.document.close()
-  setTimeout(() => win.print(), 300)
-}
-
 function openReceiptPreview() { printThermalReceipt(buildReceiptData()) }
-function openBillPreview()    { printA4Bill(buildReceiptData()) }
 
 async function processPayment() {
   if (cart.value.length === 0) return

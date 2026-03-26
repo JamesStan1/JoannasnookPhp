@@ -53,8 +53,8 @@
           :class="[
             'px-5 py-2 rounded-lg text-sm font-medium transition-colors border',
             activeCategory === cat
-              ? 'bg-green-700 text-white border-blue-600'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:text-amber-600'
+              ? 'bg-green-700 text-white border-green-700'
+              : 'bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:text-green-700'
           ]">
           {{ cat }}
         </button>

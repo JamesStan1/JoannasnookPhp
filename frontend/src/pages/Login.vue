@@ -70,7 +70,7 @@
               <input type="checkbox" v-model="rememberMe" class="w-4 h-4 rounded border-gray-300 accent-green-800 cursor-pointer" />
               <span class="text-sm font-light text-gray-600">Remember me</span>
             </label>
-            <button type="button" @click="showForgotModal = true" class="text-sm text-green-800 hover:text-amber-700 font-light transition">
+            <button type="button" @click="openForgotModal('forgot')" class="text-sm text-green-800 hover:text-amber-700 font-light transition">
               Forgot password?
             </button>
           </div>
@@ -84,16 +84,20 @@
           </button>
         </form>
 
-        <!-- Error Message -->
-        <div v-if="error" class="mt-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm font-light">
-          {{ error }}
+        <!-- H9 – Recognize, Diagnose, Recover: error with icon so users know exactly what went wrong -->
+        <div v-if="error" class="mt-6 flex items-start gap-2.5 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm font-light">
+          <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span>{{ error }}</span>
         </div>
 
         <!-- Footer Links -->
         <div class="mt-8 pt-6 border-t border-gray-100 text-center">
           <p class="text-sm text-gray-600 font-light">
             Don't have an account?
-            <button type="button" @click="showForgotModal = true" class="text-green-800 hover:text-amber-700 font-medium transition">Contact administrator</button>
+            <!-- H2 – Match Real World: opening a contact form, not the forgot-password flow -->
+            <button type="button" @click="openForgotModal('account')" class="text-green-800 hover:text-amber-700 font-medium transition">Contact administrator</button>
           </p>
         </div>
       </div>
@@ -117,8 +121,15 @@
     <!-- Forgot Password Modal -->
     <div v-if="showForgotModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4" @click.self="closeForgotModal">
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
-        <h3 class="text-lg font-light text-gray-800 mb-1">Forgot Password?</h3>
-        <p class="text-sm text-gray-400 mb-6">Submit a request and the IT team will assist you.</p>
+        <!-- H2 – Modal title changes based on why the user opened it -->
+        <h3 class="text-lg font-light text-gray-800 mb-1">
+          {{ modalMode === 'account' ? 'Request an Account' : 'Forgot Password?' }}
+        </h3>
+        <p class="text-sm text-gray-400 mb-6">
+          {{ modalMode === 'account'
+              ? 'Submit a request and the IT team will create your account.'
+              : 'Submit a request and the IT team will assist you.' }}
+        </p>
 
         <div v-if="forgotSuccess" class="bg-green-50 border border-green-100 rounded-xl p-4 mb-4">
           <p class="text-sm text-green-800">Your request has been submitted. Please wait for the IT team to contact you.</p>
@@ -178,6 +189,13 @@ const showSuccess = ref(false)
 const error = ref(null)
 const rememberMe = ref(false)
 const showForgotModal = ref(false)
+// H2 – track why the modal was opened to show the correct title
+const modalMode = ref('forgot') // 'forgot' | 'account'
+
+const openForgotModal = (mode) => {
+  modalMode.value = mode
+  showForgotModal.value = true
+}
 
 // Forgot password form state
 const forgotName = ref('')

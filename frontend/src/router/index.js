@@ -161,4 +161,12 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
+// H1 – Visibility of System Status: keep the browser tab title in sync so users
+// always know where they are, even when switching between tabs.
+router.afterEach((to) => {
+  const base = "Joanna's Nook"
+  const pageTitle = to.meta?.title || to.name
+  document.title = pageTitle ? `${pageTitle} · ${base}` : base
+})
+
 export default router

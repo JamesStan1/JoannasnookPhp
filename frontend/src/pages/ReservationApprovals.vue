@@ -343,8 +343,8 @@
 
     <!-- APPROVE PENDING MODAL -->
     <div v-if="approveTarget" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <div>
             <h3 class="text-base font-semibold text-gray-800">Approve Reservation Request</h3>
             <p class="text-xs text-amber-600 font-mono">{{ approveTarget.reference_number }}</p>
@@ -353,7 +353,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto flex-1">
           <div class="bg-gray-50 rounded-xl p-4">
             <p class="text-sm font-medium text-gray-800">{{ approveTarget.guest_name }}</p>
             <p class="text-xs text-gray-500 mt-0.5">{{ approveTarget.guest_email }}</p>
@@ -505,7 +505,7 @@
             </div>
           </div>
         </div>
-        <div class="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
+        <div class="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end flex-shrink-0">
           <button @click="approveTarget = null" class="px-4 py-2 text-sm border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">Cancel</button>
           <button @click="doApprove" :disabled="approving"
             class="px-5 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2 disabled:opacity-60">
